@@ -1,0 +1,23 @@
+<head>
+  css "simplemde.min"
+  css "github.min"
+  css "font-awesome.min"
+  css "github-markdown"
+  css "style"
+  js "highlight.min"
+  js "simplemde.min"
+  js "fuse-v6.0.0"
+  js "deadwiki"
+  <title> title
+
+<body>
+  <div#main.markdown-body.webview-app=webview?">
+      <nav>
+          <p>
+              <a href="/"> home
+              <a href="/new"> new
+              <a#edit-link href="/edit/{current-path}"> edit
+      body
+
+  <script>
+    window.WIKI_PAGES = {pages.json}; // for fuzzy finder

@@ -1,0 +1,8 @@
+<p>
+  <a href="/"> home
+  <a @click=(window.location=window.location.href.replace("/edit",""))>
+    back
+
+<form#form POST="">
+  <textarea#markdown@markdown> markdown
+  <input:submit />

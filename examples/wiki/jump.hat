@@ -1,0 +1,6 @@
+<#jump-page>
+  <form GET="/jump" autocomplete="off">
+    <input@pattern:text#jump-pattern.focused />
+  <ul#jump-list>
+    for page in pages
+      <li#"jump-{page.id}"> <a href="/{page.path}"> page.name

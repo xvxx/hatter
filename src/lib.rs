@@ -1,10 +1,15 @@
+#![allow(dead_code)]
+#![allow(unused_imports)]
+
 #[macro_use]
 mod error;
+mod scanner;
 mod token;
 
 pub use {
     error::{print_error, Error},
-    token::{Token, TokenKind},
+    scanner::scan,
+    token::{Token, TokenKind, TokenStream},
 };
 
 #[derive(Debug)]
@@ -12,11 +17,7 @@ pub struct AST {}
 
 pub type Result<T> = std::result::Result<T, Error>;
 
-pub fn scan(_src: &str) -> Result<Vec<Token>> {
-    Ok(vec![])
-}
-
-pub fn parse(_tokens: Vec<Token>) -> Result<AST> {
+pub fn parse(_tokens: TokenStream) -> Result<AST> {
     Ok(AST {})
 }
 

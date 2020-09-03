@@ -1,5 +1,5 @@
 use {
-    hatter::{parse, scan, Stmt, Token, TokenKind, AST},
+    hatter::{parse, scan},
     std::{env, io},
 };
 

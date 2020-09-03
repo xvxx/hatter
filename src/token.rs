@@ -1,14 +1,17 @@
-pub struct Tokens {
+#[derive(Debug)]
+pub struct TokenStream {
     tokens: Vec<Token>,
     source: String,
 }
 
+#[derive(Debug)]
 pub struct Token {
-    pos: usize,
-    len: usize,
-    kind: TokenKind,
+    pub pos: usize,
+    pub len: usize,
+    pub kind: TokenKind,
 }
 
+#[derive(Debug)]
 pub enum TokenKind {
     None,
     Bool,
@@ -17,20 +20,20 @@ pub enum TokenKind {
     Word,
 }
 
-struct TokenIter<'s> {
+pub struct TokenIter<'s> {
     src: &'s str,
     toks: &'s [Token],
     pos: usize,
 }
 
-struct TokenPos<'s> {
+pub struct TokenPos<'s> {
     src: &'s str,
     tok: &'s Token,
 }
 
-impl Tokens {
-    pub fn from(source: String, tokens: Vec<Token>) -> Tokens {
-        Tokens { source, tokens }
+impl TokenStream {
+    pub fn from(source: String, tokens: Vec<Token>) -> TokenStream {
+        TokenStream { source, tokens }
     }
 
     pub fn into_iter(&self) -> TokenIter {

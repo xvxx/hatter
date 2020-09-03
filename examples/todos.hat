@@ -1,5 +1,3 @@
 <ul.todos>
     for todo in todos
         <li.todo data-id=todo.id> todo.text
-
-

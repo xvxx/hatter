@@ -1,4 +1,7 @@
-use crate::{Result, TokenStream, AST};
+use crate::{
+    token::{TokenPos, TokenStream},
+    Result, AST,
+};
 
 pub struct Parser {
     ast: AST,
@@ -20,6 +23,16 @@ impl Parser {
             pos: 0,
             ast: AST::new(),
         }
+    }
+
+    /// Peek at next `Token`.
+    fn peek(&mut self) -> Option<TokenPos> {
+        self.tokens.peek()
+    }
+
+    /// Advance iterator an return next `Token`.
+    fn next(&mut self) -> Option<TokenPos> {
+        self.tokens.next()
     }
 
     /// Parse `TokenStream` into `AST`.

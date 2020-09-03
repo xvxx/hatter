@@ -13,12 +13,12 @@ struct Scanner<'s> {
 }
 
 /// Scans source code and produces a `TokenStream`.
-pub fn scan<S: AsRef<str>>(src: S) -> Result<TokenStream> {
-    let src = src.as_ref();
-    let mut scanner = Scanner::from(src);
+pub fn scan<S: AsRef<str>>(source: S) -> Result<TokenStream> {
+    let source = source.as_ref();
+    let mut scanner = Scanner::from(source);
     scanner.scan()?;
     let tokens = scanner.tokens;
-    Ok(TokenStream::from(src.to_string(), tokens))
+    Ok(TokenStream::from(source.to_string(), tokens))
 }
 
 impl<'s> Scanner<'s> {
@@ -55,7 +55,7 @@ impl<'s> Scanner<'s> {
             .is_some()
     }
 
-    /// Advance position in `src` and return next `char`.
+    /// Advance position in `source` and return next `char`.
     fn next(&mut self) -> Option<char> {
         if self.started {
             self.pos += 1;
@@ -82,7 +82,7 @@ impl<'s> Scanner<'s> {
         eaten
     }
 
-    /// Turn `src` into vector of `Token`, or error.
+    /// Turn `source` into vector of `Token`, or error.
     fn scan(&mut self) -> Result<()> {
         while let Some(c) = self.next() {
             let start = self.pos;

@@ -115,6 +115,7 @@ impl Parser {
 
     /// Parse a single <opening-tag with=attributes> or </closing-tag>
     fn tag(&mut self) -> Result<Stmt> {
+        self.next();
         Ok(Stmt::Tag)
     }
 

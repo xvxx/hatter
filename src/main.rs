@@ -1,5 +1,5 @@
 use {
-    hatter::{parse, scan},
+    hatter::{parse, scan, TokenStream},
     std::{env, io},
 };
 
@@ -35,7 +35,7 @@ fn main() -> Result<(), io::Error> {
         .map_err(|e| print_error(&path, &source, e))
         .unwrap();
     if command == "scan" {
-        println!("{:#?}", tokens);
+        print_tokens(&tokens);
         return Ok(());
     }
 
@@ -69,6 +69,12 @@ Commands:
   print       Print HTML. (default)
 "#
     );
+}
+
+fn print_tokens(tokens: &TokenStream) {
+    for tok in tokens {
+        println!("{:?}", tok);
+    }
 }
 
 fn print_error<P: AsRef<std::path::Path>, S: AsRef<str>>(path: P, source: S, err: hatter::Error) {

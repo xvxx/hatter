@@ -81,7 +81,8 @@ impl<'s> Scanner<'s> {
                 _ => self.scan_word()?,
             };
 
-            self.tokens.push(Token::new(kind, start, self.pos - start));
+            self.tokens
+                .push(Token::new(kind, start, self.pos - start + 1));
         }
 
         Ok(())
@@ -130,6 +131,10 @@ impl<'s> Scanner<'s> {
         let start = self.pos;
         self.eat(|c| !token::RESERVED.contains(&c));
         Ok(match &self.source[start..=self.pos] {
+            "for" => TokenKind::For,
+            "if" => TokenKind::If,
+            "do" => TokenKind::Do,
+            "end" => TokenKind::End,
             _ => TokenKind::Word,
         })
     }

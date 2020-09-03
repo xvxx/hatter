@@ -1,14 +1,16 @@
+#[macro_use]
 mod error;
+mod token;
 
-pub use error::{print_error, Error};
+pub use {
+    error::{print_error, Error},
+    token::{Token, TokenKind},
+};
 
+#[derive(Debug)]
 pub struct AST {}
 
 pub type Result<T> = std::result::Result<T, Error>;
-
-pub enum Token {
-    None,
-}
 
 pub fn scan(_src: &str) -> Result<Vec<Token>> {
     Ok(vec![])

@@ -23,7 +23,7 @@ pub struct TokenPos<'s> {
     tok: &'s Token,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum TokenKind {
     None,
     Indent,

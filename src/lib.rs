@@ -3,25 +3,20 @@
 
 #[macro_use]
 mod error;
+mod ast;
 mod parser;
 mod scanner;
+mod stmt;
 mod token;
 
 pub use {
+    ast::AST,
     error::{print_error, Error},
     parser::parse,
     scanner::scan,
+    stmt::Stmt,
     token::{Token, TokenKind, TokenStream},
 };
-
-#[derive(Debug)]
-pub struct AST {}
-
-impl AST {
-    pub fn new() -> AST {
-        AST {}
-    }
-}
 
 pub type Result<T> = std::result::Result<T, Error>;
 

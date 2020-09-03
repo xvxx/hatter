@@ -1,0 +1,4 @@
+<div#example>
+    <h2> Hello, world!
+    <p> It somewhat works!
+    <span.hint> For more info, <a href="/help"> Click here.

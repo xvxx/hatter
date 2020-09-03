@@ -2,6 +2,4 @@
     for todo in todos
         <li.todo data-id=todo.id> todo.text
 
-<GET /todos>
-    env.set("todos", self.get_all_todos()?);
 

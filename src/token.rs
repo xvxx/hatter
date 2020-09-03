@@ -20,6 +20,8 @@ pub struct Token {
 #[derive(Debug)]
 pub enum TokenKind {
     None,
+    Open,          // indent
+    Close,         // dedent
     Bracket(char), // < > ( ) [ ] { }
     Special(char), // # . @ : =
     Bool,
@@ -42,6 +44,19 @@ pub struct TokenIter<'s> {
 pub struct TokenPos<'s> {
     src: &'s str,
     tok: &'s Token,
+}
+
+impl TokenKind {
+    pub fn is_none(&self) -> bool {
+        match self {
+            TokenKind::None => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_some(&self) -> bool {
+        !self.is_none()
+    }
 }
 
 impl<'s> ops::Deref for TokenPos<'s> {

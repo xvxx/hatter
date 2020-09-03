@@ -63,6 +63,7 @@ impl<'s> Scanner<'s> {
         while let Some(c) = self.next() {
             let start = self.pos;
             let kind = match c {
+                '\n' => self.scan_newline()?,
                 '<' | '>' | '(' | ')' | '[' | ']' | '{' | '}' => TokenKind::Bracket(c),
                 '#' | '.' | '@' | ':' | '=' => TokenKind::Special(c),
                 '"' | '\'' | '`' => self.scan_string(c)?,
@@ -80,6 +81,11 @@ impl<'s> Scanner<'s> {
                 }
                 _ => self.scan_word()?,
             };
+
+            // skip empty tokens
+            if kind.is_none() {
+                continue;
+            }
 
             self.tokens
                 .push(Token::new(kind, start, self.pos - start + 1));
@@ -137,5 +143,10 @@ impl<'s> Scanner<'s> {
             "end" => TokenKind::End,
             _ => TokenKind::Word,
         })
+    }
+
+    /// Figure out indentation.
+    fn scan_newline(&mut self) -> Result<TokenKind> {
+        Ok(TokenKind::None)
     }
 }

@@ -4,11 +4,12 @@ use {
 };
 
 struct Scanner<'s> {
-    tokens: Vec<Token>,
-    source: &'s str,
-    chars: Peekable<Chars<'s>>,
-    pos: usize,
-    started: bool,
+    tokens: Vec<Token>,         // list we're building
+    source: &'s str,            // template source code
+    chars: Peekable<Chars<'s>>, // iterator
+    pos: usize,                 // current position in `source`
+    started: bool,              // scan has begun
+    indents: Vec<usize>,        // current depth
 }
 
 /// Scans source code and produces a `TokenStream`.
@@ -29,12 +30,29 @@ impl<'s> Scanner<'s> {
             chars: source.chars().peekable(),
             pos: 0,
             started: false,
+            indents: vec![],
         }
     }
 
     /// Peek at next `char` without iterating.
     fn peek(&mut self) -> Option<&char> {
         self.chars.peek()
+    }
+
+    /// Check the next char.
+    fn peek_is(&mut self, c: char) -> bool {
+        self.peek().filter(|&&p| p == c).is_some()
+    }
+
+    /// Check the type of the just-created token.
+    fn prev_is(&self, kind: TokenKind) -> bool {
+        if self.tokens.is_empty() {
+            return false;
+        }
+        self.tokens
+            .get(self.tokens.len() - 1)
+            .filter(|t| t.kind == kind)
+            .is_some()
     }
 
     /// Advance position in `src` and return next `char`.
@@ -45,6 +63,12 @@ impl<'s> Scanner<'s> {
             self.started = true;
         }
         self.chars.next()
+    }
+
+    /// Add single TokenKind to tokens list.
+    fn append(&mut self, kind: TokenKind) -> Result<()> {
+        self.tokens.push(Token::new(kind, self.pos, 1));
+        Ok(())
     }
 
     /// Consume and discard input while check(peek()) is true.
@@ -65,7 +89,7 @@ impl<'s> Scanner<'s> {
             let kind = match c {
                 '\n' => self.scan_newline()?,
                 '<' | '>' | '(' | ')' | '[' | ']' | '{' | '}' => TokenKind::Bracket(c),
-                '#' | '.' | '@' | ':' | '=' => TokenKind::Special(c),
+                ';' | '#' | '.' | '@' | ':' | '=' => TokenKind::Special(c),
                 '"' | '\'' | '`' => self.scan_string(c)?,
                 '-' => {
                     if self.peek().filter(|c| c.is_numeric()).is_some() {
@@ -89,6 +113,17 @@ impl<'s> Scanner<'s> {
 
             self.tokens
                 .push(Token::new(kind, start, self.pos - start + 1));
+        }
+
+        // Add final semicolon before EOF, if not present.
+        if !self.prev_is(TokenKind::Special(';')) && !self.prev_is(TokenKind::Close) {
+            self.append(TokenKind::Special(';'))?;
+        }
+
+        // Close open indents
+        while !self.indents.is_empty() {
+            self.indents.pop();
+            self.append(TokenKind::Close)?;
         }
 
         Ok(())
@@ -134,19 +169,63 @@ impl<'s> Scanner<'s> {
 
     /// Parse until we encounter a `token::RESERVED` char.
     fn scan_word(&mut self) -> Result<TokenKind> {
-        let start = self.pos;
         self.eat(|c| !token::RESERVED.contains(&c));
-        Ok(match &self.source[start..=self.pos] {
-            "for" => TokenKind::For,
-            "if" => TokenKind::If,
-            "do" => TokenKind::Do,
-            "end" => TokenKind::End,
-            _ => TokenKind::Word,
-        })
+        Ok(TokenKind::Word)
     }
 
-    /// Figure out indentation.
+    /// Figure out indents (Open) and dedents (Close).
     fn scan_newline(&mut self) -> Result<TokenKind> {
-        Ok(TokenKind::None)
+        let start = self.pos;
+        let mut indent = 0;
+        loop {
+            // ignore stacked newlines
+            self.eat(|c| c == '\n');
+
+            // count indent
+            while self.peek_is(' ') || self.peek_is('\t') {
+                indent += 1;
+                self.next();
+            }
+
+            // start over if we hit another newline
+            if let Some('\n') = self.peek() {
+                indent = 0;
+                continue;
+            }
+
+            break;
+        }
+
+        // what indent level are we at?
+        let last = if self.indents.len() > 0 {
+            self.indents[self.indents.len() - 1]
+        } else {
+            0
+        };
+
+        // greater indent than current depth: Open
+        if indent > last {
+            // set pos to first \n we saw, we may have skipped some
+            self.tokens.push(Token::new(TokenKind::Open, start, 1));
+            self.indents.push(indent);
+            return Ok(TokenKind::None);
+        }
+
+        // lesser indent than current depth: Close
+        if indent < last {
+            self.append(TokenKind::Special(';'))?;
+            while self.indents.len() > 0 {
+                if indent < self.indents[self.indents.len() - 1] {
+                    self.indents.pop();
+                    self.append(TokenKind::Close)?;
+                } else {
+                    break;
+                }
+            }
+            return Ok(TokenKind::None);
+        }
+
+        // current depth == current indent
+        Ok(TokenKind::Special(';'))
     }
 }

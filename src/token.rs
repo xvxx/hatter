@@ -17,22 +17,17 @@ pub struct Token {
     pub kind: TokenKind,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum TokenKind {
     None,
     Open,          // indent
     Close,         // dedent
     Bracket(char), // < > ( ) [ ] { }
-    Special(char), // # . @ : =
+    Special(char), // ; # . @ : =
     Bool,
     Number,
     String,
     Word,
-    // keywords
-    If,
-    For,
-    Do,
-    End,
 }
 
 pub struct TokenIter<'s> {
@@ -79,11 +74,14 @@ impl<'s> fmt::Debug for TokenPos<'s> {
 
 impl<'s> TokenPos<'s> {
     pub fn literal(&self) -> &str {
-        let pos = self.tok.pos;
-        if self.src.len() > pos {
-            &self.src[self.tok.range()]
-        } else {
-            ""
+        if self.src.len() <= self.pos {
+            return "";
+        }
+        match self.kind {
+            TokenKind::Open => "INDENT",
+            TokenKind::Close => "DEDENT",
+            TokenKind::Special(';') => ";",
+            _ => &self.src[self.tok.range()],
         }
     }
 }

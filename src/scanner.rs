@@ -107,7 +107,7 @@ impl<'s> Scanner<'s> {
             };
 
             // skip empty tokens
-            if kind.is_none() {
+            if kind == TokenKind::None {
                 continue;
             }
 

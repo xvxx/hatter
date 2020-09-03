@@ -1,5 +1,5 @@
 use {
-    hatter::{parse, scan, TokenStream},
+    hatter::{parse, scan, TokenStream, AST},
     std::{env, io},
 };
 
@@ -43,7 +43,7 @@ fn main() -> Result<(), io::Error> {
         .map_err(|e| print_error(&path, &source, e))
         .unwrap();
     if command == "parse" {
-        println!("{:#?}", ast);
+        print_ast(&ast);
         return Ok(());
     }
 
@@ -72,10 +72,13 @@ Commands:
 }
 
 fn print_tokens(tokens: &TokenStream) {
-    // println!("{:?}", tokens);
     for tok in tokens {
         println!("({:>03}:{:>03}) {}", tok.pos, tok.len, tok.literal());
     }
+}
+
+fn print_ast(ast: &AST) {
+    println!("{:?}", ast);
 }
 
 fn print_error<P: AsRef<std::path::Path>, S: AsRef<str>>(path: P, source: S, err: hatter::Error) {

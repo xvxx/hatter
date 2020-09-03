@@ -4,19 +4,6 @@ pub const RESERVED: [char; 17] = [
     '\n', '\t', '\r', ' ', '#', '.', '@', ':', '=', '<', '>', '(', ')', '[', ']', '{', '}',
 ];
 
-#[derive(Debug)]
-pub struct TokenStream {
-    tokens: Vec<Token>,
-    source: String,
-}
-
-#[derive(Debug)]
-pub struct Token {
-    pub pos: usize,
-    pub len: usize,
-    pub kind: TokenKind,
-}
-
 #[derive(Debug, PartialEq)]
 pub enum TokenKind {
     None,
@@ -30,6 +17,19 @@ pub enum TokenKind {
     Word,
 }
 
+#[derive(Debug)]
+pub struct Token {
+    pub pos: usize,
+    pub len: usize,
+    pub kind: TokenKind,
+}
+
+#[derive(Debug)]
+pub struct TokenStream {
+    tokens: Vec<Token>,
+    source: String,
+}
+
 pub struct TokenIter<'s> {
     src: &'s str,
     toks: &'s [Token],
@@ -39,19 +39,6 @@ pub struct TokenIter<'s> {
 pub struct TokenPos<'s> {
     src: &'s str,
     tok: &'s Token,
-}
-
-impl TokenKind {
-    pub fn is_none(&self) -> bool {
-        match self {
-            TokenKind::None => true,
-            _ => false,
-        }
-    }
-
-    pub fn is_some(&self) -> bool {
-        !self.is_none()
-    }
 }
 
 impl<'s> ops::Deref for TokenPos<'s> {

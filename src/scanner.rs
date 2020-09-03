@@ -89,7 +89,7 @@ impl<'s> Scanner<'s> {
             let kind = match c {
                 '\n' => self.scan_newline()?,
                 '<' | '>' | '(' | ')' | '[' | ']' | '{' | '}' => TokenKind::Bracket(c),
-                ';' | '#' | '.' | '@' | ':' | '=' => TokenKind::Special(c),
+                ';' | '#' | '.' | '@' | ':' | '=' | '/' => TokenKind::Special(c),
                 '"' | '\'' | '`' => self.scan_string(c)?,
                 '-' => {
                     if self.peek().filter(|c| c.is_numeric()).is_some() {
@@ -116,14 +116,14 @@ impl<'s> Scanner<'s> {
         }
 
         // Add final semicolon before EOF, if not present.
-        if !self.prev_is(TokenKind::Special(';')) && !self.prev_is(TokenKind::Close) {
+        if !self.prev_is(TokenKind::Special(';')) && !self.prev_is(TokenKind::Dedent) {
             self.append(TokenKind::Special(';'))?;
         }
 
         // Close open indents
         while !self.indents.is_empty() {
             self.indents.pop();
-            self.append(TokenKind::Close)?;
+            self.append(TokenKind::Dedent)?;
         }
 
         Ok(())
@@ -173,7 +173,7 @@ impl<'s> Scanner<'s> {
         Ok(TokenKind::Word)
     }
 
-    /// Figure out indents (Open) and dedents (Close).
+    /// Figure out indents and dedents.
     fn scan_newline(&mut self) -> Result<TokenKind> {
         let start = self.pos;
         let mut indent = 0;
@@ -203,21 +203,21 @@ impl<'s> Scanner<'s> {
             0
         };
 
-        // greater indent than current depth: Open
+        // greater indent than current depth: Indent
         if indent > last {
             // set pos to first \n we saw, we may have skipped some
-            self.tokens.push(Token::new(TokenKind::Open, start, 1));
+            self.tokens.push(Token::new(TokenKind::Indent, start, 1));
             self.indents.push(indent);
             return Ok(TokenKind::None);
         }
 
-        // lesser indent than current depth: Close
+        // lesser indent than current depth: Dedent
         if indent < last {
             self.append(TokenKind::Special(';'))?;
             while self.indents.len() > 0 {
                 if indent < self.indents[self.indents.len() - 1] {
                     self.indents.pop();
-                    self.append(TokenKind::Close)?;
+                    self.append(TokenKind::Dedent)?;
                 } else {
                     break;
                 }

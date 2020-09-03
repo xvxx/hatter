@@ -1,4 +1,7 @@
 <div#example>
     <h2> Hello, world!
-    <p> It somewhat works!
+    <p> It works!
     <span.hint> For more info, <a href="/help"> Click here.
+
+<div.fine-print>
+    Okay, fine, it <i>mostly</i> works...

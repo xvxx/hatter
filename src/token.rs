@@ -20,10 +20,10 @@ pub struct Token {
 #[derive(Debug, PartialEq)]
 pub enum TokenKind {
     None,
-    Open,          // indent
-    Close,         // dedent
+    Indent,
+    Dedent,
     Bracket(char), // < > ( ) [ ] { }
-    Special(char), // ; # . @ : =
+    Special(char), // ; # . @ : = /
     Bool,
     Number,
     String,
@@ -74,14 +74,17 @@ impl<'s> fmt::Debug for TokenPos<'s> {
 
 impl<'s> TokenPos<'s> {
     pub fn literal(&self) -> &str {
-        if self.src.len() <= self.pos {
-            return "";
-        }
         match self.kind {
-            TokenKind::Open => "INDENT",
-            TokenKind::Close => "DEDENT",
+            TokenKind::Indent => "INDENT",
+            TokenKind::Dedent => "DEDENT",
             TokenKind::Special(';') => ";",
-            _ => &self.src[self.tok.range()],
+            _ => {
+                if self.src.len() <= self.pos {
+                    ""
+                } else {
+                    &self.src[self.tok.range()]
+                }
+            }
         }
     }
 }

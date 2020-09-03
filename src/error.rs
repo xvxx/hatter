@@ -87,7 +87,11 @@ pub fn print_error<P: AsRef<std::path::Path>, S: AsRef<str>>(path: P, source: S,
     println!("   {}|{}", blue, clear);
 
     let lines = source.split("\n");
-    let pline = |num: usize| println!("{}   |{} {}", blue, clear, lines.clone().nth(num).unwrap());
+    let pline = |num| {
+        if let Some(line) = lines.clone().nth(num) {
+            println!("{}   |{} {}", blue, clear, line)
+        }
+    };
 
     if line > 2 {
         pline(line - 3);

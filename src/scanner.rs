@@ -8,6 +8,7 @@ struct Scanner<'s> {
     source: &'s str,
     chars: Peekable<Chars<'s>>,
     pos: usize,
+    started: bool,
 }
 
 /// Scans source code and produces a `TokenStream`.
@@ -27,6 +28,7 @@ impl<'s> Scanner<'s> {
             tokens: vec![],
             chars: source.chars().peekable(),
             pos: 0,
+            started: false,
         }
     }
 
@@ -37,6 +39,11 @@ impl<'s> Scanner<'s> {
 
     /// Advance position in `src` and return next `char`.
     fn next(&mut self) -> Option<char> {
+        if self.started {
+            self.pos += 1;
+        } else {
+            self.started = true;
+        }
         self.chars.next()
     }
 

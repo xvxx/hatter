@@ -4,19 +4,6 @@ pub const RESERVED: [char; 17] = [
     '\n', '\t', '\r', ' ', '#', '.', '@', ':', '=', '<', '>', '(', ')', '[', ']', '{', '}',
 ];
 
-#[derive(Debug, PartialEq)]
-pub enum TokenKind {
-    None,
-    Indent,
-    Dedent,
-    Bracket(char), // < > ( ) [ ] { }
-    Special(char), // ; # . @ : = /
-    Bool,
-    Number,
-    String,
-    Word,
-}
-
 #[derive(Debug)]
 pub struct Token {
     pub pos: usize,
@@ -28,17 +15,25 @@ pub struct Token {
 pub struct TokenStream {
     tokens: Vec<Token>,
     source: String,
-}
-
-pub struct TokenIter<'s> {
-    src: &'s str,
-    toks: &'s [Token],
     pos: usize,
 }
 
 pub struct TokenPos<'s> {
-    src: &'s str,
+    source: &'s str,
     tok: &'s Token,
+}
+
+#[derive(Debug, PartialEq)]
+pub enum TokenKind {
+    None,
+    Indent,
+    Dedent,
+    Bracket(char), // < > ( ) [ ] { }
+    Special(char), // ; # . @ : = /
+    Bool,
+    Number,
+    String,
+    Word,
 }
 
 impl<'s> ops::Deref for TokenPos<'s> {
@@ -66,10 +61,10 @@ impl<'s> TokenPos<'s> {
             TokenKind::Dedent => "DEDENT",
             TokenKind::Special(';') => ";",
             _ => {
-                if self.src.len() <= self.pos {
+                if self.source.len() <= self.pos {
                     ""
                 } else {
-                    &self.src[self.tok.range()]
+                    &self.source[self.tok.range()]
                 }
             }
         }
@@ -90,35 +85,33 @@ impl Token {
 
 impl TokenStream {
     pub fn from(source: String, tokens: Vec<Token>) -> TokenStream {
-        TokenStream { source, tokens }
-    }
-}
-
-impl<'s> IntoIterator for &'s TokenStream {
-    type Item = TokenPos<'s>;
-    type IntoIter = TokenIter<'s>;
-
-    fn into_iter(self) -> TokenIter<'s> {
-        TokenIter {
-            src: &self.source,
-            toks: &self.tokens,
+        TokenStream {
+            source,
+            tokens,
             pos: 0,
         }
     }
-}
 
-impl<'s> Iterator for TokenIter<'s> {
-    type Item = TokenPos<'s>;
+    pub fn peek(&self) -> Option<TokenPos> {
+        if self.tokens.is_empty() {
+            None
+        } else {
+            Some(TokenPos {
+                tok: self.tokens.get(self.pos)?,
+                source: &self.source,
+            })
+        }
+    }
 
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.pos == self.toks.len() {
+    pub fn next(&mut self) -> Option<TokenPos> {
+        if self.tokens.is_empty() {
             None
         } else {
             let pos = self.pos;
             self.pos += 1;
             Some(TokenPos {
-                src: self.src,
-                tok: &self.toks[pos],
+                tok: self.tokens.get(pos)?,
+                source: &self.source,
             })
         }
     }

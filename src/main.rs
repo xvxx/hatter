@@ -35,7 +35,7 @@ fn main() -> Result<(), io::Error> {
         .map_err(|e| print_error(&path, &source, e))
         .unwrap();
     if command == "scan" {
-        print_tokens(&tokens);
+        print_tokens(tokens);
         return Ok(());
     }
 
@@ -43,7 +43,7 @@ fn main() -> Result<(), io::Error> {
         .map_err(|e| print_error(&path, &source, e))
         .unwrap();
     if command == "parse" {
-        print_ast(&ast);
+        print_ast(ast);
         return Ok(());
     }
 
@@ -71,13 +71,13 @@ Commands:
     );
 }
 
-fn print_tokens(tokens: &TokenStream) {
-    for tok in tokens {
+fn print_tokens(mut tokens: TokenStream) {
+    while let Some(tok) = tokens.next() {
         println!("({:>03}:{:>03}) {}", tok.pos, tok.len, tok.literal());
     }
 }
 
-fn print_ast(ast: &AST) {
+fn print_ast(ast: AST) {
     println!("{:?}", ast);
 }
 

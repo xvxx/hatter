@@ -1,3 +1,7 @@
+pub const RESERVED: [char; 17] = [
+    '\n', '\t', '\r', ' ', '#', '.', '@', ':', '=', '<', '>', '(', ')', '[', ']', '{', '}',
+];
+
 #[derive(Debug)]
 pub struct TokenStream {
     tokens: Vec<Token>,
@@ -14,6 +18,8 @@ pub struct Token {
 #[derive(Debug)]
 pub enum TokenKind {
     None,
+    Bracket(char), // < > ( ) [ ] { }
+    Special(char), // # . @ : =
     Bool,
     Number,
     String,
@@ -29,6 +35,12 @@ pub struct TokenIter<'s> {
 pub struct TokenPos<'s> {
     src: &'s str,
     tok: &'s Token,
+}
+
+impl Token {
+    pub fn new(kind: TokenKind, pos: usize, len: usize) -> Token {
+        Token { kind, pos, len }
+    }
 }
 
 impl TokenStream {

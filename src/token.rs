@@ -1,4 +1,4 @@
-use std::fmt;
+use std::{fmt, ops};
 
 pub const RESERVED: [char; 17] = [
     '\n', '\t', '\r', ' ', '#', '.', '@', ':', '=', '<', '>', '(', ')', '[', ']', '{', '}',
@@ -44,6 +44,14 @@ pub struct TokenPos<'s> {
     tok: &'s Token,
 }
 
+impl<'s> ops::Deref for TokenPos<'s> {
+    type Target = Token;
+
+    fn deref(&self) -> &Self::Target {
+        self.tok
+    }
+}
+
 impl<'s> fmt::Debug for TokenPos<'s> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("TokenPos")
@@ -55,7 +63,7 @@ impl<'s> fmt::Debug for TokenPos<'s> {
 }
 
 impl<'s> TokenPos<'s> {
-    fn literal(&self) -> &str {
+    pub fn literal(&self) -> &str {
         let pos = self.tok.pos;
         if self.src.len() > pos {
             &self.src[self.tok.range()]

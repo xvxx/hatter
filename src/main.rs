@@ -73,7 +73,7 @@ Commands:
 
 fn print_tokens(tokens: &TokenStream) {
     for tok in tokens {
-        println!("{:?}", tok);
+        println!("({:>03}:{:>03}) {}", tok.pos, tok.len, tok.literal());
     }
 }
 

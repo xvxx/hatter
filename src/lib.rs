@@ -7,6 +7,7 @@ mod ast;
 mod parser;
 mod scanner;
 mod stmt;
+mod tag;
 mod token;
 
 pub use {
@@ -15,6 +16,7 @@ pub use {
     parser::parse,
     scanner::scan,
     stmt::Stmt,
+    tag::Tag,
     token::{Token, TokenKind, TokenStream},
 };
 

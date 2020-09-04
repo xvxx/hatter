@@ -1,6 +1,6 @@
 use crate::{
     token::{TokenKind, TokenPos, TokenStream},
-    Error, Result, Stmt, AST,
+    Error, Result, Stmt, Tag, AST,
 };
 
 const STACK_SIZE: usize = 1000; // infinite loop protection
@@ -9,6 +9,7 @@ pub struct Parser {
     ast: AST,
     tokens: TokenStream,
     pos: usize,
+    tags: usize,   // open tags
     peeked: usize, // infinite loop protection hack
 }
 
@@ -26,6 +27,7 @@ impl Parser {
             pos: 0,
             ast: AST::new(),
             peeked: 0,
+            tags: 0,
         }
     }
 
@@ -96,14 +98,8 @@ impl Parser {
                 // Tag
                 TokenKind::Bracket('<') => self.tag()?,
 
-                // Syntax
-                TokenKind::Special(';') => {
-                    self.next();
-                    continue;
-                }
-
                 // Unexpected
-                _ => return Err(self.error("statement")),
+                _ => return Err(self.error("HTML Tag")),
             };
 
             ast.stmts.push(node);
@@ -113,14 +109,93 @@ impl Parser {
         Ok(())
     }
 
-    /// Parse a single <opening-tag with=attributes> or </closing-tag>
-    fn tag(&mut self) -> Result<Stmt> {
-        self.next();
-        Ok(Stmt::Tag)
+    /// Parse the content of a <tag>CONTENT</tag>.
+    fn content(&mut self) -> Result<Stmt> {
+        loop {
+            match self.peek_kind() {
+                // Tag
+                TokenKind::Bracket('<') => self.tag()?,
+
+                // Unexpected
+                _ => return Err(self.error("HTML Tag")),
+            };
+        }
     }
 
     /// Parse a single code statment (IF, FOR, etc)
     fn code(&mut self) -> Result<Stmt> {
         Ok(Stmt::Expr)
+    }
+
+    /// Parse a <tag> and its contents or a </tag>.
+    fn tag(&mut self) -> Result<Stmt> {
+        self.expect(TokenKind::Bracket('<'))?;
+
+        if self.peek_kind() == TokenKind::Special('/') {
+            self.close_tag()?;
+            return Ok(Stmt::None);
+        }
+
+        let tag = self.open_tag()?;
+        if tag.is_closed() {
+            return Ok(Stmt::Tag(tag));
+        }
+        // tag.contents = self.content()?;
+        self.close_tag()?;
+        Ok(Stmt::Tag(tag))
+    }
+
+    /// Parse just a closing tag, starting after the <
+    fn close_tag(&mut self) -> Result<()> {
+        self.tags -= 1;
+        self.expect(TokenKind::Bracket('<'))?;
+        self.expect(TokenKind::Special('/'))?;
+        // </>
+        if self.peek_kind() == TokenKind::Bracket('>') {
+            self.next();
+            return Ok(());
+        }
+        self.expect(TokenKind::Word)?;
+        self.expect(TokenKind::Bracket('>'))?;
+        Ok(())
+    }
+
+    /// Parse a string <opening.tag with=attributes>
+    /// starting after the <
+    fn open_tag(&mut self) -> Result<Tag> {
+        self.tags += 1;
+        let mut tag = Tag::new(self.expect(TokenKind::Word)?.to_string());
+
+        loop {
+            let next = self.next();
+            match next.kind {
+                TokenKind::Bracket('>') => break,
+                TokenKind::Bracket('/') => {
+                    tag.close();
+                    self.tags -= 1;
+                }
+                TokenKind::Special('#') => tag.id = Some(self.expect(TokenKind::Word)?.to_string()),
+                TokenKind::Special('.') => tag.add_class(self.expect(TokenKind::Word)?.to_string()),
+                TokenKind::Special('@') => {
+                    tag.add_attr("name", self.expect(TokenKind::Word)?.literal())
+                }
+                TokenKind::Special(':') => {
+                    tag.add_attr("type", self.expect(TokenKind::Word)?.literal())
+                }
+                TokenKind::Word => {
+                    let name = next.to_string();
+                    self.expect(TokenKind::Special('='))?;
+                    match self.peek_kind() {
+                        TokenKind::Number | TokenKind::String | TokenKind::Word => {
+                            tag.add_attr(name, self.next().to_string())
+                        }
+                        _ => return Err(self.error("Word, Number, or String")),
+                    }
+                }
+                _ => return Err(self.error("Attribute or >")),
+            }
+        }
+
+        Ok(tag)
     }
 }

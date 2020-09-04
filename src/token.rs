@@ -69,6 +69,16 @@ impl<'s> TokenPos<'s> {
             }
         }
     }
+
+    pub fn to_string(&self) -> String {
+        self.literal().to_string()
+    }
+}
+
+impl<'s> From<TokenPos<'s>> for String {
+    fn from(tok: TokenPos<'s>) -> Self {
+        tok.to_string()
+    }
 }
 
 impl Token {

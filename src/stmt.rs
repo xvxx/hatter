@@ -1,8 +1,11 @@
+use crate::Tag;
+
 #[derive(Debug)]
 pub enum Stmt {
-    Tag,
+    None,
     Text,
     If,
     For,
     Expr,
+    Tag(Tag),
 }

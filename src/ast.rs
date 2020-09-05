@@ -1,12 +1,12 @@
-use crate::Stmt;
+use crate::Expr;
 
 #[derive(Debug)]
 pub struct AST {
-    pub stmts: Vec<Stmt>,
+    pub exprs: Vec<Expr>,
 }
 
 impl AST {
     pub fn new() -> AST {
-        AST { stmts: vec![] }
+        AST { exprs: vec![] }
     }
 }

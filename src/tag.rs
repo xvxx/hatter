@@ -1,11 +1,11 @@
-use {crate::Stmt, std::collections::HashMap};
+use {crate::Expr, std::collections::HashMap};
 
 #[derive(Debug)]
 pub struct Tag {
     pub tag: String,                    // tag name
     pub classes: Vec<String>,           // classes
     pub attrs: HashMap<String, String>, // other attributes
-    pub contents: Vec<Stmt>,            // Stmt::Block
+    pub contents: Vec<Expr>,            // Bunch o' expressions
     closed: bool,                       // <self-closing/> ?
 }
 

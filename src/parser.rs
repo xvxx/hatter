@@ -1,6 +1,6 @@
 use crate::{
     token::{Syntax, TokenPos, TokenStream},
-    Error, Expr, Result, Stmt, Tag, AST,
+    Error, Expr, Result, Tag, AST,
 };
 
 const STACK_SIZE: usize = 1000; // infinite loop protection
@@ -135,16 +135,11 @@ impl Parser {
                 _ => return Err(self.error("HTML Tag")),
             };
 
-            ast.stmts.push(node);
+            ast.exprs.push(node);
         }
 
         self.ast = ast;
         Ok(())
-    }
-
-    /// Parse a literal as a string statement.
-    fn as_string_stmt(&mut self) -> Result<Stmt> {
-        Ok(Stmt::Expr(self.as_string()?))
     }
 
     /// Parse a literal as a string expression.
@@ -174,11 +169,6 @@ impl Parser {
     /// Parse a word.
     fn word(&mut self) -> Result<Expr> {
         Ok(Expr::Word(self.expect(Syntax::Word)?.to_string()))
-    }
-
-    /// Parse a code expression into a statement.
-    fn expr_stmt(&mut self) -> Result<Stmt> {
-        Ok(Stmt::Expr(self.expr()?))
     }
 
     /// Parse a code expression.
@@ -218,7 +208,7 @@ impl Parser {
     }
 
     /// Parse the content of a <tag>CONTENT</tag>.
-    fn content(&mut self) -> Result<Vec<Stmt>> {
+    fn content(&mut self) -> Result<Vec<Expr>> {
         let mut block = vec![];
         let mut indented = false;
 
@@ -244,11 +234,11 @@ impl Parser {
 
                 // Literal
                 Syntax::String | Syntax::Text | Syntax::Number => {
-                    block.push(self.as_string_stmt()?);
+                    block.push(self.as_string()?);
                 }
 
                 // Expression
-                Syntax::Word => block.push(self.expr_stmt()?),
+                Syntax::Word => block.push(self.expr()?),
 
                 // keep going if we're indented
                 Syntax::Special(';') if indented => {
@@ -267,19 +257,19 @@ impl Parser {
     }
 
     /// Parse a <tag> and its contents or a </tag>.
-    fn tag(&mut self) -> Result<Stmt> {
+    fn tag(&mut self) -> Result<Expr> {
         if self
             .peek2()
             .filter(|p| p.kind == Syntax::Special('/'))
             .is_some()
         {
             self.close_tag()?;
-            return Ok(Stmt::None);
+            return Ok(Expr::None);
         }
 
         let mut tag = self.open_tag()?;
         if tag.is_closed() {
-            return Ok(Stmt::Tag(tag));
+            return Ok(Expr::Tag(tag));
         }
 
         tag.contents = self.content()?;
@@ -293,7 +283,7 @@ impl Parser {
             _ => self.close_tag()?,
         }
 
-        Ok(Stmt::Tag(tag))
+        Ok(Expr::Tag(tag))
     }
 
     /// Parse just a closing tag, starting after the <

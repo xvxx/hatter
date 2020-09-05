@@ -52,7 +52,7 @@ fn main() -> Result<(), io::Error> {
     }
 
     if command == "emit" {
-        let code = emit(ast.stmts)
+        let code = emit(ast.exprs)
             .map_err(|e| print_error(&path, &source, e))
             .unwrap();
         println!("{}", code);

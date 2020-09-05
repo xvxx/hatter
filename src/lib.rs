@@ -10,7 +10,6 @@ mod env;
 mod expr;
 mod parser;
 mod scanner;
-mod stmt;
 mod tag;
 mod token;
 
@@ -22,7 +21,6 @@ pub use {
     expr::Expr,
     parser::parse,
     scanner::scan,
-    stmt::Stmt,
     tag::Tag,
     token::{Syntax, Token, TokenStream},
 };

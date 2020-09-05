@@ -1,23 +1,22 @@
-use crate::{Expr, Result, Stmt, Tag};
+use crate::{Expr, Result, Tag};
 
 /// Turn AST into HTML.
-pub fn emit(stmts: Vec<Stmt>) -> Result<String> {
+pub fn emit(exprs: Vec<Expr>) -> Result<String> {
     let mut out = String::new();
     let mut auto_html = false;
 
     // If the first tag is <head>, emit <html>
-    if let Some(Stmt::Tag(t)) = stmts.get(0) {
+    if let Some(Expr::Tag(t)) = exprs.get(0) {
         if t.tag == "head" {
             auto_html = true;
             out.push_str("<!DOCTYPE html><html>");
         }
     }
 
-    for stmt in stmts {
-        out.push_str(&match stmt {
-            Stmt::Tag(t) => tag(t)?,
-            Stmt::Expr(e) => expr(e)?,
-            _ => unimplemented!("dog"),
+    for ex in exprs {
+        out.push_str(&match ex {
+            Expr::Tag(t) => tag(t)?,
+            _ => expr(ex)?,
         });
     }
 

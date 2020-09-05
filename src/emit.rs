@@ -43,9 +43,12 @@ pub fn tag(tag: Tag) -> Result<String> {
 
     if !tag.classes.is_empty() {
         out.push_str(" class='");
-        for class in &tag.classes {
+        let len = tag.classes.len();
+        for (i, class) in tag.classes.iter().enumerate() {
             out.push_str(class);
-            out.push(' ');
+            if i < len - 1 {
+                out.push(' ');
+            }
         }
         out.push_str("'");
     }

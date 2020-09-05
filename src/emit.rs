@@ -3,6 +3,15 @@ use crate::{Expr, Result, Stmt, Tag};
 /// Turn AST into HTML.
 pub fn emit(stmts: Vec<Stmt>) -> Result<String> {
     let mut out = String::new();
+    let mut auto_html = false;
+
+    // If the first tag is <head>, emit <html>
+    if let Some(Stmt::Tag(t)) = stmts.get(0) {
+        if t.tag == "head" {
+            auto_html = true;
+            out.push_str("<!DOCTYPE html><html>");
+        }
+    }
 
     for stmt in stmts {
         out.push_str(&match stmt {
@@ -10,6 +19,10 @@ pub fn emit(stmts: Vec<Stmt>) -> Result<String> {
             Stmt::Expr(e) => expr(e)?,
             _ => unimplemented!("dog"),
         });
+    }
+
+    if auto_html {
+        out.push_str("</html>");
     }
 
     Ok(out)

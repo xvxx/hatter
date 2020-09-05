@@ -191,7 +191,7 @@ impl Parser {
                 }
 
                 // Literal
-                Syntax::String | Syntax::Text | Syntax::Number => {
+                Syntax::String | Syntax::Text | Syntax::Number | Syntax::Word => {
                     block.push(self.as_string()?);
                 }
 

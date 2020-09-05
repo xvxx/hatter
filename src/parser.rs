@@ -276,7 +276,7 @@ impl Parser {
             let next = self.next();
             match next.kind {
                 Syntax::Bracket('>') => break,
-                Syntax::Bracket('/') => {
+                Syntax::Special('/') => {
                     tag.close();
                     self.tags -= 1;
                 }

@@ -283,6 +283,7 @@ impl Parser {
                         TokenKind::Number | TokenKind::String | TokenKind::Word => {
                             tag.add_attr(name, self.next().to_string())
                         }
+                        TokenKind::Bracket('(') => tag.add_attr(name, self.js()?),
                         _ => return Err(self.error("Word, Number, or String")),
                     }
                 }
@@ -291,5 +292,16 @@ impl Parser {
         }
 
         Ok(tag)
+    }
+
+    /// Parse (JavaScript) event handler.
+    fn js(&mut self) -> Result<String> {
+        let mut out = String::new();
+        self.expect(TokenKind::Bracket('('))?;
+        let mut parens = 0;
+        
+
+        self.expect(TokenKind::Bracket(')'))?;
+        Ok(out)
     }
 }

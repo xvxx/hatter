@@ -90,7 +90,7 @@ impl<'s> Scanner<'s> {
             let start = self.pos;
             let kind = match c {
                 '\n' => self.scan_newline()?,
-                '[' | ']' | '{' | '}' => Syntax::Bracket(c),
+                ')' | '[' | ']' | '{' | '}' => Syntax::Bracket(c),
                 ';' | '#' | '.' | '@' | ':' | '=' | '/' => Syntax::Special(c),
                 '"' | '\'' | '`' => self.scan_string(c)?,
                 '-' => {
@@ -112,19 +112,23 @@ impl<'s> Scanner<'s> {
                     Syntax::Bracket('>')
                 }
                 '(' => {
-                    let mut open = 0;
-                    while let Some(&c) = self.peek() {
-                        if c == ')' && open == 0 {
+                    if self.prev_is(Syntax::Special('=')) {
+                        let mut open = 0;
+                        while let Some(&c) = self.peek() {
+                            if c == ')' && open == 0 {
+                                self.next();
+                                break;
+                            } else if c == '(' {
+                                open += 1;
+                            } else if c == ')' {
+                                open -= 1;
+                            }
                             self.next();
-                            break;
-                        } else if c == '(' {
-                            open += 1;
-                        } else if c == ')' {
-                            open -= 1;
                         }
-                        self.next();
+                        Syntax::JS
+                    } else {
+                        Syntax::Bracket('(')
                     }
-                    Syntax::JS
                 }
                 _ if c.is_numeric() => self.scan_number()?,
                 _ if c.is_whitespace() => {

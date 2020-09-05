@@ -1,4 +1,7 @@
-use std::{fmt, ops};
+use {
+    crate::{Error, Result},
+    std::{fmt, ops},
+};
 
 pub const RESERVED: [char; 18] = [
     '\n', '\t', '\r', ' ', '#', '.', '@', ':', '/', '=', '<', '>', '(', ')', '[', ']', '{', '}',
@@ -74,6 +77,14 @@ impl<'s> TokenPos<'s> {
 
     pub fn to_string(&self) -> String {
         self.literal().to_string()
+    }
+
+    pub fn to_f64(&self) -> Result<f64> {
+        self.literal().parse::<f64>().map_err(|err| Error {
+            details: format!("{}", err),
+            pos: self.pos,
+            len: self.len,
+        })
     }
 }
 

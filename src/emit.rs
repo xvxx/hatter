@@ -32,6 +32,16 @@ pub fn emit(stmts: Vec<Stmt>) -> Result<String> {
 pub fn expr(expr: Expr) -> Result<String> {
     match expr {
         Expr::String(s) | Expr::Word(s) => Ok(format!("{} ", s)),
+        Expr::Bool(b) => Ok(format!("{} ", b)),
+        Expr::Number(n) => Ok(format!("{} ", n)),
+        Expr::Call(name, args) => Ok(format!(
+            "{}({})",
+            name,
+            args.iter()
+                .map(|a| a.to_string())
+                .collect::<Vec<_>>()
+                .join(", ")
+        )),
     }
 }
 

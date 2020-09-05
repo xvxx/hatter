@@ -159,15 +159,17 @@ impl Parser {
             match self.peek_kind() {
                 // Tag
                 TokenKind::Bracket('<') => {
-                    if self
-                        .peek2()
-                        .filter(|p| p.kind == TokenKind::Special('/'))
-                        .is_some()
+                    if !indented
+                        && self
+                            .peek2()
+                            .filter(|p| p.kind == TokenKind::Special('/'))
+                            .is_some()
                     {
                         break;
                     }
                     block.push(self.tag()?);
                 }
+
                 // Literal
                 TokenKind::String | TokenKind::Number | TokenKind::Word => {
                     block.push(self.as_string()?);
@@ -177,7 +179,9 @@ impl Parser {
                 TokenKind::Special(';') if indented => {
                     self.next();
                 }
-                TokenKind::Special(';') | TokenKind::Dedent => break,
+
+                // pass these up the food chain
+                TokenKind::Dedent | TokenKind::Special(';') => break,
 
                 // Treat as literals for now
                 TokenKind::Special(_) => block.push(self.as_string()?),
@@ -205,12 +209,18 @@ impl Parser {
         if tag.is_closed() {
             return Ok(Stmt::Tag(tag));
         }
+
         tag.contents = self.content()?;
-        if self.peek_kind() == TokenKind::Special(';') {
-            self.next();
-        } else {
-            self.close_tag()?;
+
+        match self.peek_kind() {
+            TokenKind::Special(';') => self.tags -= 1,
+            TokenKind::Dedent => {
+                self.tags -= 1;
+                self.next();
+            }
+            _ => self.close_tag()?,
         }
+
         Ok(Stmt::Tag(tag))
     }
 

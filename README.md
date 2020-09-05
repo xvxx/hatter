@@ -1,6 +1,8 @@
 # Hatter
 
-_Slightly mad, Imba-inspired, static HTML templates. In Rust._
+<img src="./img/rhetoric.jpg" align="right" width="350" alt="The Mad Hatter discussing Hatter" />
+
+_**Hatter** is a slightly mad, zero dependency HTML template library._
 
 ## TODO
 

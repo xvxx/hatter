@@ -1,5 +1,5 @@
 use crate::{
-    token::{TokenKind, TokenPos, TokenStream},
+    token::{Syntax, TokenPos, TokenStream},
     Error, Expr, Result, Stmt, Tag, AST,
 };
 
@@ -53,12 +53,12 @@ impl Parser {
     }
 
     /// Get the next token's kind.
-    fn peek_kind(&mut self) -> TokenKind {
-        self.peek().map(|t| t.kind).unwrap_or(TokenKind::None)
+    fn peek_kind(&mut self) -> Syntax {
+        self.peek().map(|t| t.kind).unwrap_or(Syntax::None)
     }
 
     /// Check the next token's kind.
-    fn peek_is(&mut self, kind: TokenKind) -> bool {
+    fn peek_is(&mut self, kind: Syntax) -> bool {
         self.peek_kind() == kind
     }
 
@@ -94,7 +94,7 @@ impl Parser {
 
     /// Consumes and returns the next token if it's of `kind`,
     /// otherwise errors.
-    fn expect(&mut self, kind: TokenKind) -> Result<TokenPos> {
+    fn expect(&mut self, kind: Syntax) -> Result<TokenPos> {
         if self.peek_kind() == kind {
             Ok(self.next())
         } else {
@@ -109,10 +109,10 @@ impl Parser {
         while let Some(tok) = self.peek() {
             let node = match tok.kind {
                 // Tag
-                TokenKind::Bracket('<') => self.tag()?,
+                Syntax::Bracket('<') => self.tag()?,
 
                 // Syntax
-                TokenKind::Special(';') => {
+                Syntax::Special(';') => {
                     self.next();
                     continue;
                 }
@@ -140,14 +140,14 @@ impl Parser {
     /// Parse a string.
     fn string(&mut self) -> Result<Stmt> {
         Ok(Stmt::Expr(Expr::String(
-            self.expect(TokenKind::String)?.to_string(),
+            self.expect(Syntax::String)?.to_string(),
         )))
     }
 
     /// Parse a word.
     fn word(&mut self) -> Result<Stmt> {
         Ok(Stmt::Expr(Expr::Word(
-            self.expect(TokenKind::Word)?.to_string(),
+            self.expect(Syntax::Word)?.to_string(),
         )))
     }
 
@@ -156,7 +156,7 @@ impl Parser {
         let mut block = vec![];
         let mut indented = false;
 
-        if self.peek_kind() == TokenKind::Indent {
+        if self.peek_kind() == Syntax::Indent {
             self.next();
             indented = true;
         }
@@ -164,11 +164,11 @@ impl Parser {
         loop {
             match self.peek_kind() {
                 // Tag
-                TokenKind::Bracket('<') => {
+                Syntax::Bracket('<') => {
                     if !indented
                         && self
                             .peek2()
-                            .filter(|p| p.kind == TokenKind::Special('/'))
+                            .filter(|p| p.kind == Syntax::Special('/'))
                             .is_some()
                     {
                         break;
@@ -177,20 +177,20 @@ impl Parser {
                 }
 
                 // Literal
-                TokenKind::String | TokenKind::Number | TokenKind::Word => {
+                Syntax::String | Syntax::Number | Syntax::Word => {
                     block.push(self.as_string()?);
                 }
 
                 // keep going if we're indented
-                TokenKind::Special(';') if indented => {
+                Syntax::Special(';') if indented => {
                     self.next();
                 }
 
                 // pass these up the food chain
-                TokenKind::Dedent | TokenKind::Special(';') => break,
+                Syntax::Dedent | Syntax::Special(';') => break,
 
                 // Treat as literals for now
-                TokenKind::Special(_) => block.push(self.as_string()?),
+                Syntax::Special(_) => block.push(self.as_string()?),
 
                 // Unexpected
                 _ => return Err(self.error("Tag contents")),
@@ -204,7 +204,7 @@ impl Parser {
     fn tag(&mut self) -> Result<Stmt> {
         if self
             .peek2()
-            .filter(|p| p.kind == TokenKind::Special('/'))
+            .filter(|p| p.kind == Syntax::Special('/'))
             .is_some()
         {
             self.close_tag()?;
@@ -219,8 +219,8 @@ impl Parser {
         tag.contents = self.content()?;
 
         match self.peek_kind() {
-            TokenKind::Special(';') => self.tags -= 1,
-            TokenKind::Dedent => {
+            Syntax::Special(';') => self.tags -= 1,
+            Syntax::Dedent => {
                 self.tags -= 1;
                 self.next();
             }
@@ -236,15 +236,15 @@ impl Parser {
             return Err(self.error("open tags"));
         }
         self.tags -= 1;
-        self.expect(TokenKind::Bracket('<'))?;
-        self.expect(TokenKind::Special('/'))?;
+        self.expect(Syntax::Bracket('<'))?;
+        self.expect(Syntax::Special('/'))?;
         // </>
-        if self.peek_kind() == TokenKind::Bracket('>') {
+        if self.peek_kind() == Syntax::Bracket('>') {
             self.next();
             return Ok(());
         }
-        self.expect(TokenKind::Word)?;
-        self.expect(TokenKind::Bracket('>'))?;
+        self.expect(Syntax::Word)?;
+        self.expect(Syntax::Bracket('>'))?;
         Ok(())
     }
 
@@ -252,38 +252,32 @@ impl Parser {
     /// starting after the <
     fn open_tag(&mut self) -> Result<Tag> {
         self.tags += 1;
-        self.expect(TokenKind::Bracket('<'))?;
+        self.expect(Syntax::Bracket('<'))?;
         let mut tag = Tag::new(match self.peek_kind() {
-            TokenKind::Special(_) => "div".to_string(),
-            _ => self.expect(TokenKind::Word)?.to_string(),
+            Syntax::Special(_) => "div".to_string(),
+            _ => self.expect(Syntax::Word)?.to_string(),
         });
 
         loop {
             let next = self.next();
             match next.kind {
-                TokenKind::Bracket('>') => break,
-                TokenKind::Bracket('/') => {
+                Syntax::Bracket('>') => break,
+                Syntax::Bracket('/') => {
                     tag.close();
                     self.tags -= 1;
                 }
-                TokenKind::Special('#') => {
-                    tag.add_attr("id", self.expect(TokenKind::Word)?.literal())
-                }
-                TokenKind::Special('.') => tag.add_class(self.expect(TokenKind::Word)?.to_string()),
-                TokenKind::Special('@') => {
-                    tag.add_attr("name", self.expect(TokenKind::Word)?.literal())
-                }
-                TokenKind::Special(':') => {
-                    tag.add_attr("type", self.expect(TokenKind::Word)?.literal())
-                }
-                TokenKind::Word => {
+                Syntax::Special('#') => tag.add_attr("id", self.expect(Syntax::Word)?.literal()),
+                Syntax::Special('.') => tag.add_class(self.expect(Syntax::Word)?.to_string()),
+                Syntax::Special('@') => tag.add_attr("name", self.expect(Syntax::Word)?.literal()),
+                Syntax::Special(':') => tag.add_attr("type", self.expect(Syntax::Word)?.literal()),
+                Syntax::Word => {
                     let name = next.to_string();
-                    self.expect(TokenKind::Special('='))?;
+                    self.expect(Syntax::Special('='))?;
                     match self.peek_kind() {
-                        TokenKind::Number | TokenKind::String | TokenKind::Word => {
+                        Syntax::Number | Syntax::String | Syntax::Word => {
                             tag.add_attr(name, self.next().to_string())
                         }
-                        TokenKind::Bracket('(') => tag.add_attr(name, self.js()?),
+                        Syntax::Bracket('(') => tag.add_attr(name, self.js()?),
                         _ => return Err(self.error("Word, Number, or String")),
                     }
                 }
@@ -297,11 +291,10 @@ impl Parser {
     /// Parse (JavaScript) event handler.
     fn js(&mut self) -> Result<String> {
         let mut out = String::new();
-        self.expect(TokenKind::Bracket('('))?;
+        self.expect(Syntax::Bracket('('))?;
         let mut parens = 0;
-        
 
-        self.expect(TokenKind::Bracket(')'))?;
+        self.expect(Syntax::Bracket(')'))?;
         Ok(out)
     }
 }

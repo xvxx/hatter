@@ -8,7 +8,7 @@ pub const RESERVED: [char; 17] = [
 pub struct Token {
     pub pos: usize,
     pub len: usize,
-    pub kind: TokenKind,
+    pub kind: Syntax,
 }
 
 #[derive(Debug)]
@@ -24,7 +24,7 @@ pub struct TokenPos<'s> {
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
-pub enum TokenKind {
+pub enum Syntax {
     None,
     Indent,
     Dedent,
@@ -57,9 +57,9 @@ impl<'s> fmt::Debug for TokenPos<'s> {
 impl<'s> TokenPos<'s> {
     pub fn literal(&self) -> &str {
         match self.kind {
-            TokenKind::Indent => "INDENT",
-            TokenKind::Dedent => "DEDENT",
-            TokenKind::Special(';') => ";",
+            Syntax::Indent => "INDENT",
+            Syntax::Dedent => "DEDENT",
+            Syntax::Special(';') => ";",
             _ => {
                 if self.source.len() <= self.pos {
                     ""
@@ -83,7 +83,7 @@ impl<'s> From<TokenPos<'s>> for String {
 
 impl Token {
     /// Create a Token.
-    pub fn new(kind: TokenKind, pos: usize, len: usize) -> Token {
+    pub fn new(kind: Syntax, pos: usize, len: usize) -> Token {
         Token { kind, pos, len }
     }
 

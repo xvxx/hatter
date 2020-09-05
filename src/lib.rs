@@ -20,7 +20,7 @@ pub use {
     scanner::scan,
     stmt::{Expr, Stmt},
     tag::Tag,
-    token::{Token, TokenKind, TokenStream},
+    token::{Syntax, Token, TokenStream},
 };
 
 pub type Result<T> = std::result::Result<T, Error>;

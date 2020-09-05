@@ -1,5 +1,5 @@
 use {
-    crate::{token, Result, Token, TokenKind, TokenStream},
+    crate::{token, Result, Token, Syntax, TokenStream},
     std::{iter::Peekable, str::Chars},
 };
 
@@ -45,7 +45,7 @@ impl<'s> Scanner<'s> {
     }
 
     /// Check the type of the just-created token.
-    fn prev_is(&self, kind: TokenKind) -> bool {
+    fn prev_is(&self, kind: Syntax) -> bool {
         if self.tokens.is_empty() {
             return false;
         }
@@ -65,8 +65,8 @@ impl<'s> Scanner<'s> {
         self.chars.next()
     }
 
-    /// Add single TokenKind to tokens list.
-    fn append(&mut self, kind: TokenKind) -> Result<()> {
+    /// Add single Syntax to tokens list.
+    fn append(&mut self, kind: Syntax) -> Result<()> {
         self.tokens.push(Token::new(kind, self.pos, 1));
         Ok(())
     }
@@ -88,8 +88,8 @@ impl<'s> Scanner<'s> {
             let start = self.pos;
             let kind = match c {
                 '\n' => self.scan_newline()?,
-                '<' | '>' | '(' | ')' | '[' | ']' | '{' | '}' => TokenKind::Bracket(c),
-                ';' | '#' | '.' | '@' | ':' | '=' | '/' => TokenKind::Special(c),
+                '<' | '>' | '(' | ')' | '[' | ']' | '{' | '}' => Syntax::Bracket(c),
+                ';' | '#' | '.' | '@' | ':' | '=' | '/' => Syntax::Special(c),
                 '"' | '\'' | '`' => self.scan_string(c)?,
                 '-' => {
                     if self.peek().filter(|c| c.is_numeric()).is_some() {
@@ -107,7 +107,7 @@ impl<'s> Scanner<'s> {
             };
 
             // skip empty tokens
-            if kind == TokenKind::None {
+            if kind == Syntax::None {
                 continue;
             }
 
@@ -116,21 +116,21 @@ impl<'s> Scanner<'s> {
         }
 
         // Add final semicolon before EOF, if not present.
-        if !self.prev_is(TokenKind::Special(';')) && !self.prev_is(TokenKind::Dedent) {
-            self.append(TokenKind::Special(';'))?;
+        if !self.prev_is(Syntax::Special(';')) && !self.prev_is(Syntax::Dedent) {
+            self.append(Syntax::Special(';'))?;
         }
 
         // Close open indents
         while !self.indents.is_empty() {
             self.indents.pop();
-            self.append(TokenKind::Dedent)?;
+            self.append(Syntax::Dedent)?;
         }
 
         Ok(())
     }
 
     /// Parse until we find a non-number.
-    fn scan_number(&mut self) -> Result<TokenKind> {
+    fn scan_number(&mut self) -> Result<Syntax> {
         let mut saw_dot = false;
 
         while let Some(&c) = self.peek() {
@@ -144,17 +144,17 @@ impl<'s> Scanner<'s> {
             }
         }
 
-        Ok(TokenKind::Number)
+        Ok(Syntax::Number)
     }
 
     /// Scan until closing delimiter.
     /// Call when the first char of the string will be `next()`.
-    fn scan_string(&mut self, delimiter: char) -> Result<TokenKind> {
+    fn scan_string(&mut self, delimiter: char) -> Result<Syntax> {
         let start = self.pos;
         let mut prev = '0'; // TODO: actual escape code parsing
         while let Some(c) = self.next() {
             if c == delimiter && prev != '\\' {
-                return Ok(TokenKind::String);
+                return Ok(Syntax::String);
             }
             prev = c;
         }
@@ -168,13 +168,13 @@ impl<'s> Scanner<'s> {
     }
 
     /// Parse until we encounter a `token::RESERVED` char.
-    fn scan_word(&mut self) -> Result<TokenKind> {
+    fn scan_word(&mut self) -> Result<Syntax> {
         self.eat(|c| !token::RESERVED.contains(&c));
-        Ok(TokenKind::Word)
+        Ok(Syntax::Word)
     }
 
     /// Figure out indents and dedents.
-    fn scan_newline(&mut self) -> Result<TokenKind> {
+    fn scan_newline(&mut self) -> Result<Syntax> {
         let start = self.pos;
         let mut indent = 0;
         loop {
@@ -206,26 +206,26 @@ impl<'s> Scanner<'s> {
         // greater indent than current depth: Indent
         if indent > last {
             // set pos to first \n we saw, we may have skipped some
-            self.tokens.push(Token::new(TokenKind::Indent, start, 1));
+            self.tokens.push(Token::new(Syntax::Indent, start, 1));
             self.indents.push(indent);
-            return Ok(TokenKind::None);
+            return Ok(Syntax::None);
         }
 
         // lesser indent than current depth: Dedent
         if indent < last {
-            self.append(TokenKind::Special(';'))?;
+            self.append(Syntax::Special(';'))?;
             while self.indents.len() > 0 {
                 if indent < self.indents[self.indents.len() - 1] {
                     self.indents.pop();
-                    self.append(TokenKind::Dedent)?;
+                    self.append(Syntax::Dedent)?;
                 } else {
                     break;
                 }
             }
-            return Ok(TokenKind::None);
+            return Ok(Syntax::None);
         }
 
         // current depth == current indent
-        Ok(TokenKind::Special(';'))
+        Ok(Syntax::Special(';'))
     }
 }

@@ -1,0 +1,13 @@
+<style> `label { display:block; }`
+
+<form GET="/search">
+    <input:text@query/>
+    <input:submit/>
+
+<form POST="/info">
+    <h3> Your Information
+    <label> <input@name:text placeholder="Name..."/>
+    <label> <input@age:text placeholder="Age..."/>
+    <br/>
+    <input:submit/>
+    <input:reset/>

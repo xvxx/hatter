@@ -7,6 +7,7 @@ mod error;
 mod ast;
 mod emit;
 mod env;
+mod expr;
 mod parser;
 mod scanner;
 mod stmt;
@@ -18,9 +19,10 @@ pub use {
     emit::emit,
     env::Env,
     error::{print_error, Error},
+    expr::Expr,
     parser::parse,
     scanner::scan,
-    stmt::{Expr, Stmt},
+    stmt::Stmt,
     tag::Tag,
     token::{Syntax, Token, TokenStream},
 };

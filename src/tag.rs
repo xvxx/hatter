@@ -32,7 +32,7 @@ impl Tag {
         self.classes.push(class.as_ref().to_string())
     }
 
-    pub fn add_attr<S: AsRef<str>>(&mut self, name: S, val: S) {
+    pub fn add_attr<S: AsRef<str>, X: AsRef<str>>(&mut self, name: S, val: X) {
         self.attrs
             .insert(name.as_ref().to_string(), val.as_ref().to_string());
     }

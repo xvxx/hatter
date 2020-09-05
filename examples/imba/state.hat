@@ -1,0 +1,5 @@
+<section>
+	<div.group>
+		<button bind=state value='one'> "one"
+		<button bind=state value='two'> "two"
+	<label> "State is {state}"

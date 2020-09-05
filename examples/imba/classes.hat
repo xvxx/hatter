@@ -1,0 +1,7 @@
+<div.note.editorial> "Hello"
+
+<div.note.editorial .resolved=data.isResolved> "Hello"
+
+<div.item .{marks} .{state} .bg-{color}-200> "Hello"
+
+<div.item .theme-{user.theme}=app.loggedIn> "Hello"

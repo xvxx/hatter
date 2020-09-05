@@ -1,0 +1,9 @@
+<style> `label { display:block; }`
+
+<form>
+    <h3> Your Information
+    <label> <input@name type="text" placeholder="Name..."/>
+    <label> <input@age type="text" placeholder="Age..."/>
+    <br/>
+    <input type="submit"/>
+    <input type="reset"/>

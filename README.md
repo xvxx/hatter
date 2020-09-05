@@ -33,3 +33,4 @@ _**Hatter** is a slightly mad, zero dependency HTML template language._
 - [ ] VSCode Extension
 - [ ] VSCode + luacheck-style LSP
 - [ ] luacheck-style tool
+- [ ] <!-- html comments -->

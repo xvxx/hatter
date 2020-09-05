@@ -90,7 +90,13 @@ impl Token {
 
     /// Location in source code.
     pub fn range(&self) -> std::ops::Range<usize> {
-        self.pos..self.pos + self.len
+        match self.kind {
+            Syntax::JS | Syntax::String => {
+                let start = self.pos + 1;
+                start..start + self.len - 1
+            }
+            _ => self.pos..self.pos + self.len,
+        }
     }
 }
 

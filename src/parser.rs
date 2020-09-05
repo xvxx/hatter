@@ -80,7 +80,6 @@ impl Parser {
 
     /// Trigger parse error for next() token.
     fn error<S: AsRef<str>>(&mut self, msg: S) -> Error {
-        println!("{:#?}", self.ast);
         if let Some(got) = self.try_next() {
             Error::new(
                 format!("expected {}, got {:?}", msg.as_ref(), got.kind),
@@ -277,7 +276,14 @@ impl Parser {
                         Syntax::Number | Syntax::String | Syntax::Word => {
                             tag.add_attr(name, self.next().to_string())
                         }
-                        Syntax::Bracket('(') => tag.add_attr(name, self.js()?),
+                        Syntax::JS => tag.add_attr(
+                            name,
+                            format!(
+                                "(function(e){{ {} }})(event);return false;",
+                                self.next().to_string()
+                            ),
+                        ),
+
                         _ => return Err(self.error("Word, Number, or String")),
                     }
                 }
@@ -286,15 +292,5 @@ impl Parser {
         }
 
         Ok(tag)
-    }
-
-    /// Parse (JavaScript) event handler.
-    fn js(&mut self) -> Result<String> {
-        let mut out = String::new();
-        self.expect(Syntax::Bracket('('))?;
-        let mut parens = 0;
-
-        self.expect(Syntax::Bracket(')'))?;
-        Ok(out)
     }
 }

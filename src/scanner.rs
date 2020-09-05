@@ -115,6 +115,7 @@ impl<'s> Scanner<'s> {
                     let mut open = 0;
                     while let Some(&c) = self.peek() {
                         if c == ')' && open == 0 {
+                            self.next();
                             break;
                         } else if c == '(' {
                             open += 1;

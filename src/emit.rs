@@ -63,6 +63,10 @@ pub fn tag(tag: Tag) -> Result<String> {
         out.push('\'');
     }
 
+    if tag.tag == "a" && !tag.attrs.contains_key("href") {
+        out.push_str("href='#'");
+    }
+    
     if tag.is_closed() {
         out.push('/');
         out.push('>');

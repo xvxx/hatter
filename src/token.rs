@@ -32,7 +32,7 @@ pub enum Syntax {
     Indent,
     Dedent,
     Bracket(char), // < > ( ) [ ] { }
-    Special(char), // ; # . @ : = /
+    Special(char), // ; # . , @ : = /
     Bool,
     Number,
     String,

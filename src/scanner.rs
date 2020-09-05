@@ -96,7 +96,7 @@ impl<'s> Scanner<'s> {
             let kind = match c {
                 '\n' => self.scan_newline()?,
                 ')' | '[' | ']' | '{' | '}' => Syntax::Bracket(c),
-                ';' | '#' | '.' | '@' | ':' | '=' | '/' => Syntax::Special(c),
+                ';' | ',' | '#' | '.' | '@' | ':' | '=' | '/' => Syntax::Special(c),
                 '"' | '\'' | '`' => self.scan_string(c)?,
                 '-' => {
                     if self.peek().filter(|c| c.is_numeric()).is_some() {
@@ -220,6 +220,9 @@ impl<'s> Scanner<'s> {
     /// Tries to determine if we are parsing code or a literal string.
     fn scan_word_or_string(&mut self) -> Result<Syntax> {
         self.eat(|c| !token::RESERVED.contains(&c));
+        if !self.prev_is(Syntax::Bracket('>')) {
+            return Ok(Syntax::Word);
+        }
         let word_end = self.pos;
         self.eat(|c| c == ' ');
         match self.peek().unwrap_or(&'0') {

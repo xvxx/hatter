@@ -22,14 +22,19 @@ pub enum Expr {
 }
 
 impl Expr {
-    pub fn literal(&self) -> &str {
-        match self {
-            Expr::String(s) | Expr::Word(s) => &s,
-            _ => "",
-        }
-    }
-
     pub fn to_string(&self) -> String {
-        self.literal().to_string()
+        match self {
+            Expr::String(s) | Expr::Word(s) => s.clone(),
+            Expr::Bool(b) => format!("{}", b),
+            Expr::Number(n) => format!("{}", n),
+            Expr::Call(name, args) => format!(
+                "{}({})",
+                name,
+                args.iter()
+                    .map(|a| a.to_string())
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            ),
+        }
     }
 }

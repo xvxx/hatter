@@ -11,21 +11,21 @@ _**Hatter** is a slightly mad, zero dependency HTML template library._
 - [x] Produce HTML
 - [x] Understand indentation
 - [x] Tag shortcuts:
-    - [x] #
-    - [x] .
-    - [x] @
-    - [x] :
+  - [x] #
+  - [x] .
+  - [x] @
+  - [x] :
 - [x] Attributes
 - [x] Implicit "div"
 - [x] (inline js event handlers)
-- [ ] <style> tag
+- [ ] \<style> tag
 - [ ] var value
 - [ ] string interpolation
 - [ ] shortcut interpolation
-    (ex: <div .{name}> -> <div class="dog"> when name="dog")
+      (ex: \<div .{name}> -> \<div class="dog"> when name="dog")
 - [ ] fn call
-    - [ ] fn call with args
-    - [ ] nested fn call
+  - [ ] fn call with args
+  - [ ] nested fn call
 - [ ] if
 - [ ] else
 - [ ] for k, v in map

@@ -64,9 +64,9 @@ pub fn tag(tag: Tag) -> Result<String> {
     }
 
     if tag.tag == "a" && !tag.attrs.contains_key("href") {
-        out.push_str("href='#'");
+        out.push_str(" href='#'");
     }
-    
+
     if tag.is_closed() {
         out.push('/');
         out.push('>');

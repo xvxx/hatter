@@ -6,8 +6,8 @@ pub struct Tag {
     pub id: Option<String>,         // id attribute
     pub classes: Vec<String>,       // classes
     attrs: HashMap<String, String>, // other attributes
-    pub contents: Vec<Stmt>,
-    closed: bool, // <self-closing/> ?
+    pub contents: Vec<Stmt>,        // Stmt::Block
+    closed: bool,                   // <self-closing/> ?
 }
 
 impl Tag {

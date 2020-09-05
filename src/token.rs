@@ -113,6 +113,17 @@ impl TokenStream {
         }
     }
 
+    pub fn peek2(&self) -> Option<TokenPos> {
+        if self.tokens.is_empty() {
+            None
+        } else {
+            Some(TokenPos {
+                tok: self.tokens.get(self.pos + 1)?,
+                source: &self.source,
+            })
+        }
+    }
+
     pub fn next(&mut self) -> Option<TokenPos> {
         if self.tokens.is_empty() {
             None

@@ -1,14 +1,16 @@
 use crate::{
     token::{TokenKind, TokenPos, TokenStream},
-    Error, Result, Stmt, Tag, AST,
+    Error, Expr, Result, Stmt, Tag, AST,
 };
 
 const STACK_SIZE: usize = 1000; // infinite loop protection
 
+#[derive(Debug)]
 pub struct Parser {
     ast: AST,
     tokens: TokenStream,
     pos: usize,
+    indent: usize,
     tags: usize,   // open tags
     peeked: usize, // infinite loop protection hack
 }
@@ -27,6 +29,7 @@ impl Parser {
             pos: 0,
             ast: AST::new(),
             peeked: 0,
+            indent: 0,
             tags: 0,
         }
     }
@@ -38,6 +41,15 @@ impl Parser {
             panic!("infinite loop while peek()ing: {:?}", self.tokens.peek());
         }
         self.tokens.peek()
+    }
+
+    /// Peek two ahead.
+    fn peek2(&mut self) -> Option<TokenPos> {
+        self.peeked += 1;
+        if self.peeked > STACK_SIZE {
+            panic!("infinite loop while peek()ing: {:?}", self.tokens.peek());
+        }
+        self.tokens.peek2()
     }
 
     /// Get the next token's kind.
@@ -68,6 +80,7 @@ impl Parser {
 
     /// Trigger parse error for next() token.
     fn error<S: AsRef<str>>(&mut self, msg: S) -> Error {
+        println!("{:#?}", self.ast);
         if let Some(got) = self.try_next() {
             Error::new(
                 format!("expected {}, got {:?}", msg.as_ref(), got.kind),
@@ -109,44 +122,103 @@ impl Parser {
         Ok(())
     }
 
-    /// Parse the content of a <tag>CONTENT</tag>.
-    fn content(&mut self) -> Result<Stmt> {
-        loop {
-            match self.peek_kind() {
-                // Tag
-                TokenKind::Bracket('<') => self.tag()?,
-
-                // Unexpected
-                _ => return Err(self.error("HTML Tag")),
-            };
+    /// Parse a literal as a string.
+    fn as_string(&mut self) -> Result<Stmt> {
+        if let Some(next) = self.try_next() {
+            Ok(Stmt::Expr(Expr::String(next.to_string())))
+        } else {
+            Err(self.error("a literal"))
         }
     }
 
-    /// Parse a single code statment (IF, FOR, etc)
-    fn code(&mut self) -> Result<Stmt> {
-        Ok(Stmt::Expr)
+    /// Parse a string.
+    fn string(&mut self) -> Result<Stmt> {
+        Ok(Stmt::Expr(Expr::String(
+            self.expect(TokenKind::String)?.to_string(),
+        )))
+    }
+
+    /// Parse a word.
+    fn word(&mut self) -> Result<Stmt> {
+        Ok(Stmt::Expr(Expr::Word(
+            self.expect(TokenKind::Word)?.to_string(),
+        )))
+    }
+
+    /// Parse the content of a <tag>CONTENT</tag>.
+    fn content(&mut self) -> Result<Vec<Stmt>> {
+        let mut block = vec![];
+        let mut indented = false;
+
+        if self.peek_kind() == TokenKind::Indent {
+            self.next();
+            indented = true;
+        }
+
+        loop {
+            match self.peek_kind() {
+                // Tag
+                TokenKind::Bracket('<') => {
+                    if self
+                        .peek2()
+                        .filter(|p| p.kind == TokenKind::Special('/'))
+                        .is_some()
+                    {
+                        break;
+                    }
+                    block.push(self.tag()?);
+                }
+                // Literal
+                TokenKind::String | TokenKind::Number | TokenKind::Word => {
+                    block.push(self.as_string()?);
+                }
+
+                // keep going if we're indented
+                TokenKind::Special(';') if indented => {
+                    self.next();
+                }
+                TokenKind::Special(';') | TokenKind::Dedent => break,
+
+                // Treat as literals for now
+                TokenKind::Special(_) => block.push(self.as_string()?),
+
+                // Unexpected
+                _ => return Err(self.error("Tag contents")),
+            };
+        }
+
+        Ok(block)
     }
 
     /// Parse a <tag> and its contents or a </tag>.
     fn tag(&mut self) -> Result<Stmt> {
-        self.expect(TokenKind::Bracket('<'))?;
-
-        if self.peek_kind() == TokenKind::Special('/') {
+        if self
+            .peek2()
+            .filter(|p| p.kind == TokenKind::Special('/'))
+            .is_some()
+        {
             self.close_tag()?;
             return Ok(Stmt::None);
         }
 
-        let tag = self.open_tag()?;
+        let mut tag = self.open_tag()?;
         if tag.is_closed() {
             return Ok(Stmt::Tag(tag));
         }
-        // tag.contents = self.content()?;
-        self.close_tag()?;
+        tag.contents = self.content()?;
+        if self.peek_kind() == TokenKind::Special(';') {
+            self.next();
+        } else {
+            self.close_tag()?;
+        }
         Ok(Stmt::Tag(tag))
     }
 
     /// Parse just a closing tag, starting after the <
     fn close_tag(&mut self) -> Result<()> {
+        if self.tags == 0 {
+            return Err(self.error("open tags"));
+        }
         self.tags -= 1;
         self.expect(TokenKind::Bracket('<'))?;
         self.expect(TokenKind::Special('/'))?;
@@ -164,6 +236,7 @@ impl Parser {
     /// starting after the <
     fn open_tag(&mut self) -> Result<Tag> {
         self.tags += 1;
+        self.expect(TokenKind::Bracket('<'))?;
         let mut tag = Tag::new(self.expect(TokenKind::Word)?.to_string());
 
         loop {

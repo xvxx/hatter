@@ -15,7 +15,7 @@ pub use {
     error::{print_error, Error},
     parser::parse,
     scanner::scan,
-    stmt::Stmt,
+    stmt::{Expr, Stmt},
     tag::Tag,
     token::{Token, TokenKind, TokenStream},
 };

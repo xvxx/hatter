@@ -93,7 +93,7 @@ impl Token {
         match self.kind {
             Syntax::JS | Syntax::String => {
                 let start = self.pos + 1;
-                start..start + self.len - 1
+                start..start + self.len - 2
             }
             _ => self.pos..self.pos + self.len,
         }

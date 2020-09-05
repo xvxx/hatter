@@ -34,6 +34,7 @@ pub enum Syntax {
     Number,
     String,
     Word,
+    JS, // (JavaScript)
 }
 
 impl<'s> ops::Deref for TokenPos<'s> {

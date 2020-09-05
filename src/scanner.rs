@@ -1,5 +1,5 @@
 use {
-    crate::{token, Result, Token, Syntax, TokenStream},
+    crate::{token, Result, Syntax, Token, TokenStream},
     std::{iter::Peekable, str::Chars},
 };
 
@@ -10,6 +10,7 @@ struct Scanner<'s> {
     pos: usize,                 // current position in `source`
     started: bool,              // scan has begun
     indents: Vec<usize>,        // current depth
+    in_tag: usize,              // whether we're inside a <tag> or not
 }
 
 /// Scans source code and produces a `TokenStream`.
@@ -29,6 +30,7 @@ impl<'s> Scanner<'s> {
             tokens: vec![],
             chars: source.chars().peekable(),
             pos: 0,
+            in_tag: 0,
             started: false,
             indents: vec![],
         }
@@ -88,7 +90,7 @@ impl<'s> Scanner<'s> {
             let start = self.pos;
             let kind = match c {
                 '\n' => self.scan_newline()?,
-                '<' | '>' | '(' | ')' | '[' | ']' | '{' | '}' => Syntax::Bracket(c),
+                '[' | ']' | '{' | '}' => Syntax::Bracket(c),
                 ';' | '#' | '.' | '@' | ':' | '=' | '/' => Syntax::Special(c),
                 '"' | '\'' | '`' => self.scan_string(c)?,
                 '-' => {
@@ -97,6 +99,31 @@ impl<'s> Scanner<'s> {
                     } else {
                         self.scan_word()?
                     }
+                }
+                '<' => {
+                    self.in_tag += 1;
+                    Syntax::Bracket('<')
+                }
+                '>' => {
+                    if self.in_tag == 0 {
+                        return scan_error!(self.pos, 1, "Got > with no tags open.");
+                    }
+                    self.in_tag -= 1;
+                    Syntax::Bracket('>')
+                }
+                '(' => {
+                    let mut open = 0;
+                    while let Some(&c) = self.peek() {
+                        if c == ')' && open == 0 {
+                            break;
+                        } else if c == '(' {
+                            open += 1;
+                        } else if c == ')' {
+                            open -= 1;
+                        }
+                        self.next();
+                    }
+                    Syntax::JS
                 }
                 _ if c.is_numeric() => self.scan_number()?,
                 _ if c.is_whitespace() => {

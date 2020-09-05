@@ -1,6 +1,6 @@
 <p>
   <a href="/"> home
-  <a @click=(history.back())> back
+  <a onclick=(history.back())> back
 
 <form#form POST="/new">
   <p><input@name:text#focused value=name placeholder="filename">

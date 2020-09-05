@@ -111,6 +111,12 @@ impl Parser {
                 // Tag
                 TokenKind::Bracket('<') => self.tag()?,
 
+                // Syntax
+                TokenKind::Special(';') => {
+                    self.next();
+                    continue;
+                }
+
                 // Unexpected
                 _ => return Err(self.error("HTML Tag")),
             };
@@ -247,7 +253,10 @@ impl Parser {
     fn open_tag(&mut self) -> Result<Tag> {
         self.tags += 1;
         self.expect(TokenKind::Bracket('<'))?;
-        let mut tag = Tag::new(self.expect(TokenKind::Word)?.to_string());
+        let mut tag = Tag::new(match self.peek_kind() {
+            TokenKind::Special(_) => "div".to_string(),
+            _ => self.expect(TokenKind::Word)?.to_string(),
+        });
 
         loop {
             let next = self.next();

@@ -18,14 +18,14 @@ pub fn emit(stmts: Vec<Stmt>) -> Result<String> {
 /// Just print as literals for now.
 pub fn expr(expr: Expr) -> Result<String> {
     match expr {
-        Expr::String(s) => Ok(s),
-        _ => unimplemented!(),
+        Expr::String(s) | Expr::Word(s) => Ok(format!("{} ", s)),
     }
 }
 
 pub fn tag(tag: Tag) -> Result<String> {
     let mut out = String::new();
     out.push('<');
+    let is_form = tag.tag == "form";
     out.push_str(&tag.tag);
 
     if !tag.classes.is_empty() {
@@ -38,6 +38,10 @@ pub fn tag(tag: Tag) -> Result<String> {
     }
 
     for (name, val) in &tag.attrs {
+        if is_form && (name == "GET" || name == "POST") {
+            out.push_str(&format!(" method='{}' action='{}'", name, val));
+            continue;
+        }
         out.push(' ');
         out.push_str(&name);
         out.push('=');

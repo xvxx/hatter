@@ -191,7 +191,7 @@ impl Parser {
                 }
 
                 // Literal
-                Syntax::String | Syntax::Text | Syntax::Number | Syntax::Word => {
+                Syntax::String | Syntax::Text | Syntax::Number => {
                     block.push(self.as_string()?);
                 }
 
@@ -202,9 +202,6 @@ impl Parser {
 
                 // pass these up the food chain
                 Syntax::Dedent | Syntax::Special(';') => break,
-
-                // Treat as literals for now
-                Syntax::Special(_) => block.push(self.as_string()?),
 
                 // Unexpected
                 _ => return Err(self.error("Tag contents")),

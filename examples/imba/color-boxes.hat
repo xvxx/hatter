@@ -1,0 +1,27 @@
+<head>
+    <style> "
+        .blue { background-color: blue; }
+        .blue:hover { background-color: white; color: blue; }
+        .teal { background-color: teal; }
+        .teal:hover { background-color: white; color: teal; }
+        .yellow { background-color: yellow; }
+        .yellow:hover { background-color: white; color: yellow; }
+        .red { background-color: red; }
+        .red:hover { background-color: white; color: red; }
+        .item {
+            padding: 1rem;
+            flex: 1;
+            border-radius: 3px;
+            margin: 1rem;
+        }
+        .flex {
+            display: flex;
+            flex-wrap: wrap;
+        } "
+
+<body>
+    <.flex>
+        <div.blue.item> One
+        <div.red.item> Two
+        <div.teal.item> Three
+        <div.yellow.item> Four

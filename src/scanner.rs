@@ -1,16 +1,16 @@
 use {
     crate::{token, Result, Syntax, Token, TokenStream},
-    std::{iter::Peekable, str::Chars},
+    std::{iter::Peekable, str::CharIndices},
 };
 
 struct Scanner<'s> {
-    tokens: Vec<Token>,         // list we're building
-    source: &'s str,            // template source code
-    chars: Peekable<Chars<'s>>, // iterator
-    pos: usize,                 // current position in `source`
-    started: bool,              // scan has begun
-    indents: Vec<usize>,        // current depth
-    in_tag: usize,              // whether we're inside a <tag> or not
+    tokens: Vec<Token>,               // list we're building
+    source: &'s str,                  // template source code
+    pos: usize,                       // current position in `source`
+    indents: Vec<usize>,              // current depth
+    in_tag: usize,                    // whether we're inside a <tag> or not
+    chars: Peekable<CharIndices<'s>>, // iterator
+    cur: char,                        // current character
 }
 
 /// Scans source code and produces a `TokenStream`.
@@ -28,17 +28,21 @@ impl<'s> Scanner<'s> {
         Scanner {
             source,
             tokens: vec![],
-            chars: source.chars().peekable(),
+            chars: source.char_indices().peekable(),
             pos: 0,
             in_tag: 0,
-            started: false,
             indents: vec![],
+            cur: '0',
         }
     }
 
     /// Peek at next `char` without iterating.
     fn peek(&mut self) -> Option<&char> {
-        self.chars.peek()
+        if let Some((_, c)) = self.chars.peek() {
+            Some(c)
+        } else {
+            None
+        }
     }
 
     /// Check the next char.
@@ -59,12 +63,13 @@ impl<'s> Scanner<'s> {
 
     /// Advance position in `source` and return next `char`.
     fn next(&mut self) -> Option<char> {
-        if self.started {
-            self.pos += 1;
+        if let Some((pos, c)) = self.chars.next() {
+            self.pos = pos;
+            self.cur = c;
+            Some(c)
         } else {
-            self.started = true;
+            None
         }
-        self.chars.next()
     }
 
     /// Add single Syntax to tokens list.
@@ -149,8 +154,8 @@ impl<'s> Scanner<'s> {
                 continue;
             }
 
-            self.tokens
-                .push(Token::new(kind, start, self.pos - start + 1));
+            let end = self.pos - start + self.cur.len_utf8();
+            self.tokens.push(Token::new(kind, start, end));
         }
 
         // Add final semicolon before EOF, if not present.

@@ -78,6 +78,11 @@ impl Parser {
         self.tokens.next().unwrap()
     }
 
+    /// Return current `Token`.
+    fn current(&mut self) -> TokenPos {
+        self.tokens.current().unwrap()
+    }
+
     /// Trigger parse error for next() token.
     fn error<S: AsRef<str>>(&mut self, msg: S) -> Error {
         if let Some(got) = self.try_next() {
@@ -89,6 +94,16 @@ impl Parser {
         } else {
             Error::new(format!("expected {}, got EOF", msg.as_ref()), 0, 0)
         }
+    }
+
+    /// Trigger parse error for current() token.
+    fn error_current<S: AsRef<str>>(&mut self, msg: S) -> Error {
+        let got = self.current();
+        Error::new(
+            format!("expected {}, got {:?}", msg.as_ref(), got.kind),
+            got.pos,
+            got.len,
+        )
     }
 
     /// Consumes and returns the next token if it's of `kind`,
@@ -284,10 +299,10 @@ impl Parser {
                             ),
                         ),
 
-                        _ => return Err(self.error("Word, Number, or String")),
+                        _ => return Err(self.error_current("Word, Number, or String")),
                     }
                 }
-                _ => return Err(self.error("Attribute or >")),
+                _ => return Err(self.error_current("Attribute or >")),
             }
         }
 

@@ -97,7 +97,7 @@ impl<'s> Scanner<'s> {
                     if self.peek().filter(|c| c.is_numeric()).is_some() {
                         self.scan_number()?
                     } else {
-                        self.scan_word()?
+                        self.scan_word_or_string()?
                     }
                 }
                 '<' => {
@@ -135,7 +135,13 @@ impl<'s> Scanner<'s> {
                     self.eat(|c| c.is_whitespace());
                     continue;
                 }
-                _ => self.scan_word()?,
+                _ => {
+                    if self.in_tag > 0 {
+                        self.scan_word()?
+                    } else {
+                        self.scan_word_or_string()?
+                    }
+                }
             };
 
             // skip empty tokens
@@ -203,6 +209,24 @@ impl<'s> Scanner<'s> {
     fn scan_word(&mut self) -> Result<Syntax> {
         self.eat(|c| !token::RESERVED.contains(&c));
         Ok(Syntax::Word)
+    }
+
+    /// Should be used after > in an opening tag.
+    /// Tries to determine if we are parsing code or a literal string.
+    fn scan_word_or_string(&mut self) -> Result<Syntax> {
+        self.eat(|c| !token::RESERVED.contains(&c));
+        let word_end = self.pos;
+        self.eat(|c| c == ' ');
+        match self.peek().unwrap_or(&'0') {
+            '<' | ';' | '\n' | '(' => {
+                self.pos = word_end;
+                return Ok(Syntax::Word);
+            }
+            _ => {
+                self.eat(|c| !['\n', ';', '<'].contains(&c));
+                return Ok(Syntax::Text);
+            }
+        }
     }
 
     /// Figure out indents and dedents.

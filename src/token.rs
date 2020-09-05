@@ -33,6 +33,7 @@ pub enum Syntax {
     Bool,
     Number,
     String,
+    Text,
     Word,
     JS, // (JavaScript)
 }

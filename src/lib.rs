@@ -6,6 +6,7 @@
 mod error;
 mod ast;
 mod emit;
+mod env;
 mod parser;
 mod scanner;
 mod stmt;
@@ -15,6 +16,7 @@ mod token;
 pub use {
     ast::AST,
     emit::emit,
+    env::Env,
     error::{print_error, Error},
     parser::parse,
     scanner::scan,

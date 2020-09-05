@@ -142,27 +142,79 @@ impl Parser {
         Ok(())
     }
 
-    /// Parse a literal as a string.
-    fn as_string(&mut self) -> Result<Stmt> {
+    /// Parse a literal as a string statement.
+    fn as_string_stmt(&mut self) -> Result<Stmt> {
+        Ok(Stmt::Expr(self.as_string()?))
+    }
+
+    /// Parse a literal as a string expression.
+    fn as_string(&mut self) -> Result<Expr> {
         if let Some(next) = self.try_next() {
-            Ok(Stmt::Expr(Expr::String(next.to_string())))
+            Ok(Expr::String(next.to_string()))
         } else {
             Err(self.error("a literal"))
         }
     }
 
+    /// Parse a bool.
+    fn boolean(&mut self) -> Result<Expr> {
+        Ok(Expr::Bool(self.expect(Syntax::Bool)?.literal() == "true"))
+    }
+
+    /// Parse a number.
+    fn number(&mut self) -> Result<Expr> {
+        Ok(Expr::Number(self.expect(Syntax::Number)?.to_f64()?))
+    }
+
     /// Parse a string.
-    fn string(&mut self) -> Result<Stmt> {
-        Ok(Stmt::Expr(Expr::String(
-            self.expect(Syntax::String)?.to_string(),
-        )))
+    fn string(&mut self) -> Result<Expr> {
+        Ok(Expr::String(self.expect(Syntax::String)?.to_string()))
     }
 
     /// Parse a word.
-    fn word(&mut self) -> Result<Stmt> {
-        Ok(Stmt::Expr(Expr::Word(
-            self.expect(Syntax::Word)?.to_string(),
-        )))
+    fn word(&mut self) -> Result<Expr> {
+        Ok(Expr::Word(self.expect(Syntax::Word)?.to_string()))
+    }
+
+    /// Parse a code expression into a statement.
+    fn expr_stmt(&mut self) -> Result<Stmt> {
+        Ok(Stmt::Expr(self.expr()?))
+    }
+
+    /// Parse a code expression.
+    fn expr(&mut self) -> Result<Expr> {
+        match self.peek_kind() {
+            Syntax::String => Ok(self.string()?),
+            Syntax::Number => Ok(self.number()?),
+            Syntax::Bool => Ok(self.boolean()?),
+            Syntax::Word => {
+                let word = self.word()?;
+                if self.peek_kind() != Syntax::Bracket('(') {
+                    return Ok(word);
+                } else {
+                    self.expect(Syntax::Bracket('('))?;
+                    let name = word.to_string();
+                    let mut args = vec![];
+                    while let Some(tok) = self.peek() {
+                        match tok.kind {
+                            Syntax::Bracket(')') => {
+                                self.next();
+                                break;
+                            }
+                            Syntax::Special(',') => {
+                                self.next();
+                            }
+                            Syntax::String | Syntax::Number | Syntax::Bool | Syntax::Word => {
+                                args.push(self.expr()?);
+                            }
+                            _ => return Err(self.error(")")),
+                        }
+                    }
+                    Ok(Expr::Call(name, args))
+                }
+            }
+            _ => Err(self.error("Expression")),
+        }
     }
 
     /// Parse the content of a <tag>CONTENT</tag>.
@@ -191,9 +243,12 @@ impl Parser {
                 }
 
                 // Literal
-                Syntax::String | Syntax::Text | Syntax::Number | Syntax::Word => {
-                    block.push(self.as_string()?);
+                Syntax::String | Syntax::Text | Syntax::Number => {
+                    block.push(self.as_string_stmt()?);
                 }
+
+                // Expression
+                Syntax::Word => block.push(self.expr_stmt()?),
 
                 // keep going if we're indented
                 Syntax::Special(';') if indented => {

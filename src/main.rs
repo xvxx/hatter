@@ -1,5 +1,5 @@
 use {
-    hatter::{parse, scan, TokenStream, AST},
+    hatter::{emit, parse, scan, TokenStream, AST},
     std::{env, io},
 };
 
@@ -47,12 +47,16 @@ fn main() -> Result<(), io::Error> {
         return Ok(());
     }
 
-    if command == "check" {
+    if false && command == "check" {
         unimplemented!();
     }
 
     if command == "emit" {
-        unimplemented!();
+        let code = emit(ast.stmts)
+            .map_err(|e| print_error(&path, &source, e))
+            .unwrap();
+        println!("{}", code);
+        return Ok(());
     }
 
     unimplemented!();

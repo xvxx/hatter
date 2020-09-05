@@ -2,19 +2,17 @@ use {crate::Stmt, std::collections::HashMap};
 
 #[derive(Debug)]
 pub struct Tag {
-    pub tag: String,                // tag name
-    pub id: Option<String>,         // id attribute
-    pub classes: Vec<String>,       // classes
-    attrs: HashMap<String, String>, // other attributes
-    pub contents: Vec<Stmt>,        // Stmt::Block
-    closed: bool,                   // <self-closing/> ?
+    pub tag: String,                    // tag name
+    pub classes: Vec<String>,           // classes
+    pub attrs: HashMap<String, String>, // other attributes
+    pub contents: Vec<Stmt>,            // Stmt::Block
+    closed: bool,                       // <self-closing/> ?
 }
 
 impl Tag {
     pub fn new(tag: String) -> Tag {
         Tag {
             tag,
-            id: None,
             classes: vec![],
             attrs: HashMap::new(),
             closed: false,

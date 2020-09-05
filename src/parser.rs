@@ -257,7 +257,9 @@ impl Parser {
                     tag.close();
                     self.tags -= 1;
                 }
-                TokenKind::Special('#') => tag.id = Some(self.expect(TokenKind::Word)?.to_string()),
+                TokenKind::Special('#') => {
+                    tag.add_attr("id", self.expect(TokenKind::Word)?.literal())
+                }
                 TokenKind::Special('.') => tag.add_class(self.expect(TokenKind::Word)?.to_string()),
                 TokenKind::Special('@') => {
                     tag.add_attr("name", self.expect(TokenKind::Word)?.literal())

@@ -9,6 +9,7 @@ pub enum Stmt {
     For,
     Expr(Expr),
     Tag(Tag),
+    Close(String),
 }
 
 #[derive(Debug)]

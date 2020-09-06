@@ -6,7 +6,6 @@ pub enum Expr {
     Tag(Tag),
     If,
     For,
-
     None,
     Bool(bool),
     Number(f64),

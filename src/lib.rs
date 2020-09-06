@@ -5,8 +5,8 @@
 #[macro_use]
 mod error;
 mod ast;
-mod emit;
 mod env;
+mod eval;
 mod expr;
 mod parser;
 mod scanner;
@@ -15,9 +15,9 @@ mod token;
 
 pub use {
     ast::AST,
-    emit::emit,
     env::Env,
     error::{print_error, Error},
+    eval::eval,
     expr::Expr,
     parser::parse,
     scanner::scan,

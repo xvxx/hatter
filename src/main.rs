@@ -1,5 +1,5 @@
 use {
-    hatter::{emit, parse, scan, TokenStream, AST},
+    hatter::{eval, parse, scan, TokenStream, AST},
     std::{env, io},
 };
 
@@ -14,7 +14,7 @@ fn main() -> Result<(), io::Error> {
     let command;
     let path;
     if args.len() < 2 {
-        command = "emit";
+        command = "print";
         path = &args[0];
     } else {
         command = &args[0];
@@ -22,7 +22,7 @@ fn main() -> Result<(), io::Error> {
     }
 
     match path.as_ref() {
-        "-h" | "-help" | "--help" => {
+        "-h" | "-help" | "--help" | "help" => {
             print_usage();
             return Ok(());
         }
@@ -44,22 +44,17 @@ fn main() -> Result<(), io::Error> {
         .unwrap();
     if command == "parse" {
         print_ast(ast);
-        return Ok(());
     }
 
-    if false && command == "check" {
+    if command == "check" {
         unimplemented!();
     }
 
-    if command == "emit" {
-        let code = emit(ast.exprs)
-            .map_err(|e| print_error(&path, &source, e))
-            .unwrap();
-        println!("{}", code);
-        return Ok(());
-    }
-
-    unimplemented!();
+    let out = eval(ast)
+        .map_err(|e| print_error(&path, &source, e))
+        .unwrap();
+    println!("{}", out);
+    Ok(())
 }
 
 fn print_usage() {

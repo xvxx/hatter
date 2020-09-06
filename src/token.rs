@@ -33,11 +33,12 @@ pub enum Syntax {
     Dedent,
     Bracket(char), // < > ( ) [ ] { }
     Special(char), // ; # . , @ : = /
-    Bool,
-    Number,
-    String,
-    Word,
-    JS, // (JavaScript)
+    Bool,          // true false
+    Number,        // 123 3.14
+    String,        // "string" 'or string' `or string`
+    Text,          // raw tag innerText
+    Word,          // ident, symbol, etc
+    JS,            // (JavaScript)
 }
 
 impl<'s> ops::Deref for TokenPos<'s> {

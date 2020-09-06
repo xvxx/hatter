@@ -102,7 +102,7 @@ impl<'s> Scanner<'s> {
                     if self.peek().filter(|c| c.is_numeric()).is_some() {
                         self.scan_number()?
                     } else {
-                        self.scan_word_or_string()?
+                        self.scan_word_or_text()?
                     }
                 }
                 '<' => {
@@ -144,7 +144,7 @@ impl<'s> Scanner<'s> {
                     if self.in_tag > 0 {
                         self.scan_word()?
                     } else {
-                        self.scan_word_or_string()?
+                        self.scan_word_or_text()?
                     }
                 }
             };
@@ -218,7 +218,7 @@ impl<'s> Scanner<'s> {
 
     /// Should be used after > in an opening tag.
     /// Tries to determine if we are parsing code or a literal string.
-    fn scan_word_or_string(&mut self) -> Result<Syntax> {
+    fn scan_word_or_text(&mut self) -> Result<Syntax> {
         self.eat(|c| !token::RESERVED.contains(&c));
         if !self.prev_is(Syntax::Bracket('>')) {
             return Ok(Syntax::Word);
@@ -232,7 +232,7 @@ impl<'s> Scanner<'s> {
             }
             _ => {
                 self.eat(|c| !['\n', ';', '<'].contains(&c));
-                return Ok(Syntax::String);
+                return Ok(Syntax::Text);
             }
         }
     }

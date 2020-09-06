@@ -232,7 +232,7 @@ impl<'s> Scanner<'s> {
             }
             _ => {
                 self.eat(|c| !['\n', ';', '<'].contains(&c));
-                return Ok(Syntax::Text);
+                return Ok(Syntax::String);
             }
         }
     }

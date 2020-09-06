@@ -135,7 +135,13 @@ impl<'s> Scanner<'s> {
                         Syntax::Bracket('(')
                     }
                 }
-                _ if c.is_numeric() => self.scan_number()?,
+                _ if c.is_numeric() => {
+                    if self.in_tag > 0 {
+                        self.scan_number()?
+                    } else {
+                        self.scan_number_or_text()?
+                    }
+                }
                 _ if c.is_whitespace() => {
                     self.eat(|c| c.is_whitespace());
                     continue;
@@ -229,6 +235,27 @@ impl<'s> Scanner<'s> {
             '<' | ';' | '\n' | '(' | '\0' => {
                 self.pos = word_end;
                 return Ok(Syntax::Word);
+            }
+            _ => {
+                self.eat(|c| !['\n', ';', '<'].contains(&c));
+                return Ok(Syntax::Text);
+            }
+        }
+    }
+
+    /// Should be used after > in an opening tag.
+    /// Tries to determine if we are parsing code or a literal string.
+    fn scan_number_or_text(&mut self) -> Result<Syntax> {
+        self.eat(|c| !token::RESERVED.contains(&c));
+        if !self.prev_is(Syntax::Bracket('>')) {
+            return Ok(Syntax::Number);
+        }
+        let word_end = self.pos;
+        self.eat(|c| c == ' ');
+        match self.peek().unwrap_or(&'\0') {
+            '<' | ';' | '\n' | '(' | '\0' => {
+                self.pos = word_end;
+                return Ok(Syntax::Number);
             }
             _ => {
                 self.eat(|c| !['\n', ';', '<'].contains(&c));

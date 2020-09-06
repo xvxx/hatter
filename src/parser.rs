@@ -179,7 +179,7 @@ impl Parser {
             Syntax::Bool => Ok(self.boolean()?),
             Syntax::Word => {
                 let word = self.word()?;
-                if self.peek_kind() != Syntax::Bracket('(') {
+                if !self.peek_is(Syntax::Bracket('(')) {
                     return Ok(word);
                 } else {
                     self.expect(Syntax::Bracket('('))?;
@@ -212,7 +212,7 @@ impl Parser {
         let mut block = vec![];
         let mut indented = false;
 
-        if self.peek_kind() == Syntax::Indent {
+        if self.peek_is(Syntax::Indent) {
             self.next();
             indented = true;
         }
@@ -238,7 +238,16 @@ impl Parser {
                 }
 
                 // Expression
-                Syntax::Word => block.push(self.expr()?),
+                Syntax::Word => {
+                    let expr = self.expr()?;
+                    if let Expr::Word(word) = &expr {
+                        if word == "if" {
+                            block.push(self.if_expr()?);
+                            continue;
+                        }
+                    }
+                    block.push(expr);
+                }
 
                 // keep going if we're indented
                 Syntax::Special(';') if indented => {
@@ -254,6 +263,34 @@ impl Parser {
         }
 
         Ok(block)
+    }
+
+    /// Parse an if statement.
+    fn if_expr(&mut self) -> Result<Expr> {
+        let mut conds = vec![];
+        let test = self.expr()?;
+        let body = if self.peek_is(Syntax::Indent) {
+            self.content()?
+        } else {
+            vec![self.expr()?]
+        };
+        conds.push((test, body));
+        if self.peek_is(Syntax::Dedent) {
+            if let Some(next) = self.peek2() {
+                if next.literal() == "else" {
+                    self.next();
+                    self.next();
+                    let body = if self.peek_is(Syntax::Indent) {
+                        self.content()?
+                    } else {
+                        vec![self.expr()?]
+                    };
+                    conds.push((Expr::Bool(true), body));
+                }
+            }
+        }
+        self.expect(Syntax::Dedent)?;
+        Ok(Expr::If(conds))
     }
 
     /// Parse a <tag> and its contents or a </tag>.
@@ -295,7 +332,7 @@ impl Parser {
         self.expect(Syntax::Bracket('<'))?;
         self.expect(Syntax::Special('/'))?;
         // </>
-        if self.peek_kind() == Syntax::Bracket('>') {
+        if self.peek_is(Syntax::Bracket('>')) {
             self.next();
             return Ok(());
         }

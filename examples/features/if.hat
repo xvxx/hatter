@@ -1,0 +1,5 @@
+<#example>
+    if gt(add(1,1), 3)
+        <b> Greater!
+    else
+        <b> Lesser :(

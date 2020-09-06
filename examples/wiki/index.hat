@@ -1,9 +1,9 @@
 <p> <a href="/new"> "new"
 <h1> "deadwiki"
 <article#index-page ondblclick=(window.location="/new")>
-    if pages.empty?
+    if empty?(pages)
         <i> Wiki Pages you create will show up here.
-    <ul.#pages>
+    <ul.pages#pages>
         for page in pages
             <li.page data-id=page.id> page
 

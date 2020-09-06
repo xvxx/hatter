@@ -3,7 +3,7 @@ use crate::Tag;
 #[derive(Debug)]
 pub enum Expr {
     Tag(Tag),
-    If,
+    If(Vec<(Expr, Vec<Expr>)>),
     For,
     None,
     Bool(bool),
@@ -22,7 +22,7 @@ impl Expr {
             Expr::String(s) => format!(r#""{}""#, s),
             Expr::Word(s) => s.clone(),
             Expr::Tag(tag) => format!("{:?}", tag),
-            Expr::If => format!("{}", "IF: Coming Soon™"),
+            Expr::If(..) => format!("{}", "IF: Coming Soon™"),
             Expr::For => format!("{}", "FOR: Coming Soon™"),
             Expr::Call(name, args) => format!(
                 "{}({})",

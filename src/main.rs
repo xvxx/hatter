@@ -44,6 +44,7 @@ fn main() -> Result<(), io::Error> {
         .unwrap();
     if command == "parse" {
         print_ast(ast);
+        return Ok(());
     }
 
     if command == "check" {

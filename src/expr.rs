@@ -2,7 +2,6 @@ use crate::Tag;
 
 #[derive(Debug)]
 pub enum Expr {
-    Block(Vec<Expr>),
     Tag(Tag),
     If,
     For,
@@ -22,11 +21,6 @@ impl Expr {
             Expr::Number(n) => format!("{}", n),
             Expr::String(s) => format!(r#""{}""#, s),
             Expr::Word(s) => s.clone(),
-            Expr::Block(exs) => exs
-                .iter()
-                .map(|a| a.to_string())
-                .collect::<Vec<_>>()
-                .join(" "),
             Expr::Tag(tag) => format!("{:?}", tag),
             Expr::If => format!("{}", "IF: Coming Soon™"),
             Expr::For => format!("{}", "FOR: Coming Soon™"),

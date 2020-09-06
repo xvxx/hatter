@@ -17,7 +17,7 @@ impl Value {
     pub fn to_string(&self) -> String {
         use Value::*;
         match self {
-            None => "None".to_string(),
+            None => "".to_string(),
             Bool(b) => b.to_string(),
             Number(num) => format!("{}", num),
             String(s) => s.clone(),

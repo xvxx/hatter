@@ -5,6 +5,16 @@ use {
 
 pub fn builtins() -> HashMap<String, Value> {
     let mut map: HashMap<String, Value> = HashMap::new();
+    fn not(_: &mut Env, args: &[Value]) -> Value {
+        if let Some(val) = args.get(0) {
+            match val {
+                Value::None | Value::Bool(false) => Value::Bool(true),
+                _ => Value::Bool(false),
+            }
+        } else {
+            Value::None
+        }
+    }
     fn add(_: &mut Env, args: &[Value]) -> Value {
         if let Some(Value::Number(a)) = args.get(0) {
             if let Some(Value::Number(b)) = args.get(1) {
@@ -96,6 +106,7 @@ pub fn builtins() -> HashMap<String, Value> {
         }
     }
 
+    map.insert("not".to_string(), Value::Fn(not));
     map.insert("add".to_string(), Value::Fn(add));
     map.insert("sub".to_string(), Value::Fn(sub));
     map.insert("mul".to_string(), Value::Fn(mul));

@@ -241,9 +241,16 @@ impl Parser {
                 Syntax::Word => {
                     let expr = self.expr()?;
                     if let Expr::Word(word) = &expr {
-                        if word == "if" {
-                            block.push(self.if_expr()?);
-                            continue;
+                        match word.as_ref() {
+                            "if" => {
+                                block.push(self.if_expr()?);
+                                continue;
+                            }
+                            "for" => {
+                                block.push(self.for_expr()?);
+                                continue;
+                            }
+                            _ => {}
                         }
                     }
                     block.push(expr);
@@ -263,6 +270,37 @@ impl Parser {
         }
 
         Ok(block)
+    }
+
+    /// Parse a `for` statement:
+    ///     for v in list
+    ///     for k, v in map
+    fn for_expr(&mut self) -> Result<Expr> {
+        let mut key = None;
+        let val;
+
+        let word = self.expect(Syntax::Word)?.to_string();
+        if self.peek_is(Syntax::Special(',')) {
+            key = Some(word);
+            val = self.next().to_string();
+        } else {
+            val = word;
+        }
+
+        let in_word = self.expect(Syntax::Word)?;
+        if in_word.literal() != "in" {
+            return Err(self.error("in"));
+        }
+
+        let iter = self.expr()?;
+        let body = if self.peek_is(Syntax::Indent) {
+            self.content()?
+        } else {
+            vec![self.expr()?]
+        };
+
+        self.expect(Syntax::Dedent)?;
+        Ok(Expr::For(key, val, Box::new(iter), body))
     }
 
     /// Parse an if statement.

@@ -2,15 +2,15 @@ use crate::Tag;
 
 #[derive(Debug)]
 pub enum Expr {
-    Tag(Tag),
-    If(Vec<(Expr, Vec<Expr>)>),
-    For,
     None,
     Bool(bool),
     Number(f64),
     String(String),
     Word(String),
     Call(String, Vec<Expr>),
+    Tag(Tag),
+    If(Vec<(Expr, Vec<Expr>)>),
+    For(Option<String>, String, Box<Expr>, Vec<Expr>), // key, val, iter, body
 }
 
 impl Expr {
@@ -23,7 +23,7 @@ impl Expr {
             Expr::Word(s) => s.clone(),
             Expr::Tag(tag) => format!("{:?}", tag),
             Expr::If(..) => format!("{}", "IF: Coming Soon™"),
-            Expr::For => format!("{}", "FOR: Coming Soon™"),
+            Expr::For(..) => format!("{}", "FOR: Coming Soon™"),
             Expr::Call(name, args) => format!(
                 "{}({})",
                 name,

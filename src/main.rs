@@ -82,7 +82,9 @@ fn print_tokens(mut tokens: TokenStream) {
 }
 
 fn print_ast(ast: AST) {
-    println!("{:#?}", ast);
+    for expr in ast.exprs {
+        println!("{:?}", expr);
+    }
 }
 
 fn print_error<P: AsRef<std::path::Path>, S: AsRef<str>>(path: P, source: S, err: hatter::Error) {

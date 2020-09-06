@@ -2,3 +2,4 @@
     <li> <b>Name:</> to-uppercase("jonny")
     <li> <b>Location:</> to-lowercase("IDAHO")
     <li> <b>Age:</> add(20, mul(4, 10))
+    <li> <b>Favorite Soda:</> to-uppercase(to-lowercase("Dr. PePpEr"))

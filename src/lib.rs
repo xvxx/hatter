@@ -5,6 +5,7 @@
 #[macro_use]
 mod error;
 mod ast;
+mod builtins;
 mod env;
 mod eval;
 mod expr;
@@ -12,9 +13,11 @@ mod parser;
 mod scanner;
 mod tag;
 mod token;
+mod value;
 
 pub use {
     ast::AST,
+    builtins::builtins,
     env::Env,
     error::{print_error, Error},
     eval::eval,
@@ -23,6 +26,7 @@ pub use {
     scanner::scan,
     tag::Tag,
     token::{Syntax, Token, TokenStream},
+    value::{HatterFn, Value},
 };
 
 pub type Result<T> = std::result::Result<T, Error>;

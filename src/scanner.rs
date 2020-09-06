@@ -225,8 +225,8 @@ impl<'s> Scanner<'s> {
         }
         let word_end = self.pos;
         self.eat(|c| c == ' ');
-        match self.peek().unwrap_or(&'0') {
-            '<' | ';' | '\n' | '(' => {
+        match self.peek().unwrap_or(&'\0') {
+            '<' | ';' | '\n' | '(' | '\0' => {
                 self.pos = word_end;
                 return Ok(Syntax::Word);
             }

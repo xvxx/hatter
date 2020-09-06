@@ -18,8 +18,9 @@ _**Hatter** is a positively mad HTML templating language._
 - [x] fn call
   - [x] fn call with args
   - [x] nested fn call
-- [ ] if
-  - [ ] else
+- [x] if
+  - [x] else
+  - [ ] else ifs
 - [ ] for v in list
   - [ ] for k, v in map
 - [ ] \<style> tag
@@ -30,3 +31,4 @@ _**Hatter** is a positively mad HTML templating language._
 - [ ] VSCode + luacheck-style LSP
 - [ ] luacheck-style tool
 - [ ] <!-- html comments -->
+- [ ] operators

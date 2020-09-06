@@ -73,7 +73,13 @@ Commands:
 
 fn print_tokens(mut tokens: TokenStream) {
     while let Some(tok) = tokens.next() {
-        println!("({:>03}:{:>03}) {}", tok.pos, tok.len, tok.literal());
+        println!(
+            "({:>03}:{:>03}) {:<15} {}",
+            tok.pos,
+            tok.len,
+            format!("{:?}", tok.kind),
+            tok.literal()
+        );
     }
 }
 

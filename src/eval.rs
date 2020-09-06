@@ -3,19 +3,132 @@ use {
     std::collections::HashMap,
 };
 
+type HatFn = fn(&mut Env, &[Value]) -> Value;
+
+fn builtins() -> HashMap<String, Value> {
+    let mut map: HashMap<String, Value> = HashMap::new();
+    fn add(_: &mut Env, args: &[Value]) -> Value {
+        if let Some(Value::Number(a)) = args.get(0) {
+            if let Some(Value::Number(b)) = args.get(1) {
+                return Value::Number(a + b);
+            }
+        }
+        Value::None
+    }
+    fn sub(_: &mut Env, args: &[Value]) -> Value {
+        if let Some(Value::Number(a)) = args.get(0) {
+            if let Some(Value::Number(b)) = args.get(1) {
+                return Value::Number(a - b);
+            }
+        }
+        Value::None
+    }
+    fn mul(_: &mut Env, args: &[Value]) -> Value {
+        if let Some(Value::Number(a)) = args.get(0) {
+            if let Some(Value::Number(b)) = args.get(1) {
+                return Value::Number(a * b);
+            }
+        }
+        Value::None
+    }
+    fn div(_: &mut Env, args: &[Value]) -> Value {
+        if let Some(Value::Number(a)) = args.get(0) {
+            if let Some(Value::Number(b)) = args.get(1) {
+                return Value::Number(a / b);
+            }
+        }
+        Value::None
+    }
+    fn print(env: &mut Env, args: &[Value]) -> Value {
+        for arg in args {
+            match arg {
+                Value::None => env.print("None"),
+                Value::String(s) => env.print(s),
+                Value::Number(n) => env.print(n.to_string()),
+                Value::Bool(b) => env.print(b.to_string()),
+                _ => unimplemented!(),
+            }
+        }
+        Value::None
+    }
+    fn to_uppercase(_env: &mut Env, args: &[Value]) -> Value {
+        if let Some(Value::String(s)) = args.get(0) {
+            Value::String(s.to_uppercase())
+        } else {
+            Value::String("Expected String".to_string())
+        }
+    }
+    fn to_lowercase(_env: &mut Env, args: &[Value]) -> Value {
+        if let Some(Value::String(s)) = args.get(0) {
+            Value::String(s.to_lowercase())
+        } else {
+            Value::String("Expected String".to_string())
+        }
+    }
+
+    map.insert("add".to_string(), Value::Fn(add));
+    map.insert("sub".to_string(), Value::Fn(sub));
+    map.insert("mul".to_string(), Value::Fn(mul));
+    map.insert("div".to_string(), Value::Fn(div));
+    map.insert("print".to_string(), Value::Fn(print));
+    map.insert("to-uppercase".to_string(), Value::Fn(to_uppercase));
+    map.insert("to-lowercase".to_string(), Value::Fn(to_lowercase));
+    map
+}
+
+#[derive(Clone)]
+enum Value {
+    None,
+    Bool(bool),
+    Number(f64),
+    String(String),
+    Fn(HatFn),
+    List(Vec<Value>),
+    Map(HashMap<Value, Value>),
+}
+
+impl Value {
+    fn typename(&self) -> &str {
+        use Value::*;
+        match self {
+            None => "None",
+            Bool(..) => "Bool",
+            Number(..) => "Number",
+            String(..) => "String",
+            Fn(..) => "Fn",
+            List(..) => "List",
+            Map(..) => "Map",
+        }
+    }
+}
+
 struct Env<'p> {
     out: String,
-    env: HashMap<String, Expr>,
+    env: HashMap<String, Value>,
+    builtins: HashMap<String, Value>,
     parent: Option<&'p Env<'p>>,
 }
 
 impl<'p> Env<'p> {
+    fn root() -> Env<'p> {
+        let mut new = Env::new();
+        new.builtins = builtins();
+        new
+    }
+
     fn new() -> Env<'p> {
         Env {
             out: String::new(),
             env: HashMap::new(),
+            builtins: HashMap::new(),
             parent: None,
         }
+    }
+
+    fn from(env: &'p Env) -> Env<'p> {
+        let mut new = Env::new();
+        new.parent = Some(env);
+        new
     }
 
     fn putc(&mut self, c: char) {
@@ -26,11 +139,13 @@ impl<'p> Env<'p> {
         self.out.push_str(it.as_ref());
     }
 
-    fn lookup(&self, name: &str) -> Option<&Expr> {
+    fn lookup(&self, name: &str) -> Option<&Value> {
         if let Some(v) = self.env.get(name) {
             Some(v)
         } else if let Some(p) = self.parent {
             p.lookup(name)
+        } else if let Some(b) = self.builtins.get(name) {
+            Some(b)
         } else {
             None
         }
@@ -38,7 +153,7 @@ impl<'p> Env<'p> {
 }
 
 pub fn eval(ast: AST) -> Result<String> {
-    let mut env = Env::new();
+    let mut env = Env::root();
     let mut auto_html = false;
 
     // If the first tag is <head>, add doctype and <html>
@@ -49,9 +164,7 @@ pub fn eval(ast: AST) -> Result<String> {
         }
     }
 
-    for expr in &ast.exprs {
-        eval_expr(&mut env, expr)?;
-    }
+    print_exprs(&mut env, &ast.exprs)?;
 
     // tidy up
     if auto_html {
@@ -61,45 +174,64 @@ pub fn eval(ast: AST) -> Result<String> {
     Ok(env.out)
 }
 
-fn eval_exprs(env: &mut Env, exprs: &[Expr]) -> Result<()> {
+fn print_exprs(env: &mut Env, exprs: &[Expr]) -> Result<()> {
     for expr in exprs {
-        eval_expr(env, expr)?;
+        print_expr(env, expr)?;
     }
     Ok(())
 }
 
-fn eval_expr(env: &mut Env, expr: &Expr) -> Result<()> {
+fn print_expr(env: &mut Env, expr: &Expr) -> Result<()> {
+    match expr {
+        Expr::Tag(t) => print_tag(env, t)?,
+        _ => match eval_expr(env, expr)? {
+            Value::String(s) => env.print(&s),
+            Value::Number(n) => env.print(&n.to_string()),
+            Value::Bool(b) => env.print(&b.to_string()),
+            _ => unimplemented!(),
+        },
+    }
+    Ok(())
+}
+
+fn eval_expr(env: &mut Env, expr: &Expr) -> Result<Value> {
     use Expr::*;
 
-    match expr {
-        Block(exprs) => {
-            for expr in exprs {
-                eval_expr(env, expr)?;
-            }
-        }
-        Tag(tag) => eval_tag(env, tag)?,
-        If => unimplemented!(),
-        For => unimplemented!(),
-        None => unimplemented!(),
-        Bool(b) => env.print(b.to_string()),
-        Number(num) => env.print(num.to_string()),
-        String(s) => env.print(s),
+    Ok(match expr {
+        None | If | For | Tag(..) => unimplemented!(),
+        Bool(b) => Value::Bool(*b),
+        Number(n) => Value::Number(*n),
+        String(n) => Value::String(n.clone()),
         Word(word) => {
             if let Some(val) = env.lookup(word) {
-                let s = val.to_string();
-                env.print(s);
+                val.clone()
             } else {
-                env.print(format!("<undefined word: {}>", word));
+                eprintln!("<undefined word: {}>", word); // TODO
+                Value::String(word.clone())
             }
         }
-        Call(_name, _args) => {
-            env.print("<function call>");
+        Call(name, args) => {
+            let mut evaled_args = vec![];
+            for arg in args {
+                evaled_args.push(eval_expr(env, arg)?);
+            }
+
+            if let Some(val) = env.lookup(name) {
+                if let Value::Fn(f) = val {
+                    f(env, &evaled_args)
+                } else {
+                    eprintln!("<expected Fn, got {}>", val.typename()); // TODO
+                    Value::String(format!("<expected Fn, got {}>", val.typename()))
+                }
+            } else {
+                eprintln!("<undefined function: {}>", name); // TODO
+                Value::String(format!("<undefined function: {}>", name))
+            }
         }
-    }
-    Ok(())
+    })
 }
 
-fn eval_tag(env: &mut Env, tag: &Tag) -> Result<()> {
+fn print_tag(env: &mut Env, tag: &Tag) -> Result<()> {
     env.putc('<');
     let is_form = tag.tag == "form";
     env.print(&tag.tag);
@@ -142,7 +274,7 @@ fn eval_tag(env: &mut Env, tag: &Tag) -> Result<()> {
     }
 
     if !tag.contents.is_empty() {
-        eval_exprs(env, &tag.contents)?;
+        print_exprs(env, &tag.contents)?;
     }
 
     env.putc('<');

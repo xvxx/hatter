@@ -33,23 +33,29 @@ fn print_exprs(env: &mut Env, exprs: &[Expr]) -> Result<()> {
 }
 
 fn print_expr(env: &mut Env, expr: &Expr) -> Result<()> {
-    match expr {
-        Expr::Tag(t) => print_tag(env, t)?,
-        _ => match eval_expr(env, expr)? {
-            Value::String(s) => env.print(&s),
-            Value::Number(n) => env.print(&n.to_string()),
-            Value::Bool(b) => env.print(&b.to_string()),
-            _ => unimplemented!(),
-        },
+    match eval_expr(env, expr)? {
+        Value::String(s) => env.print(&s),
+        Value::Number(n) => env.print(&n.to_string()),
+        Value::Bool(b) => env.print(&b.to_string()),
+        _ => unimplemented!(),
     }
     Ok(())
+}
+
+fn eval_exprs(env: &mut Env, exprs: &[Expr]) -> Result<Value> {
+    let mut ret = Value::None;
+    for expr in exprs {
+        ret = eval_expr(env, expr)?;
+    }
+    Ok(ret)
 }
 
 fn eval_expr(env: &mut Env, expr: &Expr) -> Result<Value> {
     use Expr::*;
 
     Ok(match expr {
-        None | If | For | Tag(..) => unimplemented!(),
+        None | For => unimplemented!(),
+        Tag(tag) => eval_tag(env, tag)?,
         Bool(b) => Value::Bool(*b),
         Number(n) => Value::Number(*n),
         String(n) => Value::String(n.clone()),
@@ -60,6 +66,19 @@ fn eval_expr(env: &mut Env, expr: &Expr) -> Result<Value> {
                 eprintln!("<undefined word: {}>", word); // TODO
                 Value::String(word.clone())
             }
+        }
+        If(conds) => {
+            let mut ret = Value::None;
+            for (test, body) in conds {
+                match eval_expr(env, test)? {
+                    Value::Bool(false) | Value::None => {}
+                    _ => {
+                        ret = eval_exprs(env, body)?;
+                        break;
+                    }
+                }
+            }
+            ret
         }
         Call(name, args) => {
             let mut evaled_args = vec![];
@@ -82,56 +101,59 @@ fn eval_expr(env: &mut Env, expr: &Expr) -> Result<Value> {
     })
 }
 
-fn print_tag(env: &mut Env, tag: &Tag) -> Result<()> {
-    env.putc('<');
+fn eval_tag(env: &mut Env, tag: &Tag) -> Result<Value> {
+    let mut out = String::new();
+    out.push('<');
     let is_form = tag.tag == "form";
-    env.print(&tag.tag);
+    out.push_str(&tag.tag);
 
     if !tag.classes.is_empty() {
-        env.print(" class='");
+        out.push_str(" class='");
         let len = tag.classes.len();
         for (i, class) in tag.classes.iter().enumerate() {
-            env.print(class);
+            out.push_str(class);
             if i < len - 1 {
-                env.putc(' ');
+                out.push(' ');
             }
         }
-        env.print("'");
+        out.push_str("'");
     }
 
     for (name, val) in &tag.attrs {
         if is_form && (name == "GET" || name == "POST") {
-            env.print(&format!(" method='{}' action='{}'", name, val));
+            out.push_str(&format!(" method='{}' action='{}'", name, val));
             continue;
         }
-        env.putc(' ');
-        env.print(&name);
-        env.putc('=');
-        env.putc('\'');
-        env.print(&val);
-        env.putc('\'');
+        out.push(' ');
+        out.push_str(&name);
+        out.push('=');
+        out.push('\'');
+        out.push_str(&val);
+        out.push('\'');
     }
 
     if tag.tag == "a" && !tag.attrs.contains_key("href") {
-        env.print(" href='#'");
+        out.push_str(" href='#'");
     }
 
     if tag.is_closed() {
-        env.putc('/');
-        env.putc('>');
-        return Ok(());
+        out.push('/');
+        out.push('>');
+        return Ok(Value::String(out));
     } else {
-        env.putc('>');
+        out.push('>');
     }
 
     if !tag.contents.is_empty() {
-        print_exprs(env, &tag.contents)?;
+        for expr in &tag.contents {
+            out.push_str(&eval_expr(env, expr)?.to_string());
+        }
     }
 
-    env.putc('<');
-    env.putc('/');
-    env.print(&tag.tag);
-    env.putc('>');
+    out.push('<');
+    out.push('/');
+    out.push_str(&tag.tag);
+    out.push('>');
 
-    Ok(())
+    Ok(Value::String(out))
 }

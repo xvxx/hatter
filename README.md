@@ -14,10 +14,10 @@ _**Hatter** is a slightly mad, zero dependency HTML template language._
 - [x] Attributes
 - [x] Implicit "div"
 - [x] (inline js event handlers)
-- [ ] var value
-- [ ] fn call
-  - [ ] fn call with args
-  - [ ] nested fn call
+- [x] var value
+- [x] fn call
+  - [x] fn call with args
+  - [x] nested fn call
 - [ ] if
   - [ ] else
 - [ ] for v in list

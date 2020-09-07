@@ -6,18 +6,6 @@ _**Hatter** is a positively mad HTML templating language._
 
 ## TODO
 
-- [x] .hat -> Tokens
-- [x] Tokens -> AST
-- [x] Produce HTML
-- [x] Understand indentation
-- [x] Tag shortcuts
-- [x] Attributes
-- [x] Implicit "div"
-- [x] (inline js event handlers)
-- [x] var value
-- [x] fn call
-  - [x] fn call with args
-  - [x] nested fn call
 - [x] if
   - [x] else
   - [ ] else ifs

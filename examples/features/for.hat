@@ -10,3 +10,10 @@
             i
             ": "
             v
+
+<#break>
+    <h2> List w/ indices
+    for i, v in abc
+        if gt(i, 0)
+            break
+        <.item> i

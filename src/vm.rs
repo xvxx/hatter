@@ -95,6 +95,9 @@ impl<'p> VM<'p> {
                     }
                     self.ip += 1;
                 }
+                Code::Break | Code::Continue => {
+                    return error!("Break and Continue should be handled in the compiler")
+                }
                 Code::TestShouldLoop => {
                     self.ip += 1;
                     if let Value::Number(n) = self.pop_stack() {
@@ -116,64 +119,7 @@ impl<'p> VM<'p> {
                         );
                     }
                 }
-                Code::Break | Code::Continue => {
-                    return error!("Break and Continue should be handled in the compiler")
-                }
-                Code::Loop(key, val) => {
-                    self.ip += 1;
-                    let iter = self.pop_stack();
-                    match iter {
-                        Value::List(list) => {
-                            if let Some(k) = key {
-                                self.env.set(k, 0);
-                            }
-                            self.env.set(val, list[0].clone());
-                            self.push(list);
-                            self.push(0);
-                        }
-                        Value::Number(n) => {
-                            if let Value::List(list) = self.pop_stack() {
-                                if let Some(k) = key {
-                                    self.env.set(k, n);
-                                }
-                                self.env.set(val, list[n as usize].clone());
-                                self.push(list);
-                                self.push(n);
-                            } else {
-                                return error!("expected Number on top of stack");
-                            }
-                        }
-                        Value::Map(map) => {
-                            if let Some(fst) = map.keys().next() {
-                                if let Some(k) = key {
-                                    self.env.set(k, fst);
-                                }
-                                self.env
-                                    .set(val, map.get(fst).unwrap_or(&Value::None).clone());
-                                let fst = Value::from(fst);
-                                self.push(map);
-                                self.push(fst);
-                            }
-                        }
-                        Value::String(s) => {
-                            let next = s;
-                            if let Value::Map(map) = self.pop_stack() {
-                                if let Some((keyname, v)) = map.range(..next).next() {
-                                    let keyname = Value::from(keyname);
-                                    if let Some(k) = key {
-                                        self.env.set(k, keyname.clone());
-                                    }
-                                    self.env.set(val, v.clone());
-                                    self.push(map);
-                                    self.push(keyname);
-                                }
-                            } else {
-                                return error!("expected String on top of stack");
-                            }
-                        }
-                        _ => return error!("can only loop over List or Map, got {:?}", iter),
-                    }
-                }
+                Code::Loop(key, val) => self.do_loop(key, val)?,
                 Code::Lookup(name) => {
                     if let Some(v) = self.env.lookup(name) {
                         let v = v.clone();
@@ -204,6 +150,63 @@ impl<'p> VM<'p> {
                     }
                 }
             }
+        }
+        Ok(())
+    }
+
+    fn do_loop(&mut self, key: &Option<String>, val: &str) -> Result<()> {
+        self.ip += 1;
+        let iter = self.pop_stack();
+        match iter {
+            Value::List(list) => {
+                if let Some(k) = key {
+                    self.env.set(k, 0);
+                }
+                self.env.set(val, list[0].clone());
+                self.push(list);
+                self.push(0);
+            }
+            Value::Number(n) => {
+                if let Value::List(list) = self.pop_stack() {
+                    if let Some(k) = key {
+                        self.env.set(k, n);
+                    }
+                    self.env.set(val, list[n as usize].clone());
+                    self.push(list);
+                    self.push(n);
+                } else {
+                    return error!("expected Number on top of stack");
+                }
+            }
+            Value::Map(map) => {
+                if let Some(fst) = map.keys().next() {
+                    if let Some(k) = key {
+                        self.env.set(k, fst);
+                    }
+                    self.env
+                        .set(val, map.get(fst).unwrap_or(&Value::None).clone());
+                    let fst = Value::from(fst);
+                    self.push(map);
+                    self.push(fst);
+                }
+            }
+            Value::String(s) => {
+                let next = s;
+                if let Value::Map(map) = self.pop_stack() {
+                    if let Some((keyname, v)) = map.range(..next).next() {
+                        let keyname = Value::from(keyname);
+                        if let Some(k) = key {
+                            self.env.set(k, keyname.clone());
+                        }
+                        self.env.set(val, v.clone());
+                        self.push(map);
+                        self.push(keyname);
+                    }
+                } else {
+                    return error!("expected String on top of stack");
+                }
+            }
+            _ => return error!("can only loop over List or Map, got {:?}", iter),
         }
         Ok(())
     }

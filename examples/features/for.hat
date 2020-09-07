@@ -26,4 +26,4 @@
         if eq(i, 1)
             continue
             <b> "ok"
-        <.item> i
+        <.item> v

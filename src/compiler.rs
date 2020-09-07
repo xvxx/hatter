@@ -47,12 +47,11 @@ fn compile_stmt(expr: &Expr) -> Result<Vec<Code>> {
 
     Ok(match expr {
         None => vec![],
-        Bool(..) | Number(..) | String(..) | Call(..) => {
+        Bool(..) | Number(..) | String(..) | Word(..) | Call(..) => {
             let mut inst = compile_expr(expr)?;
             inst.push(Code::Print);
             inst
         }
-        Word(word) => vec![Code::Lookup(word.to_string()), Code::Print],
         If(conds) => {
             let mut inst = vec![];
             let mut ends = vec![]; // needs jump to END
@@ -168,6 +167,7 @@ fn compile_expr(expr: &Expr) -> Result<Vec<Code>> {
         Bool(b) => vec![Code::Push(b.into())],
         Number(n) => vec![Code::Push(n.into())],
         String(s) => vec![Code::Push(s.into())],
+        Word(word) => vec![Code::Lookup(word.to_string())],
         Call(name, args) => {
             let mut inst = vec![];
             for expr in args {
@@ -177,6 +177,6 @@ fn compile_expr(expr: &Expr) -> Result<Vec<Code>> {
             inst.push(Code::Call(name.to_string(), args.len()));
             inst
         }
-        _ => unimplemented!(),
+        _ => panic!("don't know how to compile {:?}", expr),
     })
 }

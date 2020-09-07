@@ -1,7 +1,9 @@
 use {
-    crate::{builtins, Builtin, Code, Env, Result, Value},
+    crate::{builtins, Builtin, Code, Result, Value},
     std::collections::HashMap,
 };
+
+pub type Env = HashMap<String, Value>;
 
 pub struct VM {
     stack: Vec<Value>, // value stack
@@ -57,7 +59,7 @@ impl VM {
     }
 
     fn set<S: AsRef<str>, V: Into<Value>>(&mut self, key: S, val: V) {
-        self.env().set(key, val);
+        self.env().insert(key.as_ref().to_string(), val.into());
     }
 
     fn run(&mut self, inst: Vec<Code>) -> Result<()> {

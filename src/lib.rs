@@ -8,7 +8,6 @@ mod error;
 mod ast;
 mod builtins;
 mod compiler;
-mod env;
 mod expr;
 mod parser;
 mod scanner;
@@ -21,7 +20,6 @@ pub use {
     ast::AST,
     builtins::builtins,
     compiler::{compile, Code},
-    env::Env,
     error::{print_error, Error},
     expr::Expr,
     parser::parse,
@@ -29,7 +27,7 @@ pub use {
     tag::Tag,
     token::{Syntax, Token, TokenStream},
     value::{Builtin, Value},
-    vm::VM,
+    vm::{Env, VM},
 };
 
 pub type Result<T> = std::result::Result<T, Error>;

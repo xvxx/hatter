@@ -13,6 +13,21 @@ pub enum Value {
     Map(HashMap<String, Value>),
 }
 
+impl fmt::Debug for Value {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        use Value::*;
+        match self {
+            None => f.debug_struct("None").finish(),
+            Bool(b) => f.debug_struct(if *b { "True" } else { "False" }).finish(),
+            Number(num) => f.debug_struct("Number").field("val", &num).finish(),
+            String(s) => f.debug_struct("String").field("val", &s).finish(),
+            Fn(..) => f.debug_struct("Function").field("val", &"?").finish(),
+            List(..) => f.debug_struct("List").field("val", &"?").finish(),
+            Map(..) => f.debug_struct("Map").field("val", &"?").finish(),
+        }
+    }
+}
+
 impl Value {
     pub fn to_string(&self) -> String {
         use Value::*;

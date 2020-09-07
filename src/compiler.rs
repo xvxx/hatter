@@ -72,6 +72,7 @@ fn compile_stmt(expr: &Expr) -> Result<Vec<Code>> {
             let mut inst = vec![];
             let mut ends = vec![]; // needs jump to END
 
+            inst.push(Code::PushEnv);
             for (test, body) in conds {
                 let mut test = compile_expr(test)?;
                 let mut body = compile_stmts(body)?;
@@ -90,7 +91,7 @@ fn compile_stmt(expr: &Expr) -> Result<Vec<Code>> {
             for end in ends {
                 inst[end] = Code::JumpBy((end_pos - end) as isize);
             }
-
+            inst.push(Code::PopEnv);
             inst
         }
         // key, val, iter, body

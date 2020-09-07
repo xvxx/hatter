@@ -6,6 +6,7 @@
 mod error;
 mod ast;
 mod builtins;
+mod compiler;
 mod env;
 mod eval;
 mod expr;
@@ -14,10 +15,12 @@ mod scanner;
 mod tag;
 mod token;
 mod value;
+mod vm;
 
 pub use {
     ast::AST,
     builtins::builtins,
+    compiler::{compile, Compiled},
     env::Env,
     error::{print_error, Error},
     eval::eval,
@@ -27,14 +30,7 @@ pub use {
     tag::Tag,
     token::{Syntax, Token, TokenStream},
     value::{HatterFn, Value},
+    vm::Code,
 };
 
 pub type Result<T> = std::result::Result<T, Error>;
-
-pub fn compile(_ast: AST) -> Result<String> {
-    Ok(String::new())
-}
-
-pub fn to_html(source: &str) -> Result<String> {
-    Ok(source.to_string())
-}

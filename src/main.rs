@@ -1,5 +1,5 @@
 use {
-    hatter::{eval, parse, scan, TokenStream, AST},
+    hatter::{compile, eval, parse, scan, Compiled, TokenStream, AST},
     std::{env, io},
 };
 
@@ -51,10 +51,18 @@ fn main() -> Result<(), io::Error> {
         unimplemented!();
     }
 
-    let out = eval(ast)
+    let compiled = compile(ast)
         .map_err(|e| print_error(&path, &source, e))
         .unwrap();
-    println!("{}", out);
+    if command == "compile" {
+        print_compiled(compiled);
+        return Ok(());
+    }
+
+    // let out = eval(ast)
+    //     .map_err(|e| print_error(&path, &source, e))
+    //     .unwrap();
+    // println!("{}", out);
     Ok(())
 }
 
@@ -66,6 +74,7 @@ Commands:
   scan        Print tokens.
   parse       Print AST.
   check       Check for compile errors only.
+  compile     Compile to HASM.
   print       Print HTML. (default)
 "#
     );
@@ -86,6 +95,12 @@ fn print_tokens(mut tokens: TokenStream) {
 fn print_ast(ast: AST) {
     for expr in ast.exprs {
         println!("{:?}", expr);
+    }
+}
+
+fn print_compiled(compiled: Compiled) {
+    for code in compiled.codes {
+        println!("{:?}", code);
     }
 }
 

@@ -1,5 +1,5 @@
 use {
-    crate::{Env, Expr, Result, Value, AST},
+    crate::{Env, Expr, Result, Tag, Value, AST},
     std::collections::HashMap,
 };
 
@@ -112,9 +112,65 @@ fn compile_stmt(expr: &Expr) -> Result<Vec<Code>> {
             inst.push(Code::JumpIfTrue(-(body.len() as isize)));
             inst
         }
+        Tag(tag) => compile_tag(tag)?,
         _ => unimplemented!(),
-        // Tag(Tag),
     })
+}
+
+fn compile_tag(tag: &Tag) -> Result<Vec<Code>> {
+    let mut out = String::new();
+    out.push('<');
+    let is_form = tag.tag == "form";
+    out.push_str(&tag.tag);
+
+    if !tag.classes.is_empty() {
+        out.push_str(" class='");
+        let len = tag.classes.len();
+        for (i, class) in tag.classes.iter().enumerate() {
+            out.push_str(class);
+            if i < len - 1 {
+                out.push(' ');
+            }
+        }
+        out.push_str("'");
+    }
+
+    for (name, val) in &tag.attrs {
+        if is_form && (name == "GET" || name == "POST") {
+            out.push_str(&format!(" method='{}' action='{}'", name, val));
+            continue;
+        }
+        out.push(' ');
+        out.push_str(&name);
+        out.push('=');
+        out.push('\'');
+        out.push_str(&val);
+        out.push('\'');
+    }
+
+    if tag.tag == "a" && !tag.attrs.contains_key("href") {
+        out.push_str(" href='#'");
+    }
+
+    if tag.is_closed() {
+        out.push('/');
+        out.push('>');
+        return Ok(vec![Code::Push(out.into()), Code::Print]);
+    } else {
+        out.push('>');
+    }
+
+    let mut inst = vec![Code::Push(out.into()), Code::Print];
+
+    if !tag.contents.is_empty() {
+        let mut body = compile_stmts(&tag.contents)?;
+        inst.append(&mut body);
+    }
+
+    inst.push(Code::Push(format!("</{}>", tag.tag).into()));
+    inst.push(Code::Print);
+
+    Ok(inst)
 }
 
 fn compile_exprs(exprs: &[Expr]) -> Result<Vec<Code>> {

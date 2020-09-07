@@ -1,15 +1,15 @@
 use {
-    crate::{Code, Env, Result, Value},
+    crate::{builtins, Builtin, Code, Env, Result, Value},
     std::collections::HashMap,
 };
 
-struct VM {
+pub struct VM {
     stack: Vec<Value>, // value stack
     calls: Vec<usize>, // call stack
     envs: Vec<Env>,
     ip: usize,
     out: String,
-    builtins: HashMap<String, fn()>,
+    builtins: HashMap<String, Builtin>,
 }
 
 pub fn run(inst: Vec<Code>) -> Result<String> {
@@ -26,7 +26,7 @@ impl VM {
             calls: vec![],
             envs: vec![Env::new()],
             out: String::new(),
-            builtins: HashMap::new(),
+            builtins: builtins(),
         }
     }
 
@@ -171,14 +171,14 @@ impl VM {
                 }
                 Code::Return => self.ip = self.pop_call(),
                 Code::Call(name, arity) => {
+                    self.ip += 1;
                     let mut args = vec![];
                     for _ in 0..*arity {
                         args.push(self.pop_stack());
                     }
                     let args = args.into_iter().rev().collect::<Vec<_>>();
-                    if let Some(Value::Fn(f)) = self.lookup(name) {
-                        let retval = f(&mut self.env(), &args);
-                        self.calls.push(self.ip + 1);
+                    if let Some(f) = self.builtins.get(name) {
+                        let retval = f(self, &args);
                         self.push(retval);
                     } else {
                         return error!("can't find fn named {}", name);

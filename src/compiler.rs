@@ -77,11 +77,11 @@ fn compile_stmt(expr: &Expr) -> Result<Vec<Code>> {
                 let mut test = compile_expr(test)?;
                 let mut body = compile_stmts(body)?;
                 inst.append(&mut test);
-                inst.push(Code::JumpIfFalse(1 + body.len() as isize));
+                inst.push(Code::JumpIfFalse(2 + body.len() as isize));
                 inst.append(&mut body);
 
                 // save this location to rewrite later
-                inst.push(Code::JumpBy(0)); // end
+                inst.push(Code::JumpBy(-1000)); // end
                 ends.push(inst.len() - 1);
             }
 
@@ -89,7 +89,7 @@ fn compile_stmt(expr: &Expr) -> Result<Vec<Code>> {
             // instructions are in the `else` clauses
             let end_pos = inst.len() - 1;
             for end in ends {
-                inst[end] = Code::JumpBy((end_pos - end) as isize);
+                inst[end] = Code::JumpBy((end_pos - end + 1) as isize);
             }
             inst.push(Code::PopEnv);
             inst

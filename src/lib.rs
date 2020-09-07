@@ -28,7 +28,8 @@ pub use {
     scanner::scan,
     tag::Tag,
     token::{Syntax, Token, TokenStream},
-    value::{HatterFn, Value},
+    value::{Builtin, Value},
+    vm::VM,
 };
 
 pub type Result<T> = std::result::Result<T, Error>;

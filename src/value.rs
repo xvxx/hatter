@@ -1,9 +1,9 @@
 use {
-    crate::Env,
+    crate::{Env, VM},
     std::{collections::BTreeMap, fmt},
 };
 
-pub type HatterFn = fn(&mut Env, &[Value]) -> Value;
+pub type Builtin = fn(&mut VM, &[Value]) -> Value;
 
 #[derive(Clone)]
 pub enum Value {
@@ -11,7 +11,7 @@ pub enum Value {
     Bool(bool),
     Number(f64),
     String(String),
-    Fn(HatterFn),
+    Fn(Builtin),
     List(Vec<Value>),
     Map(BTreeMap<String, Value>),
 }

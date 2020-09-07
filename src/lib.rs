@@ -1,6 +1,7 @@
 #![allow(dead_code)]
 #![allow(unused_imports)]
 #![deny(unused_must_use)]
+#![deny(unreachable_patterns)]
 
 #[macro_use]
 mod error;

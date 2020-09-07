@@ -24,34 +24,13 @@ pub enum Code {
     Return,
 }
 
-pub struct Compiled<'p> {
-    pub codes: Vec<Code>,
-    pub env: Env<'p>,
-    pub builtins: HashMap<String, Box<dyn Fn(&mut Env, &[Value]) -> Result<Value>>>,
-}
-
-impl<'p> Compiled<'p> {
-    fn new() -> Compiled<'p> {
-        Compiled {
-            codes: vec![],
-            env: Env::root(),
-            builtins: HashMap::new(),
-        }
-    }
-
-    fn push_codes(&mut self, mut codes: Vec<Code>) {
-        self.codes.append(&mut codes);
-    }
-}
-
-struct Compiler;
-
-pub fn compile<'p>(ast: AST) -> Result<Compiled<'p>> {
-    let mut code = Compiled::new();
+pub fn compile(ast: AST) -> Result<Vec<Code>> {
+    let mut codes = vec![];
     for expr in &ast.exprs {
-        code.push_codes(compile_stmt(expr)?);
+        let mut ex = compile_stmt(expr)?;
+        codes.append(&mut ex);
     }
-    Ok(code)
+    Ok(codes)
 }
 
 fn compile_stmts(exprs: &[Expr]) -> Result<Vec<Code>> {
@@ -113,7 +92,6 @@ fn compile_stmt(expr: &Expr) -> Result<Vec<Code>> {
             inst
         }
         Tag(tag) => compile_tag(tag)?,
-        _ => unimplemented!(),
     })
 }
 

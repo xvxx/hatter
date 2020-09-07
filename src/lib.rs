@@ -21,7 +21,7 @@ pub mod vm;
 pub use {
     ast::AST,
     builtins::builtins,
-    compiler::{compile, Code, Compiled},
+    compiler::{compile, Code},
     env::Env,
     error::{print_error, Error},
     eval::eval,

@@ -31,7 +31,17 @@ impl fmt::Debug for Value {
             Number(num) => f.debug_struct("Number").field("val", &num).finish(),
             String(s) => f.debug_struct("String").field("val", &s).finish(),
             Fn(..) => f.debug_struct("Function").field("val", &"?").finish(),
-            List(..) => f.debug_struct("List").field("val", &"?").finish(),
+            List(list) => f
+                .debug_struct("List")
+                .field(
+                    "val",
+                    &list
+                        .iter()
+                        .map(|i| format!("{:?}", i))
+                        .collect::<Vec<_>>()
+                        .join(", "),
+                )
+                .finish(),
             Map(..) => f.debug_struct("Map").field("val", &"?").finish(),
         }
     }

@@ -24,7 +24,7 @@ impl VM {
             ip: 0,
             stack: vec![],
             calls: vec![],
-            envs: vec![],
+            envs: vec![Env::new()],
             out: String::new(),
             builtins: HashMap::new(),
         }
@@ -52,7 +52,8 @@ impl VM {
     }
 
     fn env(&mut self) -> &mut Env {
-        &mut self.envs[self.envs.len() - 1]
+        let len = self.envs.len();
+        &mut self.envs[len - 1]
     }
 
     fn set<S: AsRef<str>, V: Into<Value>>(&mut self, key: S, val: V) {
@@ -167,8 +168,8 @@ impl VM {
                     }
                     let args = args.into_iter().rev().collect::<Vec<_>>();
                     if let Some(Value::Fn(f)) = self.lookup(name) {
-                        self.calls.push(self.ip + 1);
                         let retval = f(&mut self.env(), &args);
+                        self.calls.push(self.ip + 1);
                         self.push(retval);
                     } else {
                         return error!("can't find fn named {}", name);
@@ -200,7 +201,7 @@ impl VM {
                     self.push(list);
                     self.push(n);
                 } else {
-                    return error!("expected Number on top of stack");
+                    return error!("expected Number on top of stack, stack: {:?}", self.stack);
                 }
             }
             Value::Map(map) => {
@@ -227,7 +228,7 @@ impl VM {
                         self.push(keyname);
                     }
                 } else {
-                    return error!("expected String on top of stack");
+                    return error!("expected String on top of stack, stack: {:?}", self.stack);
                 }
             }
             _ => return error!("can only loop over List or Map, got {:?}", iter),

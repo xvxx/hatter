@@ -42,6 +42,7 @@ impl<'p> Env<'p> {
 
     pub fn print<S: AsRef<str>>(&mut self, it: S) {
         self.out.push_str(it.as_ref());
+        self.out.push('\n');
     }
 
     pub fn lookup(&self, name: &str) -> Option<&Value> {

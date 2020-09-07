@@ -2,6 +2,7 @@
     <h2> List
     for i in abc
         <.item> i
+        <hr/>
 
 <#index>
     <h2> List w/ indices
@@ -12,8 +13,9 @@
             v
 
 <#break>
-    <h2> List w/ indices
+    <h2> Testing break
     for i, v in abc
-        if gt(i, 0)
+        if gt(i, 1)
             break
+            <b> "ok"
         <.item> i

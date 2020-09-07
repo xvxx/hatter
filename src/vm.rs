@@ -38,6 +38,10 @@ impl<'p> VM<'p> {
         self.stack.pop().unwrap_or(Value::None)
     }
 
+    fn push<T: Into<Value>>(&mut self, v: T) {
+        self.stack.push(v.into());
+    }
+
     fn run(&mut self, inst: Vec<Code>) -> Result<()> {
         while let Some(inst) = inst.get(self.ip) {
             match inst {
@@ -64,7 +68,7 @@ impl<'p> VM<'p> {
                     self.ip += 1;
                 }
                 Code::Push(v) => {
-                    self.stack.push(v.clone());
+                    self.push(v.clone());
                     self.ip += 1;
                 }
                 Code::Pop => {
@@ -88,7 +92,7 @@ impl<'p> VM<'p> {
                 Code::ShouldLoop => {
                     if let Value::Number(n) = self.pop_stack() {
                         if let Value::List(list) = self.pop_stack() {
-                            self.stack.push(Value::from((n as usize) < list.len()));
+                            self.push((n as usize) < list.len());
                         } else {
                             return error!("ShouldLoop expected List at -2 of stack");
                         }
@@ -104,8 +108,8 @@ impl<'p> VM<'p> {
                                 self.env.set(k, 0.into());
                             }
                             self.env.set(val, list[0].clone());
-                            self.stack.push(list.into());
-                            self.stack.push(0.into());
+                            self.push(list);
+                            self.push(0);
                         }
                         Value::Number(n) => {
                             let new = n + 1.0;
@@ -114,20 +118,46 @@ impl<'p> VM<'p> {
                                     self.env.set(k, new.into());
                                 }
                                 self.env.set(val, list[new as usize].clone());
-                                self.stack.push(list.into());
-                                self.stack.push(new.into());
+                                self.push(list);
+                                self.push(new);
                             } else {
                                 return error!("expected Number on top of stack");
                             }
                         }
-                        Value::Map(_map) => unimplemented!(),
-                        Value::String(_s) => unimplemented!(),
+                        Value::Map(map) => {
+                            if let Some(fst) = map.keys().next() {
+                                if let Some(k) = key {
+                                    self.env.set(k, fst.into());
+                                }
+                                self.env
+                                    .set(val, map.get(fst).unwrap_or(&Value::None).clone());
+                                let fst = Value::from(fst);
+                                self.push(map);
+                                self.push(fst);
+                            }
+                        }
+                        Value::String(s) => {
+                            let next = s;
+                            if let Value::Map(map) = self.pop_stack() {
+                                if let Some((keyname, v)) = map.range(..next).next() {
+                                    let keyname = Value::from(keyname);
+                                    if let Some(k) = key {
+                                        self.env.set(k, keyname.clone());
+                                    }
+                                    self.env.set(val, v.clone());
+                                    self.push(map);
+                                    self.push(keyname);
+                                }
+                            } else {
+                                return error!("expected String on top of stack");
+                            }
+                        }
                         _ => return error!("can only loop over List or Map, got {:?}", iter),
                     }
                 }
                 Code::Lookup(name) => {
                     if let Some(v) = self.env.lookup(name) {
-                        self.stack.push(v.clone());
+                        self.push(v.clone());
                     }
                     self.ip += 1;
                 }
@@ -145,7 +175,8 @@ impl<'p> VM<'p> {
                     let args = args.into_iter().rev().collect::<Vec<_>>();
                     if let Some(Value::Fn(f)) = self.env.lookup(name) {
                         self.calls.push(self.ip + 1);
-                        self.stack.push(f(&mut self.env, &args));
+                        let retval = f(&mut self.env, &args);
+                        self.push(retval);
                     } else {
                         return error!("can't find fn named {}", name);
                     }

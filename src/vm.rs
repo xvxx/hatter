@@ -164,6 +164,8 @@ impl<'p> VM<'p> {
                     if let Some(v) = self.env.lookup(name) {
                         let v = v.clone();
                         self.push(v);
+                    } else {
+                        self.push(name);
                     }
                     self.ip += 1;
                 }

@@ -11,6 +11,7 @@ pub enum Code {
     Decr(String),
     Push(Value),
     Print(Value),
+    PrintVar(String),
     PrintPop,
     Pop,
     Lookup(String),
@@ -57,11 +58,7 @@ fn compile_stmt(expr: &Expr) -> Result<Vec<Code>> {
         Word(word) => match word.as_ref() {
             "break" => vec![Code::Break],
             "continue" => vec![Code::Continue],
-            _ => {
-                let mut inst = compile_expr(expr)?;
-                inst.push(Code::PrintPop);
-                inst
-            }
+            _ => vec![Code::PrintVar(word.clone())],
         },
         Call(..) => {
             let mut inst = compile_expr(expr)?;

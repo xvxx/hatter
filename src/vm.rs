@@ -137,6 +137,14 @@ impl VM {
                     }
                 }
                 Code::Loop(key, val) => self.do_loop(key, val)?,
+                Code::PrintVar(name) => {
+                    if let Some(v) = self.lookup(name) {
+                        println!("{}", v);
+                    } else {
+                        println!("{}", name);
+                    }
+                    self.ip += 1;
+                }
                 Code::Lookup(name) => {
                     if let Some(v) = self.lookup(name) {
                         let v = v.clone();

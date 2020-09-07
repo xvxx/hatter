@@ -1,3 +1,12 @@
 <#list>
+    <h2> List
     for i in abc
         <.item> i
+
+<#index>
+    <h2> List w/ indices
+    for i, v in abc
+        <.item>
+            i
+            ": "
+            v

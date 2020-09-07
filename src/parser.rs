@@ -281,6 +281,7 @@ impl Parser {
 
         let word = self.expect(Syntax::Word)?.to_string();
         if self.peek_is(Syntax::Special(',')) {
+            self.next();
             key = Some(word);
             val = self.next().to_string();
         } else {

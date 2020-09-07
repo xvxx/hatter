@@ -62,7 +62,7 @@ impl VM {
 
     fn run(&mut self, inst: Vec<Code>) -> Result<()> {
         while let Some(inst) = inst.get(self.ip) {
-            // println!(">> VM: {:?}", inst);
+            // println!("\n>> VM: {:?}\nSTACK: {:?}\n", inst, self.stack);
             match inst {
                 Code::Debug(..) => self.ip += 1,
                 Code::Noop => self.ip += 1,

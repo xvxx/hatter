@@ -105,6 +105,9 @@ impl<'p> VM<'p> {
                         return error!("ShouldLoop expected Number at top of stack");
                     }
                 }
+                Code::Break | Code::Continue => {
+                    return error!("Break and Continue should be handled in the compiler")
+                }
                 Code::Loop(key, val) => {
                     let iter = self.pop_stack();
                     match iter {

@@ -138,6 +138,7 @@ impl VM {
                     }
                 }
                 Code::InitLoop => self.init_loop()?,
+                Code::EndLoop => self.end_loop()?,
                 Code::Loop(key, val) => self.do_loop(key, val)?,
                 Code::PrintVar(name) => {
                     if let Some(v) = self.lookup(name) {
@@ -189,15 +190,23 @@ impl VM {
         Ok(())
     }
 
+    fn end_loop(&mut self) -> Result<()> {
+        self.ip += 1;
+        self.pop_stack(); // pop counter
+        self.pop_stack(); // pop iterator/list
+        self.envs.pop();
+        Ok(())
+    }
+
     fn init_loop(&mut self) -> Result<()> {
         self.ip += 1;
+        self.envs.push(Env::new());
         let iter = self.pop_stack();
         match iter {
             Value::List(list) => {
                 self.push(list);
                 self.push(0);
             }
-
             Value::Map(map) => {
                 if let Some(fst) = map.keys().next() {
                     let fst = Value::from(fst);
@@ -205,7 +214,6 @@ impl VM {
                     self.push(fst);
                 }
             }
-
             _ => return error!("can only loop over List or Map, got {:?}", iter),
         }
         Ok(())

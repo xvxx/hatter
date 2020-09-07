@@ -23,6 +23,7 @@ pub enum Code {
     JumpIfTrue(isize),
     JumpIfFalse(isize),
     InitLoop,
+    EndLoop,
     Loop(Option<String>, String),
     TestShouldLoop,
     Break,
@@ -111,13 +112,12 @@ fn compile_stmt(expr: &Expr) -> Result<Vec<Code>> {
                 })
                 .collect::<Vec<_>>();
             inst.append(&mut expr); // push list
-            inst.push(Code::PushEnv);
             inst.push(Code::InitLoop);
             inst.push(Code::Loop(key.clone(), val.clone())); // setup loop over list
             inst.append(&mut body); // run code
             inst.push(Code::TestShouldLoop);
             inst.push(Code::JumpIfTrue(-(body_len + 2)));
-            inst.push(Code::PopEnv);
+            inst.push(Code::EndLoop);
             inst
         }
         Tag(tag) => compile_tag(tag)?,

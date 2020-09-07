@@ -157,7 +157,8 @@ impl<'p> VM<'p> {
                 }
                 Code::Lookup(name) => {
                     if let Some(v) = self.env.lookup(name) {
-                        self.push(v.clone());
+                        let v = v.clone();
+                        self.push(v);
                     }
                     self.ip += 1;
                 }

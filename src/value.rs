@@ -32,6 +32,14 @@ impl fmt::Debug for Value {
 }
 
 impl Value {
+    pub fn to_bool(&self) -> bool {
+        match self {
+            Value::None => false,
+            Value::Bool(b) => *b,
+            _ => true,
+        }
+    }
+
     pub fn to_string(&self) -> String {
         use Value::*;
         match self {

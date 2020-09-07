@@ -21,8 +21,8 @@ _**Hatter** is a positively mad HTML templating language._
 - [x] if
   - [x] else
   - [ ] else ifs
-- [ ] for v in list
-  - [ ] for k, v in map
+- [x] for v in list
+  - [x] for k, v in map
   - [ ] break
   - [ ] continue
 - [ ] \<style> tag

@@ -1,4 +1,7 @@
-use {crate::Env, std::collections::HashMap};
+use {
+    crate::Env,
+    std::{collections::HashMap, fmt},
+};
 
 pub type HatterFn = fn(&mut Env, &[Value]) -> Value;
 
@@ -103,6 +106,18 @@ impl From<i32> for Value {
 
 impl From<&i32> for Value {
     fn from(item: &i32) -> Self {
+        Value::from(*item)
+    }
+}
+
+impl From<f64> for Value {
+    fn from(item: f64) -> Self {
+        Value::Number(item.into())
+    }
+}
+
+impl From<&f64> for Value {
+    fn from(item: &f64) -> Self {
         Value::from(*item)
     }
 }

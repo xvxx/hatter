@@ -15,7 +15,7 @@ mod scanner;
 mod tag;
 mod token;
 mod value;
-mod vm;
+pub mod vm;
 
 pub use {
     ast::AST,

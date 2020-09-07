@@ -1,5 +1,5 @@
 use {
-    hatter::{compile, eval, parse, scan, Compiled, TokenStream, AST},
+    hatter::{compile, parse, scan, vm, Compiled, TokenStream, AST},
     std::{env, io},
 };
 

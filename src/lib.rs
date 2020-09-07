@@ -20,7 +20,7 @@ mod vm;
 pub use {
     ast::AST,
     builtins::builtins,
-    compiler::{compile, Compiled},
+    compiler::{compile, Code, Compiled},
     env::Env,
     error::{print_error, Error},
     eval::eval,
@@ -30,7 +30,6 @@ pub use {
     tag::Tag,
     token::{Syntax, Token, TokenStream},
     value::{HatterFn, Value},
-    vm::Code,
 };
 
 pub type Result<T> = std::result::Result<T, Error>;

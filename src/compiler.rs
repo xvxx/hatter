@@ -13,7 +13,7 @@ pub enum Code {
     JumpBy(usize),
     JumpIfTrue(usize),
     JumpIfFalse(usize),
-    Call(String),
+    Call(String, usize),
     Print,
     Exit,
     Return,
@@ -75,7 +75,7 @@ fn compile_stmt(expr: &Expr) -> Result<Vec<Code>> {
                 let mut e = compile_expr(expr)?;
                 inst.append(&mut e);
             }
-            inst.push(Code::Call(name.to_string()));
+            inst.push(Code::Call(name.to_string(), args.len()));
             inst
         }
         If(conds) => {
@@ -102,9 +102,10 @@ fn compile_stmt(expr: &Expr) -> Result<Vec<Code>> {
             }
 
             inst
-        } // Tag(Tag),
-          // If(Vec<(Expr, Vec<Expr>)>),
-          // For(Option<String>, String, Box<Expr>, Vec<Expr>), // key, val, iter, body
+        }
+        _ => unimplemented!(),
+        // Tag(Tag),
+        // For(Option<String>, String, Box<Expr>, Vec<Expr>), // key, val, iter, body
     })
 }
 
@@ -125,5 +126,6 @@ fn compile_expr(expr: &Expr) -> Result<Vec<Code>> {
         Bool(b) => vec![Code::Push(b.into())],
         Number(n) => vec![Code::Push(n.into())],
         String(s) => vec![Code::Push(s.into())],
+        _ => unimplemented!(),
     })
 }

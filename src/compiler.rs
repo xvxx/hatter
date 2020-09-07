@@ -5,10 +5,13 @@ use {
 
 #[derive(Debug)]
 pub enum Code {
+    Debug(String),
     Noop,
     Incr(String),
     Decr(String),
     Push(Value),
+    Print(Value),
+    PrintPop,
     Pop,
     Lookup(String),
     Set(String),
@@ -17,9 +20,8 @@ pub enum Code {
     JumpIfTrue(isize),
     JumpIfFalse(isize),
     Loop(Option<String>, String),
-    ShouldLoop,
+    TestShouldLoop,
     Call(String, usize),
-    Print,
     Exit,
     Return,
 }
@@ -47,9 +49,12 @@ fn compile_stmt(expr: &Expr) -> Result<Vec<Code>> {
 
     Ok(match expr {
         None => vec![],
-        Bool(..) | Number(..) | String(..) | Word(..) | Call(..) => {
+        Bool(b) => vec![Code::Print(b.into())],
+        Number(n) => vec![Code::Print(n.into())],
+        String(s) => vec![Code::Print(s.into())],
+        Word(..) | Call(..) => {
             let mut inst = compile_expr(expr)?;
-            inst.push(Code::Print);
+            inst.push(Code::PrintPop);
             inst
         }
         If(conds) => {
@@ -60,7 +65,7 @@ fn compile_stmt(expr: &Expr) -> Result<Vec<Code>> {
                 let mut test = compile_expr(test)?;
                 let mut body = compile_stmts(body)?;
                 inst.append(&mut test);
-                inst.push(Code::JumpIfFalse(body.len() as isize));
+                inst.push(Code::JumpIfFalse(1 + body.len() as isize));
                 inst.append(&mut body);
 
                 // save this location to rewrite later
@@ -83,11 +88,12 @@ fn compile_stmt(expr: &Expr) -> Result<Vec<Code>> {
             let mut inst = vec![];
             let mut expr = compile_expr(iter)?;
             let mut body = compile_stmts(body)?;
+            let body_len = body.len() as isize;
             inst.append(&mut expr); // push list
             inst.push(Code::Loop(key.clone(), val.clone())); // setup loop over list
             inst.append(&mut body); // run code
-            inst.push(Code::ShouldLoop);
-            inst.push(Code::JumpIfTrue(-(body.len() as isize)));
+            inst.push(Code::TestShouldLoop);
+            inst.push(Code::JumpIfTrue(-(body_len + 1)));
             inst
         }
         Tag(tag) => compile_tag(tag)?,
@@ -132,20 +138,19 @@ fn compile_tag(tag: &Tag) -> Result<Vec<Code>> {
     if tag.is_closed() {
         out.push('/');
         out.push('>');
-        return Ok(vec![Code::Push(out.into()), Code::Print]);
+        return Ok(vec![Code::Print(out.into())]);
     } else {
         out.push('>');
     }
 
-    let mut inst = vec![Code::Push(out.into()), Code::Print];
+    let mut inst = vec![Code::Print(out.into())];
 
     if !tag.contents.is_empty() {
         let mut body = compile_stmts(&tag.contents)?;
         inst.append(&mut body);
     }
 
-    inst.push(Code::Push(format!("</{}>", tag.tag).into()));
-    inst.push(Code::Print);
+    inst.push(Code::Print(format!("</{}>", tag.tag).into()));
 
     Ok(inst)
 }

@@ -45,6 +45,7 @@ impl<'p> VM<'p> {
     fn run(&mut self, inst: Vec<Code>) -> Result<()> {
         while let Some(inst) = inst.get(self.ip) {
             match inst {
+                Code::Debug(..) => self.ip += 1,
                 Code::Noop => self.ip += 1,
                 Code::JumpTo(n) => self.ip = *n,
                 Code::JumpBy(n) => self.ip = (self.ip as isize + n) as usize,
@@ -63,7 +64,11 @@ impl<'p> VM<'p> {
                     }
                 }
                 Code::Exit => return Ok(()),
-                Code::Print => {
+                Code::Print(v) => {
+                    println!("{}", v.to_string());
+                    self.ip += 1;
+                }
+                Code::PrintPop => {
                     println!("{}", self.pop_stack().to_string());
                     self.ip += 1;
                 }
@@ -89,7 +94,7 @@ impl<'p> VM<'p> {
                     }
                     self.ip += 1;
                 }
-                Code::ShouldLoop => {
+                Code::TestShouldLoop => {
                     if let Value::Number(n) = self.pop_stack() {
                         if let Value::List(list) = self.pop_stack() {
                             self.push((n as usize) < list.len());

@@ -13,6 +13,7 @@ pub struct Env<'p> {
 impl<'p> Env<'p> {
     pub fn root() -> Env<'p> {
         let mut new = Env::new();
+        new.set("abc", vec!["a", "b", "c"]);
         new.builtins = builtins();
         new
     }

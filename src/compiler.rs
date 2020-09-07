@@ -113,7 +113,7 @@ fn compile_stmt(expr: &Expr) -> Result<Vec<Code>> {
             inst.push(Code::Loop(key.clone(), val.clone())); // setup loop over list
             inst.append(&mut body); // run code
             inst.push(Code::TestShouldLoop);
-            inst.push(Code::JumpIfTrue(-(body_len + 1)));
+            inst.push(Code::JumpIfTrue(-(body_len + 2)));
             inst
         }
         Tag(tag) => compile_tag(tag)?,

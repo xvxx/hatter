@@ -44,6 +44,7 @@ impl<'p> VM<'p> {
 
     fn run(&mut self, inst: Vec<Code>) -> Result<()> {
         while let Some(inst) = inst.get(self.ip) {
+            // println!(">> VM: {:?}", inst);
             match inst {
                 Code::Debug(..) => self.ip += 1,
                 Code::Noop => self.ip += 1,
@@ -95,20 +96,31 @@ impl<'p> VM<'p> {
                     self.ip += 1;
                 }
                 Code::TestShouldLoop => {
+                    self.ip += 1;
                     if let Value::Number(n) = self.pop_stack() {
                         if let Value::List(list) = self.pop_stack() {
-                            self.push((n as usize) < list.len());
+                            let len = list.len();
+                            self.push(list);
+                            self.push(1.0 + n);
+                            self.push((1 + n as usize) < len);
                         } else {
-                            return error!("ShouldLoop expected List at -2 of stack");
+                            return error!(
+                                "TestShouldLoop expected List at -2 of stack, stack: {:?}",
+                                self.stack
+                            );
                         }
                     } else {
-                        return error!("ShouldLoop expected Number at top of stack");
+                        return error!(
+                            "TestShouldLoop expected Number at top of stack, stack: {:?}",
+                            self.stack
+                        );
                     }
                 }
                 Code::Break | Code::Continue => {
                     return error!("Break and Continue should be handled in the compiler")
                 }
                 Code::Loop(key, val) => {
+                    self.ip += 1;
                     let iter = self.pop_stack();
                     match iter {
                         Value::List(list) => {
@@ -120,14 +132,13 @@ impl<'p> VM<'p> {
                             self.push(0);
                         }
                         Value::Number(n) => {
-                            let new = n + 1.0;
                             if let Value::List(list) = self.pop_stack() {
                                 if let Some(k) = key {
-                                    self.env.set(k, new);
+                                    self.env.set(k, n);
                                 }
-                                self.env.set(val, list[new as usize].clone());
+                                self.env.set(val, list[n as usize].clone());
                                 self.push(list);
-                                self.push(new);
+                                self.push(n);
                             } else {
                                 return error!("expected Number on top of stack");
                             }

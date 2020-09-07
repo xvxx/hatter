@@ -6,6 +6,39 @@ use {
 pub fn builtins() -> HashMap<String, Builtin> {
     let mut map: HashMap<String, Builtin> = HashMap::new();
 
+    fn eq(_: &mut VM, args: &[Value]) -> Value {
+        if let Some(val) = args.get(0) {
+            match val {
+                Value::None => match args.get(1) {
+                    Some(Value::None) => true,
+                    _ => false,
+                },
+                Value::Bool(b1) => match args.get(1) {
+                    Some(Value::Bool(b2)) => b1 == b2,
+                    _ => false,
+                },
+                Value::Number(n1) => match args.get(1) {
+                    Some(Value::Number(n2)) => n1 == n2,
+                    _ => false,
+                },
+                Value::String(s1) => match args.get(1) {
+                    Some(Value::String(s2)) => s1 == s2,
+                    _ => false,
+                },
+                _ => false,
+            }
+            .into()
+        } else {
+            Value::None
+        }
+    }
+    fn neq(vm: &mut VM, args: &[Value]) -> Value {
+        match eq(vm, args) {
+            Value::Bool(b) => !b,
+            _ => false,
+        }
+        .into()
+    }
     fn not(_: &mut VM, args: &[Value]) -> Value {
         if let Some(val) = args.get(0) {
             match val {
@@ -101,6 +134,8 @@ pub fn builtins() -> HashMap<String, Builtin> {
         }
     }
 
+    map.insert("eq".to_string(), not);
+    map.insert("neq".to_string(), not);
     map.insert("not".to_string(), not);
     map.insert("add".to_string(), add);
     map.insert("sub".to_string(), sub);

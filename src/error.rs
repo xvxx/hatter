@@ -55,9 +55,10 @@ macro_rules! scan_error {
 
 /// Convenient way to create an Err(Error{}).
 macro_rules! error {
-    ($msg:expr) => {
-        line_error!(0, 0, $msg)
-    };
+    ($msg:expr) => {{
+        use crate::Error;
+        Err(Error::new($msg.into(), 0, 0))
+    }};
     ($msg:expr, $($args:expr),*) => {
         error!(format!($msg, $($args),*));
     };

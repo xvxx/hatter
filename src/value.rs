@@ -11,13 +11,17 @@ pub enum Value {
     Fn(HatterFn),
     List(Vec<Value>),
     Map(HashMap<String, Value>),
+
+    // flow
+    Break,
+    Continue,
 }
 
 impl Value {
     pub fn to_string(&self) -> String {
         use Value::*;
         match self {
-            None => "".to_string(),
+            None | Break | Continue => "".to_string(),
             Bool(b) => b.to_string(),
             Number(num) => format!("{}", num),
             String(s) => s.clone(),
@@ -37,6 +41,8 @@ impl Value {
             Fn(..) => "Fn",
             List(..) => "List",
             Map(..) => "Map",
+            Break => "Break",
+            Continue => "Continue",
         }
     }
 }

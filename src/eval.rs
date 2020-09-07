@@ -62,6 +62,9 @@ fn eval_exprs(env: &mut Env, exprs: &[Expr]) -> Result<Value> {
     let mut ret = Value::None;
     for expr in exprs {
         ret = eval_expr(env, expr)?;
+        if let Value::Break = ret {
+            break;
+        }
     }
     Ok(ret)
 }
@@ -76,7 +79,9 @@ fn eval_expr(env: &mut Env, expr: &Expr) -> Result<Value> {
         Number(n) => Value::Number(*n),
         String(n) => Value::String(n.clone()),
         Word(word) => {
-            if let Some(val) = env.lookup(word) {
+            if word == "break" {
+                return Ok(Value::Break);
+            } else if let Some(val) = env.lookup(word) {
                 val.clone()
             } else {
                 eprintln!("<undefined word: {}>", word); // TODO
@@ -89,13 +94,22 @@ fn eval_expr(env: &mut Env, expr: &Expr) -> Result<Value> {
                 Value::List(list) => {
                     let mut scope = Env::from(env);
                     let mut ret = vec![];
-                    for (i, v) in list.iter().enumerate() {
+                    'for_list: for (i, v) in list.iter().enumerate() {
                         scope.set(val, v.clone());
                         if let Some(k) = key {
                             scope.set(k, Value::from(i));
                         }
                         for expr in body {
-                            ret.push(eval_expr(&mut scope, expr)?);
+                            println!("{:?}", expr);
+                            match eval_expr(&mut scope, expr)? {
+                                Value::Break => {
+                                    println!("BREAKING!");
+                                    break 'for_list;
+                                }
+                                r @ _ => {
+                                    ret.push(r);
+                                },
+                            }
                         }
                     }
                     ret.join("\n")
@@ -103,13 +117,16 @@ fn eval_expr(env: &mut Env, expr: &Expr) -> Result<Value> {
                 Value::Map(map) => {
                     let mut scope = Env::from(env);
                     let mut ret = vec![];
-                    for (k, v) in map {
+                    'for_map: for (k, v) in map {
                         scope.set(val, v.clone());
                         if let Some(var) = key {
                             scope.set(var, Value::from(k));
                         }
                         for expr in body {
-                            ret.push(eval_expr(&mut scope, expr)?);
+                            match eval_expr(&mut scope, expr)? {
+                                Value::Break => break 'for_map,
+                                r @ _ => ret.push(r),
+                            }
                         }
                     }
                     ret.join("\n")

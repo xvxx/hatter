@@ -20,6 +20,7 @@ pub enum Code {
     JumpBy(isize),
     JumpIfTrue(isize),
     JumpIfFalse(isize),
+    InitLoop,
     Loop(Option<String>, String),
     TestShouldLoop,
     Break,
@@ -107,6 +108,7 @@ fn compile_stmt(expr: &Expr) -> Result<Vec<Code>> {
                 })
                 .collect::<Vec<_>>();
             inst.append(&mut expr); // push list
+            inst.push(Code::InitLoop);
             inst.push(Code::Loop(key.clone(), val.clone())); // setup loop over list
             inst.append(&mut body); // run code
             inst.push(Code::TestShouldLoop);

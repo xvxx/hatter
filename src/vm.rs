@@ -137,6 +137,7 @@ impl VM {
                         );
                     }
                 }
+                Code::InitLoop => self.init_loop()?,
                 Code::Loop(key, val) => self.do_loop(key, val)?,
                 Code::PrintVar(name) => {
                     if let Some(v) = self.lookup(name) {
@@ -180,18 +181,32 @@ impl VM {
         Ok(())
     }
 
-    fn do_loop(&mut self, key: &Option<String>, val: &str) -> Result<()> {
+    fn init_loop(&mut self) -> Result<()> {
         self.ip += 1;
         let iter = self.pop_stack();
         match iter {
             Value::List(list) => {
-                if let Some(k) = key {
-                    self.set(k, 0);
-                }
-                self.set(val, list[0].clone());
                 self.push(list);
                 self.push(0);
             }
+
+            Value::Map(map) => {
+                if let Some(fst) = map.keys().next() {
+                    let fst = Value::from(fst);
+                    self.push(map);
+                    self.push(fst);
+                }
+            }
+
+            _ => return error!("can only loop over List or Map, got {:?}", iter),
+        }
+        Ok(())
+    }
+
+    fn do_loop(&mut self, key: &Option<String>, val: &str) -> Result<()> {
+        self.ip += 1;
+        let iter = self.pop_stack();
+        match iter {
             Value::Number(n) => {
                 if let Value::List(list) = self.pop_stack() {
                     if let Some(k) = key {
@@ -202,17 +217,6 @@ impl VM {
                     self.push(n);
                 } else {
                     return error!("expected Number on top of stack, stack: {:?}", self.stack);
-                }
-            }
-            Value::Map(map) => {
-                if let Some(fst) = map.keys().next() {
-                    if let Some(k) = key {
-                        self.set(k, fst);
-                    }
-                    self.set(val, map.get(fst).unwrap_or(&Value::None).clone());
-                    let fst = Value::from(fst);
-                    self.push(map);
-                    self.push(fst);
                 }
             }
             Value::String(s) => {

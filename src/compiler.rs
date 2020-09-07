@@ -105,7 +105,7 @@ fn compile_stmt(expr: &Expr) -> Result<Vec<Code>> {
                 .into_iter()
                 .enumerate()
                 .map(|(i, code)| match code {
-                    Code::Break => Code::JumpBy(body_len - i as isize),
+                    Code::Break => Code::JumpBy(2 + body_len - i as isize),
                     Code::Continue => Code::JumpBy(-(i as isize)),
                     _ => code,
                 })

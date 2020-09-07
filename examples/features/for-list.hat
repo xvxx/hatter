@@ -3,3 +3,4 @@
     for v in abc
         <.item> v
         <hr/>
+    leaky? <i> v

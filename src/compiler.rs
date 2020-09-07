@@ -21,6 +21,8 @@ pub enum Code {
     JumpIfFalse(isize),
     Loop(Option<String>, String),
     TestShouldLoop,
+    Break,
+    Continue,
     Call(String, usize),
     Exit,
     Return,
@@ -52,7 +54,16 @@ fn compile_stmt(expr: &Expr) -> Result<Vec<Code>> {
         Bool(b) => vec![Code::Print(b.into())],
         Number(n) => vec![Code::Print(n.into())],
         String(s) => vec![Code::Print(s.into())],
-        Word(..) | Call(..) => {
+        Word(word) => match word.as_ref() {
+            "break" => vec![Code::Break],
+            "continue" => vec![Code::Continue],
+            _ => {
+                let mut inst = compile_expr(expr)?;
+                inst.push(Code::PrintPop);
+                inst
+            }
+        },
+        Call(..) => {
             let mut inst = compile_expr(expr)?;
             inst.push(Code::PrintPop);
             inst
@@ -89,6 +100,15 @@ fn compile_stmt(expr: &Expr) -> Result<Vec<Code>> {
             let mut expr = compile_expr(iter)?;
             let mut body = compile_stmts(body)?;
             let body_len = body.len() as isize;
+            body = body
+                .into_iter()
+                .enumerate()
+                .map(|(i, code)| match code {
+                    Code::Break => Code::JumpBy(body_len - i as isize),
+                    Code::Continue => Code::JumpBy(-(i as isize)),
+                    _ => code,
+                })
+                .collect::<Vec<_>>();
             inst.append(&mut expr); // push list
             inst.push(Code::Loop(key.clone(), val.clone())); // setup loop over list
             inst.append(&mut body); // run code

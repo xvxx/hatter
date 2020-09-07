@@ -32,6 +32,10 @@ impl<'p> Env<'p> {
         new
     }
 
+    pub fn set<S: AsRef<str>>(&mut self, key: S, val: Value) {
+        self.env.insert(key.as_ref().to_string(), val);
+    }
+
     pub fn putc(&mut self, c: char) {
         self.out.push(c);
     }

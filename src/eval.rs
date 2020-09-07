@@ -3,8 +3,24 @@ use {
     std::collections::HashMap,
 };
 
+trait JoinValues {
+    fn join<S: AsRef<str>>(&self, joiner: S) -> Value;
+}
+
+impl JoinValues for Vec<Value> {
+    fn join<S: AsRef<str>>(&self, joiner: S) -> Value {
+        Value::String(
+            self.iter()
+                .map(|v| v.to_string())
+                .collect::<Vec<_>>()
+                .join(joiner.as_ref()),
+        )
+    }
+}
+
 pub fn eval(ast: AST) -> Result<String> {
     let mut env = Env::root();
+    env.set("abc", Value::from(vec!["one", "two", "three"]));
     let mut auto_html = false;
 
     // If the first tag is <head>, add doctype and <html>
@@ -54,7 +70,7 @@ fn eval_expr(env: &mut Env, expr: &Expr) -> Result<Value> {
     use Expr::*;
 
     Ok(match expr {
-        None | For => unimplemented!(),
+        None => unimplemented!(),
         Tag(tag) => eval_tag(env, tag)?,
         Bool(b) => Value::Bool(*b),
         Number(n) => Value::Number(*n),
@@ -67,18 +83,57 @@ fn eval_expr(env: &mut Env, expr: &Expr) -> Result<Value> {
                 Value::String(word.clone())
             }
         }
+        For(key, val, iter, body) => {
+            let iter = eval_expr(env, iter)?;
+            match iter {
+                Value::List(list) => {
+                    let mut scope = Env::from(env);
+                    let mut ret = vec![];
+                    for (i, v) in list.iter().enumerate() {
+                        scope.set(val, v.clone());
+                        if let Some(k) = key {
+                            scope.set(k, Value::from(i));
+                        }
+                        for expr in body {
+                            ret.push(eval_expr(&mut scope, expr)?);
+                        }
+                    }
+                    ret.join("\n")
+                }
+                Value::Map(map) => {
+                    let mut scope = Env::from(env);
+                    let mut ret = vec![];
+                    for (k, v) in map {
+                        scope.set(val, v.clone());
+                        if let Some(var) = key {
+                            scope.set(var, Value::from(k));
+                        }
+                        for expr in body {
+                            ret.push(eval_expr(&mut scope, expr)?);
+                        }
+                    }
+                    ret.join("\n")
+                }
+                _ => {
+                    println!(">> GOT: {:?}", iter.typename());
+                    unimplemented!();
+                }
+            }
+        }
         If(conds) => {
-            let mut ret = Value::None;
+            let mut ret = vec![];
             for (test, body) in conds {
                 match eval_expr(env, test)? {
                     Value::Bool(false) | Value::None => {}
                     _ => {
-                        ret = eval_exprs(env, body)?;
+                        for expr in body {
+                            ret.push(eval_expr(env, expr)?);
+                        }
                         break;
                     }
                 }
             }
-            ret
+            ret.join("\n")
         }
         Call(name, args) => {
             let mut evaled_args = vec![];

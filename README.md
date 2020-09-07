@@ -23,6 +23,8 @@ _**Hatter** is a positively mad HTML templating language._
   - [ ] else ifs
 - [ ] for v in list
   - [ ] for k, v in map
+  - [ ] break
+  - [ ] continue
 - [ ] \<style> tag
 - [ ] string interpolation
 - [ ] shortcut interpolation

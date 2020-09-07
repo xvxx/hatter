@@ -1,6 +1,6 @@
 use {
     crate::Env,
-    std::{collections::HashMap, fmt},
+    std::{collections::BTreeMap, fmt},
 };
 
 pub type HatterFn = fn(&mut Env, &[Value]) -> Value;
@@ -13,7 +13,7 @@ pub enum Value {
     String(String),
     Fn(HatterFn),
     List(Vec<Value>),
-    Map(HashMap<String, Value>),
+    Map(BTreeMap<String, Value>),
 }
 
 impl fmt::Debug for Value {
@@ -190,15 +190,15 @@ impl From<Vec<i32>> for Value {
     }
 }
 
-impl From<HashMap<String, Value>> for Value {
-    fn from(map: HashMap<String, Value>) -> Self {
+impl From<BTreeMap<String, Value>> for Value {
+    fn from(map: BTreeMap<String, Value>) -> Self {
         Value::Map(map)
     }
 }
 
-impl From<HashMap<String, &str>> for Value {
-    fn from(map: HashMap<String, &str>) -> Self {
-        let mut new = HashMap::new();
+impl From<BTreeMap<String, &str>> for Value {
+    fn from(map: BTreeMap<String, &str>) -> Self {
+        let mut new = BTreeMap::new();
         for (k, v) in map {
             new.insert(k, val(v));
         }
@@ -206,9 +206,9 @@ impl From<HashMap<String, &str>> for Value {
     }
 }
 
-impl From<HashMap<&str, &str>> for Value {
-    fn from(map: HashMap<&str, &str>) -> Self {
-        let mut new = HashMap::new();
+impl From<BTreeMap<&str, &str>> for Value {
+    fn from(map: BTreeMap<&str, &str>) -> Self {
+        let mut new = BTreeMap::new();
         for (k, v) in map {
             new.insert(k.to_string(), val(v));
         }
@@ -216,9 +216,9 @@ impl From<HashMap<&str, &str>> for Value {
     }
 }
 
-impl From<HashMap<&str, i32>> for Value {
-    fn from(map: HashMap<&str, i32>) -> Self {
-        let mut new = HashMap::new();
+impl From<BTreeMap<&str, i32>> for Value {
+    fn from(map: BTreeMap<&str, i32>) -> Self {
+        let mut new = BTreeMap::new();
         for (k, v) in map {
             new.insert(k.into(), val(v));
         }
@@ -226,9 +226,9 @@ impl From<HashMap<&str, i32>> for Value {
     }
 }
 
-impl From<HashMap<&str, bool>> for Value {
-    fn from(map: HashMap<&str, bool>) -> Self {
-        let mut new = HashMap::new();
+impl From<BTreeMap<&str, bool>> for Value {
+    fn from(map: BTreeMap<&str, bool>) -> Self {
+        let mut new = BTreeMap::new();
         for (k, v) in map {
             new.insert(k.into(), val(v));
         }

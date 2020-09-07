@@ -1,5 +1,5 @@
 use {
-    hatter::{compile, parse, scan, vm, Compiled, TokenStream, AST},
+    hatter::{compile, parse, scan, vm, Code, TokenStream, AST},
     std::{env, io},
 };
 
@@ -55,14 +55,14 @@ fn main() -> Result<(), io::Error> {
         .map_err(|e| print_error(&path, &source, e))
         .unwrap();
     if command == "compile" {
-        print_compiled(compiled);
+        print_codes(compiled);
         return Ok(());
     }
 
-    // let out = eval(ast)
-    //     .map_err(|e| print_error(&path, &source, e))
-    //     .unwrap();
-    // println!("{}", out);
+    let out = vm::run(compiled)
+        .map_err(|e| print_error(&path, &source, e))
+        .unwrap();
+    println!("{}", out);
     Ok(())
 }
 
@@ -98,8 +98,8 @@ fn print_ast(ast: AST) {
     }
 }
 
-fn print_compiled(compiled: Compiled) {
-    for code in compiled.codes {
+fn print_codes(codes: Vec<Code>) {
+    for code in codes {
         println!("{:?}", code);
     }
 }

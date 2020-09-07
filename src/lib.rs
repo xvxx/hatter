@@ -9,7 +9,6 @@ mod ast;
 mod builtins;
 mod compiler;
 mod env;
-mod eval;
 mod expr;
 mod parser;
 mod scanner;
@@ -24,7 +23,6 @@ pub use {
     compiler::{compile, Code},
     env::Env,
     error::{print_error, Error},
-    eval::eval,
     expr::Expr,
     parser::parse,
     scanner::scan,

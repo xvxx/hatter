@@ -99,8 +99,8 @@ fn print_ast(ast: AST) {
 }
 
 fn print_codes(codes: Vec<Code>) {
-    for code in codes {
-        println!("{:?}", code);
+    for (i, code) in codes.iter().enumerate() {
+        println!("{:>04}{}{:?}", i, " ".repeat(3), code);
     }
 }
 

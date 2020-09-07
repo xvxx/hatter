@@ -3,10 +3,10 @@ use {
     std::collections::HashMap,
 };
 
-struct VM<'p> {
+struct VM {
     stack: Vec<Value>, // value stack
     calls: Vec<usize>, // call stack
-    env: Env<'p>,
+    envs: Vec<Env>,
     ip: usize,
     out: String,
     builtins: HashMap<String, fn()>,
@@ -18,13 +18,13 @@ pub fn run(inst: Vec<Code>) -> Result<String> {
     Ok(vm.out)
 }
 
-impl<'p> VM<'p> {
-    fn new() -> VM<'p> {
+impl VM {
+    fn new() -> VM {
         VM {
             ip: 0,
             stack: vec![],
             calls: vec![],
-            env: Env::root(),
+            envs: vec![],
             out: String::new(),
             builtins: HashMap::new(),
         }
@@ -40,6 +40,23 @@ impl<'p> VM<'p> {
 
     fn push<T: Into<Value>>(&mut self, v: T) {
         self.stack.push(v.into());
+    }
+
+    fn lookup(&self, key: &str) -> Option<&Value> {
+        for env in &self.envs {
+            if let Some(v) = env.get(key) {
+                return Some(v);
+            }
+        }
+        None
+    }
+
+    fn env(&mut self) -> &mut Env {
+        &mut self.envs[self.envs.len() - 1]
+    }
+
+    fn set<S: AsRef<str>, V: Into<Value>>(&mut self, key: S, val: V) {
+        self.env().set(key, val);
     }
 
     fn run(&mut self, inst: Vec<Code>) -> Result<()> {
@@ -82,16 +99,16 @@ impl<'p> VM<'p> {
                     self.ip += 1;
                 }
                 Code::Incr(name) => {
-                    if let Some(Value::Number(n)) = self.env.lookup(name) {
+                    if let Some(Value::Number(n)) = self.lookup(name) {
                         let n = *n;
-                        self.env.set(name, n + 1.0);
+                        self.set(name, n + 1.0);
                     }
                     self.ip += 1;
                 }
                 Code::Decr(name) => {
-                    if let Some(Value::Number(n)) = self.env.lookup(name) {
+                    if let Some(Value::Number(n)) = self.lookup(name) {
                         let n = *n;
-                        self.env.set(name, n - 1.0);
+                        self.set(name, n - 1.0);
                     }
                     self.ip += 1;
                 }
@@ -121,7 +138,7 @@ impl<'p> VM<'p> {
                 }
                 Code::Loop(key, val) => self.do_loop(key, val)?,
                 Code::Lookup(name) => {
-                    if let Some(v) = self.env.lookup(name) {
+                    if let Some(v) = self.lookup(name) {
                         let v = v.clone();
                         self.push(v);
                     } else {
@@ -131,7 +148,7 @@ impl<'p> VM<'p> {
                 }
                 Code::Set(name) => {
                     let val = self.pop_stack();
-                    self.env.set(name, val);
+                    self.set(name, val);
                     self.ip += 1;
                 }
                 Code::Return => self.ip = self.pop_call(),
@@ -141,9 +158,9 @@ impl<'p> VM<'p> {
                         args.push(self.pop_stack());
                     }
                     let args = args.into_iter().rev().collect::<Vec<_>>();
-                    if let Some(Value::Fn(f)) = self.env.lookup(name) {
+                    if let Some(Value::Fn(f)) = self.lookup(name) {
                         self.calls.push(self.ip + 1);
-                        let retval = f(&mut self.env, &args);
+                        let retval = f(&mut self.env(), &args);
                         self.push(retval);
                     } else {
                         return error!("can't find fn named {}", name);
@@ -160,18 +177,18 @@ impl<'p> VM<'p> {
         match iter {
             Value::List(list) => {
                 if let Some(k) = key {
-                    self.env.set(k, 0);
+                    self.set(k, 0);
                 }
-                self.env.set(val, list[0].clone());
+                self.set(val, list[0].clone());
                 self.push(list);
                 self.push(0);
             }
             Value::Number(n) => {
                 if let Value::List(list) = self.pop_stack() {
                     if let Some(k) = key {
-                        self.env.set(k, n);
+                        self.set(k, n);
                     }
-                    self.env.set(val, list[n as usize].clone());
+                    self.set(val, list[n as usize].clone());
                     self.push(list);
                     self.push(n);
                 } else {
@@ -181,10 +198,9 @@ impl<'p> VM<'p> {
             Value::Map(map) => {
                 if let Some(fst) = map.keys().next() {
                     if let Some(k) = key {
-                        self.env.set(k, fst);
+                        self.set(k, fst);
                     }
-                    self.env
-                        .set(val, map.get(fst).unwrap_or(&Value::None).clone());
+                    self.set(val, map.get(fst).unwrap_or(&Value::None).clone());
                     let fst = Value::from(fst);
                     self.push(map);
                     self.push(fst);
@@ -196,9 +212,9 @@ impl<'p> VM<'p> {
                     if let Some((keyname, v)) = map.range(..next).next() {
                         let keyname = Value::from(keyname);
                         if let Some(k) = key {
-                            self.env.set(k, keyname.clone());
+                            self.set(k, keyname.clone());
                         }
-                        self.env.set(val, v.clone());
+                        self.set(val, v.clone());
                         self.push(map);
                         self.push(keyname);
                     }

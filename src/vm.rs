@@ -78,14 +78,14 @@ impl<'p> VM<'p> {
                 Code::Incr(name) => {
                     if let Some(Value::Number(n)) = self.env.lookup(name) {
                         let n = *n;
-                        self.env.set(name, (n + 1.0).into());
+                        self.env.set(name, n + 1.0);
                     }
                     self.ip += 1;
                 }
                 Code::Decr(name) => {
                     if let Some(Value::Number(n)) = self.env.lookup(name) {
                         let n = *n;
-                        self.env.set(name, (n - 1.0).into());
+                        self.env.set(name, n - 1.0);
                     }
                     self.ip += 1;
                 }
@@ -105,7 +105,7 @@ impl<'p> VM<'p> {
                     match iter {
                         Value::List(list) => {
                             if let Some(k) = key {
-                                self.env.set(k, 0.into());
+                                self.env.set(k, 0);
                             }
                             self.env.set(val, list[0].clone());
                             self.push(list);
@@ -115,7 +115,7 @@ impl<'p> VM<'p> {
                             let new = n + 1.0;
                             if let Value::List(list) = self.pop_stack() {
                                 if let Some(k) = key {
-                                    self.env.set(k, new.into());
+                                    self.env.set(k, new);
                                 }
                                 self.env.set(val, list[new as usize].clone());
                                 self.push(list);
@@ -127,7 +127,7 @@ impl<'p> VM<'p> {
                         Value::Map(map) => {
                             if let Some(fst) = map.keys().next() {
                                 if let Some(k) = key {
-                                    self.env.set(k, fst.into());
+                                    self.env.set(k, fst);
                                 }
                                 self.env
                                     .set(val, map.get(fst).unwrap_or(&Value::None).clone());

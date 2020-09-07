@@ -6,13 +6,18 @@ use {
 #[derive(Debug)]
 pub enum Code {
     Noop,
+    Incr(String),
+    Decr(String),
     Push(Value),
     Pop,
     Lookup(String),
+    Set(String),
     JumpTo(usize),
-    JumpBy(usize),
-    JumpIfTrue(usize),
-    JumpIfFalse(usize),
+    JumpBy(isize),
+    JumpIfTrue(isize),
+    JumpIfFalse(isize),
+    Loop(Option<String>, String),
+    ShouldLoop,
     Call(String, usize),
     Print,
     Exit,
@@ -63,30 +68,21 @@ fn compile_stmt(expr: &Expr) -> Result<Vec<Code>> {
 
     Ok(match expr {
         None => vec![],
-        Bool(..) | Number(..) | String(..) => {
+        Bool(..) | Number(..) | String(..) | Call(..) => {
             let mut inst = compile_expr(expr)?;
             inst.push(Code::Print);
             inst
         }
         Word(word) => vec![Code::Lookup(word.to_string()), Code::Print],
-        Call(name, args) => {
-            let mut inst = vec![];
-            for expr in args {
-                let mut e = compile_expr(expr)?;
-                inst.append(&mut e);
-            }
-            inst.push(Code::Call(name.to_string(), args.len()));
-            inst
-        }
         If(conds) => {
             let mut inst = vec![];
             let mut ends = vec![]; // needs jump to END
 
             for (test, body) in conds {
                 let mut test = compile_expr(test)?;
-                let mut body = compile_exprs(body)?;
+                let mut body = compile_stmts(body)?;
                 inst.append(&mut test);
-                inst.push(Code::JumpIfFalse(body.len()));
+                inst.push(Code::JumpIfFalse(body.len() as isize));
                 inst.append(&mut body);
 
                 // save this location to rewrite later
@@ -98,14 +94,26 @@ fn compile_stmt(expr: &Expr) -> Result<Vec<Code>> {
             // instructions are in the `else` clauses
             let end_pos = inst.len() - 1;
             for end in ends {
-                inst[end] = Code::JumpBy(end_pos - end);
+                inst[end] = Code::JumpBy((end_pos - end) as isize);
             }
 
             inst
         }
+        // key, val, iter, body
+        // Option<String>, String, Box<Expr>, Vec<Expr>
+        For(key, val, iter, body) => {
+            let mut inst = vec![];
+            let mut expr = compile_expr(iter)?;
+            let mut body = compile_stmts(body)?;
+            inst.append(&mut expr); // push list
+            inst.push(Code::Loop(key.clone(), val.clone())); // setup loop over list
+            inst.append(&mut body); // run code
+            inst.push(Code::ShouldLoop);
+            inst.push(Code::JumpIfTrue(-(body.len() as isize)));
+            inst
+        }
         _ => unimplemented!(),
         // Tag(Tag),
-        // For(Option<String>, String, Box<Expr>, Vec<Expr>), // key, val, iter, body
     })
 }
 
@@ -126,6 +134,15 @@ fn compile_expr(expr: &Expr) -> Result<Vec<Code>> {
         Bool(b) => vec![Code::Push(b.into())],
         Number(n) => vec![Code::Push(n.into())],
         String(s) => vec![Code::Push(s.into())],
+        Call(name, args) => {
+            let mut inst = vec![];
+            for expr in args {
+                let mut e = compile_expr(expr)?;
+                inst.append(&mut e);
+            }
+            inst.push(Code::Call(name.to_string(), args.len()));
+            inst
+        }
         _ => unimplemented!(),
     })
 }

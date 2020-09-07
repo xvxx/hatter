@@ -43,17 +43,17 @@ impl<'p> VM<'p> {
             match inst {
                 Code::Noop => self.ip += 1,
                 Code::JumpTo(n) => self.ip = *n,
-                Code::JumpBy(n) => self.ip += n,
+                Code::JumpBy(n) => self.ip = (self.ip as isize + n) as usize,
                 Code::JumpIfTrue(n) => {
                     if self.pop_stack().to_bool() {
-                        self.ip += n;
+                        self.ip = (self.ip as isize + n) as usize;
                     } else {
                         self.ip += 1;
                     }
                 }
                 Code::JumpIfFalse(n) => {
                     if !self.pop_stack().to_bool() {
-                        self.ip += n;
+                        self.ip = (self.ip as isize + n) as usize;
                     } else {
                         self.ip += 1;
                     }
@@ -71,10 +71,69 @@ impl<'p> VM<'p> {
                     self.stack.pop();
                     self.ip += 1;
                 }
+                Code::Incr(name) => {
+                    if let Some(Value::Number(n)) = self.env.lookup(name) {
+                        let n = *n;
+                        self.env.set(name, (n + 1.0).into());
+                    }
+                    self.ip += 1;
+                }
+                Code::Decr(name) => {
+                    if let Some(Value::Number(n)) = self.env.lookup(name) {
+                        let n = *n;
+                        self.env.set(name, (n - 1.0).into());
+                    }
+                    self.ip += 1;
+                }
+                Code::ShouldLoop => {
+                    if let Value::Number(n) = self.pop_stack() {
+                        if let Value::List(list) = self.pop_stack() {
+                            self.stack.push(Value::from((n as usize) < list.len()));
+                        } else {
+                            return error!("ShouldLoop expected List at -2 of stack");
+                        }
+                    } else {
+                        return error!("ShouldLoop expected Number at top of stack");
+                    }
+                }
+                Code::Loop(key, val) => {
+                    let iter = self.pop_stack();
+                    match iter {
+                        Value::List(list) => {
+                            if let Some(k) = key {
+                                self.env.set(k, 0.into());
+                            }
+                            self.env.set(val, list[0].clone());
+                            self.stack.push(list.into());
+                            self.stack.push(0.into());
+                        }
+                        Value::Number(n) => {
+                            let new = n + 1.0;
+                            if let Value::List(list) = self.pop_stack() {
+                                if let Some(k) = key {
+                                    self.env.set(k, new.into());
+                                }
+                                self.env.set(val, list[new as usize].clone());
+                                self.stack.push(list.into());
+                                self.stack.push(new.into());
+                            } else {
+                                return error!("expected Number on top of stack");
+                            }
+                        }
+                        Value::Map(_map) => unimplemented!(),
+                        Value::String(_s) => unimplemented!(),
+                        _ => return error!("can only loop over List or Map, got {:?}", iter),
+                    }
+                }
                 Code::Lookup(name) => {
                     if let Some(v) = self.env.lookup(name) {
                         self.stack.push(v.clone());
                     }
+                    self.ip += 1;
+                }
+                Code::Set(name) => {
+                    let val = self.pop_stack();
+                    self.env.set(name, val);
                     self.ip += 1;
                 }
                 Code::Return => self.ip = self.pop_call(),

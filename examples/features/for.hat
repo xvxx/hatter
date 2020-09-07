@@ -19,3 +19,11 @@
             break
             <b> "ok"
         <.item> i
+
+<#continue>
+    <h2> Testing continue
+    for i, v in abc
+        if eq(i, 1)
+            continue
+            <b> "ok"
+        <.item> i

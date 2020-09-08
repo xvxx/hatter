@@ -2,7 +2,31 @@
 
 <img src="./img/rhetoric.jpg" align="right" width="350" alt="The Mad Hatter discussing Hatter" />
 
-<em>~ **Hatter** is a positively mad, HTML templating language. ~</em>
+_**Hatter** is a positively mad, HTML templating language._
+
+Hatter is a cheap knock-off of [Imba](https://imba.io), without any
+JavaScript. It runs server-side and produces static HTML, like a
+less powerful 90s-era PHP. If you're feeling adventerous, or mad as a
+hatter, you can use the standalone binary to turn templates into HTML
+files or include the zero-dependency Rust library in your (web/cli/?)
+application.
+
+Here's what it looks like:
+
+```
+<nav .webview-app=webview?>
+  <a href="/signin"> sign in
+  <a href="/signup"> sign up
+  <ul>
+  for link in nav-links
+    <li.small-link> <a href=link.href> link.text
+
+<div#main.markdown-body>
+  if logged-in?
+    <h1> Welcome back, <span.username> name </>!
+  else
+    <h1> Nice to, uh, see you. <span.aside> Have we met..?
+```
 
 ## Features
 

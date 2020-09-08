@@ -4,11 +4,17 @@
 
 _**Hatter** is a positively mad, HTML templating language._
 
-Hatter is a cheap knock-off of [Imba's](https://imba.io) syntax,
-without any of the fancy JavaScript stuff. Hatter runs server-side and
-produces static HTML, like a less powerful 90s-era PHP. If you're
-feeling adventerous, or mad as a hatter, you can use the standalone
-binary to turn templates into HTML files, or include the
+Hatter is an HTML templating language that runs server-side and
+produces static HTML. Its syntax is a cheap knock-off of
+[Imba's](https://imba.io), without including any of the JavaScript
+parts.
+
+It's like a less powerful, 90s-era PHP. But we're talking PHP/FI, none
+of that easy bake oven PHP3 stuff that you could use to build actual
+sites.
+
+If you're feeling adventerous, or mad as a hatter, you can use the
+standalone binary to turn templates into HTML files, or include the
 zero-dependency Rust library in your (web/cli/?) application.
 
 Here's what it looks like:
@@ -111,16 +117,15 @@ Here's what it looks like:
 
 ## TODO
 
-- [x] allow everything in top-level
-- [x] else ifs
-- [x] \<style> tag
-- [x] \<script> tag
 - [ ] attribute=thing?
 - [ ] string interpolation
 - [ ] operators
 - [ ] VSCode Extension
 - [ ] VSCode + luacheck-style LSP
 - [ ] bomb-ass test suite
+- [ ] stdlib
+- [ ] docs for stdlib
+- [ ] docs for how to use it
 - [ ] show error location when compiling
 - [ ] luacheck-style tool
 - [ ] <!-- html comments -->

@@ -98,7 +98,6 @@ impl Compiler {
                 let end_label = self.label("end_if");
                 let mut next_label = self.label("if_cond");
 
-                inst.push(Code::PushEnv);
                 for (test, body) in conds {
                     let mut test = self.compile_expr(test)?;
                     let mut body = self.compile_stmts(body)?;
@@ -111,7 +110,6 @@ impl Compiler {
                 }
                 inst.push(Code::Label(next_label));
                 inst.push(Code::Label(end_label));
-                inst.push(Code::PopEnv);
 
                 inst
             }

@@ -49,4 +49,8 @@ impl TokenStream {
             Some(TokenPos::new(self.tokens.get(pos)?, &self.source))
         }
     }
+
+    pub fn source(&self) -> &str {
+        &self.source
+    }
 }

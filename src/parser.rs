@@ -351,7 +351,10 @@ impl Parser {
             return Ok(Expr::Tag(tag));
         }
 
-        tag.contents = self.content()?;
+        tag.contents = match tag.tag.as_ref() {
+            "style" | "script" => vec![self.raw()?],
+            _ => self.content()?,
+        };
 
         match self.peek_kind() {
             Syntax::Special(';') => self.tags -= 1,
@@ -428,5 +431,38 @@ impl Parser {
         }
 
         Ok(tag)
+    }
+
+    /// Parse text between INDENT and DEDENT as a single string.
+    /// Mostly for <style> and <script>.
+    ///
+    /// ~ Eventually we'll want to dip into parsing <style> and adding
+    /// features there too... ~
+    fn raw(&mut self) -> Result<Expr> {
+        let mut indents = 0;
+        let tok = self.expect(Syntax::Indent)?;
+        let start = tok.pos;
+        while !self.peek_eof() {
+            match self.peek_kind() {
+                Syntax::Indent => {
+                    self.next();
+                    indents += 1;
+                }
+                Syntax::Dedent => {
+                    if indents > 0 {
+                        self.next();
+                        indents -= 1;
+                    } else {
+                        break;
+                    }
+                }
+                _ => {
+                    self.next();
+                }
+            }
+        }
+        let last = self.current();
+        let end = last.pos + last.len;
+        Ok(Expr::String(self.tokens.source()[start..end].into()))
     }
 }

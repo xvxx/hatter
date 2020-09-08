@@ -112,8 +112,8 @@ Here's what it looks like:
 ## TODO
 
 - [ ] else ifs
-- [ ] \<style> tag
-- [ ] \<script> tag
+- [x] \<style> tag
+- [x] \<script> tag
 - [ ] attribute=thing?
 - [ ] string interpolation
 - [ ] operators

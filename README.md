@@ -2,7 +2,7 @@
 
 <img src="./img/rhetoric.jpg" align="right" width="350" alt="The Mad Hatter discussing Hatter" />
 
-<em>~ **Hatter** is a positively mad HTML templating language. ~</em>
+<em>~ **Hatter** is a positively mad, HTML templating language. ~</em>
 
 ## Features
 
@@ -15,32 +15,28 @@
   - `<#main> -> <div id='main'>`
 - Auto-closing tags through indentation:
 
-```html
+```
 <ul#items>
   <li.item>
     Item 1
-    <li.item>
-      <i>
-        Item 2 <li.item> <b>Item</b> 3</li.item></i
-      ></li.item
-    ></li.item
-  ></ul#items
->
+  <li.item> <i> Item 2
+  <li.item> <b>Item</> 3
 ```
 
 - `for` loops:
 
-```html
+```
 <ul#people>
   for name in names
-  <li.person> name</li.person></ul#people
->
+    <li.person> name
 ```
 
 - `if else` statements:
 
-```html
-<div>if show-hint? <.hint> <b>Psst...</b> You can type `?` for help.</div>
+```
+<div>
+  if show-hint?
+    <.hint> <b>Psst...</> You can type `?` for help.
 ```
 
 ## TODO

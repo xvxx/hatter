@@ -27,7 +27,7 @@
 
 ```
 <div#main.markdown-body.webview-app=webview?>
-  <nav>
+  <nav .logged-in=logged-in?>
     <p>
 ```
 

@@ -66,18 +66,24 @@ impl VM {
         while let Some(inst) = inst.get(self.ip) {
             // println!("\n>> VM: {:?}\nSTACK: {:?}\n", inst, self.stack);
             match inst {
-                Code::Debug(..) => self.ip += 1,
+                Code::Break | Code::Continue => {
+                    panic!("{:?} should be handled in the compiler", inst)
+                }
+                Code::Debug(..) | Code::Label(..) => self.ip += 1,
                 Code::Noop => self.ip += 1,
-                Code::JumpTo(n) => self.ip = *n,
+                Code::JumpTo(_) | Code::JumpToIfTrue(_) | Code::JumpToIfFalse(_) => {
+                    self.ip += 1;
+                }
+                Code::Jump(n) => self.ip = *n,
                 Code::JumpBy(n) => self.ip = (self.ip as isize + n) as usize,
-                Code::JumpIfTrue(n) => {
+                Code::JumpByIfTrue(n) => {
                     if self.pop_stack().to_bool() {
                         self.ip = (self.ip as isize + n) as usize;
                     } else {
                         self.ip += 1;
                     }
                 }
-                Code::JumpIfFalse(n) => {
+                Code::JumpByIfFalse(n) => {
                     if !self.pop_stack().to_bool() {
                         self.ip = (self.ip as isize + n) as usize;
                     } else {
@@ -114,9 +120,6 @@ impl VM {
                         self.set(name, n - 1.0);
                     }
                     self.ip += 1;
-                }
-                Code::Break | Code::Continue => {
-                    return error!("Break and Continue should be handled in the compiler")
                 }
                 Code::TestShouldLoop => {
                     self.ip += 1;

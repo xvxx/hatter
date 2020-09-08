@@ -22,9 +22,10 @@ pub enum Code {
     JumpTo(String),
     JumpToIfTrue(String),
     JumpToIfFalse(String),
+    Jump(usize),
     JumpBy(isize),
-    JumpIfTrue(isize),
-    JumpIfFalse(isize),
+    JumpByIfTrue(isize),
+    JumpByIfFalse(isize),
     InitLoop,
     EndLoop,
     Loop(Option<String>, String),
@@ -62,7 +63,7 @@ impl Compiler {
             let mut ex = self.compile_stmt(expr)?;
             codes.append(&mut ex);
         }
-        Ok(codes)
+        self.reconcile_labels(codes)
     }
 
     fn compile_stmts(&mut self, exprs: &[Expr]) -> Result<Vec<Code>> {
@@ -101,12 +102,12 @@ impl Compiler {
                 for (test, body) in conds {
                     let mut test = self.compile_expr(test)?;
                     let mut body = self.compile_stmts(body)?;
-                    inst.push(Code::Label(next_label));
+                    inst.push(Code::Label(next_label.clone()));
                     next_label = self.label("if_cond");
                     inst.append(&mut test);
-                    inst.push(Code::JumpToIfFalse(next_label));
+                    inst.push(Code::JumpToIfFalse(next_label.clone()));
                     inst.append(&mut body);
-                    inst.push(Code::JumpTo(end_label));
+                    inst.push(Code::JumpTo(end_label.clone()));
                 }
                 inst.push(Code::Label(next_label));
                 inst.push(Code::Label(end_label));
@@ -125,17 +126,16 @@ impl Compiler {
                 let mut body = self
                     .compile_stmts(body)?
                     .into_iter()
-                    .enumerate()
-                    .map(|(i, code)| match code {
-                        Code::Break => Code::JumpTo(end_label),
-                        Code::Continue => Code::JumpTo(continue_label),
+                    .map(|code| match code {
+                        Code::Break => Code::JumpTo(end_label.clone()),
+                        Code::Continue => Code::JumpTo(continue_label.clone()),
                         _ => code,
                     })
                     .collect::<Vec<_>>();
 
                 inst.append(&mut expr); // push list
                 inst.push(Code::InitLoop);
-                inst.push(Code::Label(start_label));
+                inst.push(Code::Label(start_label.clone()));
                 inst.push(Code::Loop(key.clone(), val.clone())); // setup loop over list
                 inst.append(&mut body); // run code
                 inst.push(Code::Label(continue_label));
@@ -233,5 +233,40 @@ impl Compiler {
             }
             _ => panic!("don't know how to compile {:?}", expr),
         })
+    }
+
+    fn reconcile_labels(&mut self, mut codes: Vec<Code>) -> Result<Vec<Code>> {
+        let mut labels = HashMap::new();
+        let mut wants_label = vec![];
+        for (i, code) in codes.iter().enumerate() {
+            match code {
+                Code::Label(lbl) => {
+                    labels.insert(lbl.clone(), i);
+                }
+                Code::JumpTo(..) | Code::JumpToIfTrue(..) | Code::JumpToIfFalse(..) => {
+                    wants_label.push(i);
+                }
+                _ => {}
+            }
+        }
+        for idx in wants_label {
+            let new = match &codes[idx] {
+                Code::JumpTo(lbl) => {
+                    let pos = *labels.get(lbl).unwrap_or(&0) as isize;
+                    Code::JumpBy(pos - idx as isize)
+                }
+                Code::JumpToIfTrue(lbl) => {
+                    let pos = *labels.get(lbl).unwrap_or(&0) as isize;
+                    Code::JumpByIfTrue(pos - idx as isize)
+                }
+                Code::JumpToIfFalse(lbl) => {
+                    let pos = *labels.get(lbl).unwrap_or(&0) as isize;
+                    Code::JumpByIfFalse(pos - idx as isize)
+                }
+                _ => unimplemented!(),
+            };
+            codes[idx] = new;
+        }
+        Ok(codes)
     }
 }

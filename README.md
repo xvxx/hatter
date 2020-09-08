@@ -52,6 +52,7 @@
 - [ ] string interpolation
 - [ ] VSCode Extension
 - [ ] VSCode + luacheck-style LSP
+- [ ] bomb-ass test suite
 - [ ] show error location when compiling
 - [ ] luacheck-style tool
 - [ ] <!-- html comments -->

@@ -15,8 +15,6 @@ pub enum Code {
     PrintVar(String),
     PrintPop,
     Pop,
-    PushEnv,
-    PopEnv,
     Lookup(String),
     Set(String),
     JumpTo(String),

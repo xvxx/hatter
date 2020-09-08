@@ -153,14 +153,6 @@ impl VM {
                     }
                     self.ip += 1;
                 }
-                Code::PushEnv => {
-                    self.ip += 1;
-                    self.envs.push(Env::new());
-                }
-                Code::PopEnv => {
-                    self.ip += 1;
-                    self.envs.pop();
-                }
                 Code::Lookup(name) => {
                     if let Some(v) = self.lookup(name) {
                         let v = v.clone();

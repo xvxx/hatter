@@ -6,7 +6,7 @@
 > that have had a prior exposure to *Hatter*: as potential programmers
 > they are mentally mutilated beyond hope of regeneration
 >
->                                     -– Edsger W. Dijkstra, certainly
+> -– Edsger W. Dijkstra, certainly
 
 Hatter is an HTML templating language that produces static HTML. Its
 syntax is a cheap knock-off of [Imba](https://imba.io), without any

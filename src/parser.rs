@@ -311,19 +311,28 @@ impl Parser {
             vec![self.expr()?]
         };
         conds.push((test, body));
-        if self.peek_is(Syntax::Dedent) {
+        while self.peek_is(Syntax::Dedent) {
             if let Some(next) = self.peek2() {
                 if next.literal() == "else" {
-                    self.next();
-                    self.next();
+                    self.next(); // skip dedent
+                    self.next(); // skip else
+                    let mut test = Expr::Bool(true);
+                    if let Some(word) = self.peek() {
+                        if word.literal() == "if" {
+                            self.next();
+                            test = self.expr()?;
+                        }
+                    }
                     let body = if self.peek_is(Syntax::Indent) {
                         self.block()?
                     } else {
                         vec![self.expr()?]
                     };
-                    conds.push((Expr::Bool(true), body));
+                    conds.push((test, body));
+                    continue;
                 }
             }
+            break;
         }
         self.expect(Syntax::Dedent)?;
         Ok(Expr::If(conds))

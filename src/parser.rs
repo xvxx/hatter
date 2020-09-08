@@ -208,8 +208,11 @@ impl Parser {
         }
     }
 
-    /// Parse the content of a <tag>CONTENT</tag>.
-    fn content(&mut self) -> Result<Vec<Expr>> {
+    /// Parse a block of code, either:
+    /// - to the next Dedent if the next() char is an Indent
+    ///   or
+    /// - to the next ; if the next() char isn't an Indent
+    fn block(&mut self) -> Result<Vec<Expr>> {
         let mut block = vec![];
         let mut indented = false;
 
@@ -218,7 +221,7 @@ impl Parser {
             indented = true;
         }
 
-        loop {
+        while !self.peek_eof() {
             match self.peek_kind() {
                 // Tag
                 Syntax::Bracket('<') => {
@@ -272,7 +275,7 @@ impl Parser {
                 }
 
                 // Unexpected
-                _ => return Err(self.error("Tag contents")),
+                _ => return Err(self.error("Block stmt")),
             };
         }
 
@@ -302,7 +305,7 @@ impl Parser {
 
         let iter = self.expr()?;
         let body = if self.peek_is(Syntax::Indent) {
-            self.content()?
+            self.block()?
         } else {
             vec![self.expr()?]
         };
@@ -316,7 +319,7 @@ impl Parser {
         let mut conds = vec![];
         let test = self.expr()?;
         let body = if self.peek_is(Syntax::Indent) {
-            self.content()?
+            self.block()?
         } else {
             vec![self.expr()?]
         };
@@ -327,7 +330,7 @@ impl Parser {
                     self.next();
                     self.next();
                     let body = if self.peek_is(Syntax::Indent) {
-                        self.content()?
+                        self.block()?
                     } else {
                         vec![self.expr()?]
                     };
@@ -357,7 +360,7 @@ impl Parser {
 
         tag.contents = match tag.tag.as_ref() {
             "style" | "script" => vec![self.raw()?],
-            _ => self.content()?,
+            _ => self.block()?,
         };
 
         match self.peek_kind() {

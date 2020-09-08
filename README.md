@@ -43,6 +43,7 @@
 
 ## TODO
 
+- [ ] move text vs expr to parser
 - [x] if
   - [x] else
   - [ ] else ifs

@@ -9,8 +9,9 @@ mod ast;
 mod builtins;
 mod compiler;
 mod expr;
+mod lexer;
 mod parser;
-mod scanner;
+mod syntax;
 mod tag;
 mod token;
 mod value;
@@ -22,10 +23,11 @@ pub use {
     compiler::{compile, Code},
     error::{print_error, Error},
     expr::Expr,
+    lexer::scan,
     parser::parse,
-    scanner::scan,
+    syntax::Syntax,
     tag::Tag,
-    token::{Syntax, Token, TokenStream},
+    token::{Token, TokenPos, TokenStream},
     value::{Builtin, Value},
     vm::{Env, VM},
 };

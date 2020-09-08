@@ -1,7 +1,4 @@
-use crate::{
-    token::{Syntax, TokenPos, TokenStream},
-    Error, Expr, Result, Tag, AST,
-};
+use crate::{Error, Expr, Result, Syntax, Tag, TokenPos, TokenStream, AST};
 
 const STACK_SIZE: usize = 1000; // infinite loop protection
 

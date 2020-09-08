@@ -3,7 +3,7 @@ use {
     std::{iter::Peekable, str::CharIndices},
 };
 
-struct Scanner<'s> {
+struct Lexer<'s> {
     tokens: Vec<Token>,               // list we're building
     source: &'s str,                  // template source code
     pos: usize,                       // current position in `source`
@@ -16,16 +16,16 @@ struct Scanner<'s> {
 /// Scans source code and produces a `TokenStream`.
 pub fn scan<S: AsRef<str>>(source: S) -> Result<TokenStream> {
     let source = source.as_ref();
-    let mut scanner = Scanner::from(source);
-    scanner.scan()?;
-    let tokens = scanner.tokens;
+    let mut lexer = Lexer::from(source);
+    lexer.scan()?;
+    let tokens = lexer.tokens;
     Ok(TokenStream::from(source.to_string(), tokens))
 }
 
-impl<'s> Scanner<'s> {
-    /// Create a scanner from source code.
-    fn from(source: &'s str) -> Scanner<'s> {
-        Scanner {
+impl<'s> Lexer<'s> {
+    /// Create a lexer from source code.
+    fn from(source: &'s str) -> Lexer<'s> {
+        Lexer {
             source,
             tokens: vec![],
             chars: source.char_indices().peekable(),

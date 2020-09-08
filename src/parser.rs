@@ -233,7 +233,7 @@ impl Parser {
                 }
 
                 // Literal
-                Syntax::String | Syntax::Text | Syntax::Number => {
+                Syntax::String | Syntax::Number => {
                     block.push(self.as_string()?);
                 }
 
@@ -263,6 +263,12 @@ impl Parser {
 
                 // pass these up the food chain
                 Syntax::Dedent | Syntax::Special(';') => break,
+
+                // probably implicit text...
+                Syntax::Special(c) => {
+                    self.next();
+                    block.push(Expr::Word(c.to_string()));
+                }
 
                 // Unexpected
                 _ => return Err(self.error("Tag contents")),

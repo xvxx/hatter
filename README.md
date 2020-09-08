@@ -7,6 +7,7 @@
 ## Features
 
 - Tag shorthands (`<div#id>`, `<div.class1.class2>`, `<input@name:type>`)
+- Conditional attributes
 - Implicit divs (`<#main>` becomes `<div id='main'>`)
 - `<html>` gets added if the first tag is `<head>`
 - Auto-closing tags through Python-ish indentation
@@ -21,6 +22,14 @@
 - `<div.class1.class2>`
 - `<input@name>`
 - `<input:type>`
+
+### Conditional attributes
+
+```
+<div#main.markdown-body.webview-app=webview?>
+  <nav>
+    <p>
+```
 
 ### Implicit divs
 

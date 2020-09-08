@@ -158,7 +158,7 @@ impl VM {
                         let v = v.clone();
                         self.push(v);
                     } else {
-                        self.push(name);
+                        return error!("can't find {}", name);
                     }
                     self.ip += 1;
                 }

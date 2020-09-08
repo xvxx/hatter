@@ -6,14 +6,28 @@
 
 ## Features
 
-- Tag shorthand:
-  - `<div#id>`
-  - `<div.class1.class2>`
-  - `<input@name>`
-  - `<input:type>`
-- Implicit div:
-  - `<#main> -> <div id='main'>`
-- Auto-closing tags through indentation:
+- Tag shorthands (`<div#id>`, `<div.class1.class2>`, `<input@name:type>`)
+- Implicit divs (`<#main>` becomes `<div id='main'>`)
+- `<html>` gets added if the first tag is `<head>`
+- Auto-closing tags through Python-ish indentation
+- `for` loops over lists and maps
+- `if else` statements
+- Call functions defined in Rust
+- Easy inline JavaScript
+
+### Tag shorthand
+
+- `<div#id>`
+- `<div.class1.class2>`
+- `<input@name>`
+- `<input:type>`
+
+### Implicit divs
+
+- `<#main> -> <div id='main'>`
+- `<html>` gets added if the first tag is `<head>`
+
+### Auto-closing tags through indentation
 
 ```
 <ul#items>
@@ -23,7 +37,7 @@
   <li.item> <b>Item</> 3
 ```
 
-- `for` loops:
+### `for` loops
 
 ```
 <ul#people>
@@ -31,7 +45,7 @@
     <li.person> name
 ```
 
-- `if else` statements:
+### `if else` statements
 
 ```
 <div>
@@ -39,6 +53,27 @@
     <.hint> <b>Psst...</> You can type `?` for help.
   else
     <p.nada> Nothing to see here.
+```
+
+### Functions defined in Rust
+
+```
+<ul>
+  <li> <b>Name:</> to-titlecase("jonny idaho")
+  <li> <b>Location:</> to-titlecase("IDAHO!")
+  <li>
+    <b>Age:
+    add(20, mul(4, 10))
+
+```
+
+### Easy inline JavaScript
+
+```
+<ul>
+    <li> <a onclick=(alert("Clicked me."))> Click me
+    <li> <a onclick=(alert("Oink!"))> 🐷
+    <li> <a onclick=(history.back())> Go back
 ```
 
 ## TODO

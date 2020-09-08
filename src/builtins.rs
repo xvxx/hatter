@@ -134,8 +134,8 @@ pub fn builtins() -> HashMap<String, Builtin> {
         }
     }
 
-    map.insert("eq".to_string(), not);
-    map.insert("neq".to_string(), not);
+    map.insert("eq".to_string(), eq);
+    map.insert("neq".to_string(), neq);
     map.insert("not".to_string(), not);
     map.insert("add".to_string(), add);
     map.insert("sub".to_string(), sub);

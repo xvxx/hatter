@@ -117,22 +117,9 @@ impl Parser {
     pub fn parse(&mut self) -> Result<()> {
         let mut ast = AST::new();
 
-        while let Some(tok) = self.peek() {
-            let node = match tok.kind {
-                // Tag
-                Syntax::Bracket('<') => self.tag()?,
-
-                // Syntax
-                Syntax::Special(';') => {
-                    self.next();
-                    continue;
-                }
-
-                // Unexpected
-                _ => return Err(self.error("HTML Tag")),
-            };
-
-            ast.exprs.push(node);
+        while !self.peek_eof() {
+            let mut block = self.block()?;
+            ast.exprs.append(&mut block);
         }
 
         self.ast = ast;

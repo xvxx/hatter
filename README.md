@@ -111,6 +111,7 @@ Here's what it looks like:
 
 ## TODO
 
+- [x] allow everything in top-level
 - [ ] else ifs
 - [x] \<style> tag
 - [x] \<script> tag
@@ -126,4 +127,4 @@ Here's what it looks like:
 - [ ] shortcut interpolation
       (ex: \<div .{name}> -> \<div class="dog"> when name="dog")
 - [ ] def <tag>
-- [ ] def fn?
+- [ ] def fn

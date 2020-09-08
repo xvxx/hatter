@@ -78,13 +78,13 @@
 
 ## TODO
 
-- [ ] move text vs expr to parser
 - [x] if
   - [x] else
   - [ ] else ifs
 - [ ] \<style> tag
 - [ ] \<script> tag
 - [ ] string interpolation
+- [ ] operators
 - [ ] VSCode Extension
 - [ ] VSCode + luacheck-style LSP
 - [ ] bomb-ass test suite
@@ -94,5 +94,4 @@
 - [ ] shortcut interpolation
       (ex: \<div .{name}> -> \<div class="dog"> when name="dog")
 - [ ] def <tag>
-- [ ] operators
 - [ ] def fn?

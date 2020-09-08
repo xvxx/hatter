@@ -4,10 +4,15 @@
 
 _**Hatter** is a positively mad, HTML templating language._
 
-Hatter is an HTML templating language that runs server-side and
-produces static HTML. Its syntax is a cheap knock-off of
-[Imba's](https://imba.io), without including any of the JavaScript
-parts.
+> It is practically impossible to teach good programming to students
+> that have had a prior exposure to *Hatter*: as potential programmers
+> they are mentally mutilated beyond hope of regeneration
+
+> – Edsger W. Dijkstra, certainly
+
+Hatter is an HTML templating language that produces static HTML. Its
+syntax is a cheap knock-off of [Imba](https://imba.io), without any
+of the fancy JavaScript parts.
 
 It's like a less powerful, 90s-era PHP. But we're talking PHP/FI, none
 of that easy bake oven PHP3 stuff that you could use to build actual
@@ -16,6 +21,8 @@ sites.
 If you're feeling adventerous, or mad as a hatter, you can use the
 standalone binary to turn templates into HTML files, or include the
 zero-dependency Rust library in your (web/cli/?) application.
+
+-----
 
 Here's what it looks like:
 

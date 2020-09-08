@@ -4,12 +4,12 @@
 
 _**Hatter** is a positively mad, HTML templating language._
 
-Hatter is a cheap knock-off of [Imba](https://imba.io), without any
-JavaScript. It runs server-side and produces static HTML, like a
-less powerful 90s-era PHP. If you're feeling adventerous, or mad as a
-hatter, you can use the standalone binary to turn templates into HTML
-files or include the zero-dependency Rust library in your (web/cli/?)
-application.
+Hatter is a cheap knock-off of [Imba's](https://imba.io) syntax,
+without any of the fancy JavaScript stuff. Hatter runs server-side and
+produces static HTML, like a less powerful 90s-era PHP. If you're
+feeling adventerous, or mad as a hatter, you can use the standalone
+binary to turn templates into HTML files, or include the
+zero-dependency Rust library in your (web/cli/?) application.
 
 Here's what it looks like:
 
@@ -111,11 +111,10 @@ Here's what it looks like:
 
 ## TODO
 
-- [x] if
-  - [x] else
-  - [ ] else ifs
+- [ ] else ifs
 - [ ] \<style> tag
 - [ ] \<script> tag
+- [ ] attribute=thing?
 - [ ] string interpolation
 - [ ] operators
 - [ ] VSCode Extension

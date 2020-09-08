@@ -2,7 +2,7 @@
 
 <img src="./img/rhetoric.jpg" align="right" width="350" alt="The Mad Hatter discussing Hatter" />
 
-_~ **Hatter** is a positively mad HTML templating language. ~_
+<em>~ **Hatter** is a positively mad HTML templating language. ~</em>
 
 ## Features
 

@@ -23,9 +23,9 @@ pub enum Code {
     JumpToIfTrue(String),
     JumpToIfFalse(String),
     Jump(usize),
-    JumpBy(isize),
-    JumpByIfTrue(isize),
-    JumpByIfFalse(isize),
+    JumpBy(String, isize),
+    JumpByIfTrue(String, isize),
+    JumpByIfFalse(String, isize),
     InitLoop,
     EndLoop,
     Loop(Option<String>, String),
@@ -253,15 +253,15 @@ impl Compiler {
             let new = match &codes[idx] {
                 Code::JumpTo(lbl) => {
                     let pos = *labels.get(lbl).unwrap_or(&0) as isize;
-                    Code::JumpBy(pos - idx as isize)
+                    Code::JumpBy(lbl.clone(), pos - idx as isize)
                 }
                 Code::JumpToIfTrue(lbl) => {
                     let pos = *labels.get(lbl).unwrap_or(&0) as isize;
-                    Code::JumpByIfTrue(pos - idx as isize)
+                    Code::JumpByIfTrue(lbl.clone(), pos - idx as isize)
                 }
                 Code::JumpToIfFalse(lbl) => {
                     let pos = *labels.get(lbl).unwrap_or(&0) as isize;
-                    Code::JumpByIfFalse(pos - idx as isize)
+                    Code::JumpByIfFalse(lbl.clone(), pos - idx as isize)
                 }
                 _ => unimplemented!(),
             };

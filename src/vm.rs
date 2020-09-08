@@ -75,15 +75,15 @@ impl VM {
                     self.ip += 1;
                 }
                 Code::Jump(n) => self.ip = *n,
-                Code::JumpBy(n) => self.ip = (self.ip as isize + n) as usize,
-                Code::JumpByIfTrue(n) => {
+                Code::JumpBy(_, n) => self.ip = (self.ip as isize + n) as usize,
+                Code::JumpByIfTrue(_, n) => {
                     if self.pop_stack().to_bool() {
                         self.ip = (self.ip as isize + n) as usize;
                     } else {
                         self.ip += 1;
                     }
                 }
-                Code::JumpByIfFalse(n) => {
+                Code::JumpByIfFalse(_, n) => {
                     if !self.pop_stack().to_bool() {
                         self.ip = (self.ip as isize + n) as usize;
                     } else {

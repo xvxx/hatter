@@ -165,7 +165,11 @@ impl Parser {
 
     /// Parse a word.
     fn word(&mut self) -> Result<Expr> {
-        Ok(Expr::Word(self.expect(Syntax::Word)?.to_string()))
+        let word = self.expect(Syntax::Word)?;
+        Ok(match word.literal() {
+            "true" | "false" => Expr::Bool(word.literal() == "true"),
+            _ => Expr::Word(word.to_string()),
+        })
     }
 
     /// Parse a code expression.

@@ -37,6 +37,8 @@
 <div>
   if show-hint?
     <.hint> <b>Psst...</> You can type `?` for help.
+  else
+    <p.nada> Nothing to see here.
 ```
 
 ## TODO

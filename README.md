@@ -112,7 +112,7 @@ Here's what it looks like:
 ## TODO
 
 - [x] allow everything in top-level
-- [ ] else ifs
+- [x] else ifs
 - [x] \<style> tag
 - [x] \<script> tag
 - [ ] attribute=thing?
@@ -128,3 +128,4 @@ Here's what it looks like:
       (ex: \<div .{name}> -> \<div class="dog"> when name="dog")
 - [ ] def <tag>
 - [ ] def fn
+- [ ] rewrite lexer based on https://github.com/nathanwhit/minimal-yaml

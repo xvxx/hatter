@@ -2,7 +2,7 @@
 
 <img src="./img/rhetoric.jpg" align="right" width="350" alt="The Mad Hatter discussing Hatter" />
 
-_**Hatter** is a positively mad HTML templating language._
+_~ **Hatter** is a positively mad HTML templating language. ~_
 
 ## Features
 
@@ -17,24 +17,30 @@ _**Hatter** is a positively mad HTML templating language._
 
 ```html
 <ul#items>
-  <li.item> Item 1
-  <li.item> <i> Item 2
-  <li.item> <b>Item</> 3
+  <li.item>
+    Item 1
+    <li.item>
+      <i>
+        Item 2 <li.item> <b>Item</b> 3</li.item></i
+      ></li.item
+    ></li.item
+  ></ul#items
+>
 ```
+
 - `for` loops:
 
 ```html
 <ul#people>
   for name in names
-    <li.person> name
+  <li.person> name</li.person></ul#people
+>
 ```
 
 - `if else` statements:
 
 ```html
-<div>
-  if show-hint?
-    <.hint> <b>Psst...</> You can type `?` for help.
+<div>if show-hint? <.hint> <b>Psst...</b> You can type `?` for help.</div>
 ```
 
 ## TODO

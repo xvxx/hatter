@@ -110,6 +110,7 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
 ## TODO
 
 - [ ] `do` syntax
+- [ ] `if 1 + 15 > 3`
 - [ ] <!DOCTYPE html>
 - [ ] <!-- html comments -->
 - [ ] Basic types

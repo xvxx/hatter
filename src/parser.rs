@@ -7,13 +7,13 @@ const STACK_SIZE: usize = 1000; // infinite loop protection
 
 #[derive(Debug)]
 pub struct Parser {
-    ast: AST,
-    tokens: TokenStream,
-    pos: usize,
-    indent: usize,
+    ast: AST,                           // what we're building
+    tokens: TokenStream,                // code
     tags: usize,                        // open tags
-    peeked: usize,                      // infinite loop protection hack
     operators: HashMap<String, String>, // operators like + - * /
+
+    #[cfg(debug_assertions)]
+    peeked: usize, // infinite loop protection hack
 }
 
 pub fn parse(tokens: TokenStream) -> Result<AST> {
@@ -27,12 +27,11 @@ impl Parser {
     pub fn from(tokens: TokenStream) -> Parser {
         Parser {
             tokens,
-            pos: 0,
             ast: AST::new(),
-            peeked: 0,
-            indent: 0,
             tags: 0,
             operators: Self::default_operators(),
+            #[cfg(debug_assertions)]
+            peeked: 0,
         }
     }
 
@@ -57,18 +56,24 @@ impl Parser {
 
     /// Peek at next `Token`.
     fn peek(&mut self) -> Option<TokenPos> {
-        self.peeked += 1;
-        if self.peeked > STACK_SIZE {
-            panic!("infinite loop while peek()ing: {:?}", self.tokens.peek());
+        #[cfg(debug_assertions)]
+        {
+            self.peeked += 1;
+            if self.peeked > STACK_SIZE {
+                panic!("infinite loop while peek()ing: {:?}", self.tokens.peek());
+            }
         }
         self.tokens.peek()
     }
 
     /// Peek two ahead.
     fn peek2(&mut self) -> Option<TokenPos> {
-        self.peeked += 1;
-        if self.peeked > STACK_SIZE {
-            panic!("infinite loop while peek()ing: {:?}", self.tokens.peek());
+        #[cfg(debug_assertions)]
+        {
+            self.peeked += 1;
+            if self.peeked > STACK_SIZE {
+                panic!("infinite loop while peek()ing: {:?}", self.tokens.peek());
+            }
         }
         self.tokens.peek2()
     }
@@ -95,7 +100,10 @@ impl Parser {
 
     /// Advance iterator an return next `Token`.
     fn next(&mut self) -> TokenPos {
-        self.peeked = 0;
+        #[cfg(debug_assertions)]
+        {
+            self.peeked = 0;
+        }
         self.tokens.next().unwrap()
     }
 

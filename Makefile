@@ -7,7 +7,7 @@ docs: target/release/hatter docs/index.hat
 
 .PHONY: serve
 serve: docs
-	serve docs/
+	serve -r docs/
 
 .PHONY: clean
 clean:

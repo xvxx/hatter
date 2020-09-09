@@ -9,9 +9,9 @@ mod stream;
 pub use pos::TokenPos;
 pub use stream::TokenStream;
 
-pub const RESERVED: [char; 19] = [
-    '\n', '\t', '\r', ' ', ';', ',', '#', '.', '@', ':', '/', '<', '>', '(', ')', '[', ']', '{',
-    '}',
+pub const RESERVED: [char; 20] = [
+    '\n', '\t', '\r', ' ', ';', ',', '#', '.', '@', ':', '/', '=', '<', '>', '(', ')', '[', ']',
+    '{', '}',
 ];
 
 #[derive(Debug)]

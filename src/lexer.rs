@@ -100,7 +100,8 @@ impl<'s> Lexer<'s> {
                 '"' | '\'' | '`' => self.scan_string(c)?,
                 '=' => {
                     if self.peek_is('=') {
-                        self.scan_word()?
+                        self.next();
+                        Syntax::Word
                     } else {
                         Syntax::Special(c)
                     }

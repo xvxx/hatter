@@ -67,87 +67,49 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
 
 ## Features
 
-- Tag shorthands (`<div#id>`, `<div.class1.class2>`, `<input@name:type>`)
-- Conditional attributes
-- Implicit divs (`<#main>` becomes `<div id='main'>`)
-- `<html>` gets added if the first tag is `<head>`
-- Auto-closing tags through Python-ish indentation
-- `for` loops over lists and maps
-- `if else` statements
-- Call functions defined in Rust
-- Easy inline JavaScript
+- Auto-closing HTML tags and code blocks based on indentation.
+- Shorthand for `id`, `class`, `type`, and `name` attributes:
+  - `<div#id>`
+  - `<div.class1.class2>`
+  - `<input@form-field-name>`
+  - `<input:text>`
+- Basic types:
+  - `bool`, `float`, `string`, `list`, `map`, `fn()`
+- for loops over `list` and `map`:
+  - `<ul> for page in pages do <li id=page-{page.id}> page.name`
+  - `for k, v in some-map do <td> k </> <td> v`
+- if statements
+  - `if logged_in? do <h2> Welcome back!`
+- Dynamic values for regular attributes:
+  - `<div page-num=page.id>`
+- Conditionally set attributes or enable shorthand:
+  - `<div .logged-in=logged-in?>`
+  - `<div data-map=is-map?>`
+- String interpolation:
+  - `<span.greeting> "Hey there {name}."`
+- Shorthand interpolation:
+  - `<span #page-{page.id} .is-{page.type}> page.title`
+- Implicit divs:
+  - `<#main>` becomes `<div id='main'>`
+- Call functions defined in Rust:
+  - `<div.name> to-uppercase(name)`
+- Easy inline JavaScript:
+  - `<li> <a onclick=(alert("Oink!"))> 🐷`
+- Add your own operators:
+  - `op! ++ append`
+- Hatter will add a `<!DOCTYPE>` and wrap everything in `<html>` if
+  the first tag in your template is `<head>`.
 
-### Tag shorthand
+## Future Features
 
-- `<div#id>`
-- `<div.class1.class2>`
-- `<input@name>`
-- `<input:type>`
-
-### Conditional attributes
-
-```
-<div#main.markdown-body.webview-app=webview?>
-  <nav .logged-in=logged-in?>
-    <p>
-```
-
-### Implicit divs
-
-- `<#main> -> <div id='main'>`
-- `<html>` gets added if the first tag is `<head>`
-
-### Auto-closing tags through indentation
-
-```
-<ul#items>
-  <li.item>
-    Item 1
-  <li.item> <i> Item 2
-  <li.item> <b>Item</> 3
-```
-
-### `for` loops
-
-```
-<ul#people>
-  for name in names
-    <li.person> name
-```
-
-### `if else` statements
-
-```
-<div>
-  if show-hint?
-    <.hint> <b>Psst...</> You can type `?` for help.
-  else
-    <p.nada> Nothing to see here.
-```
-
-### Functions defined in Rust
-
-```
-<ul>
-  <li> <b>Name:</> to-titlecase("jonny idaho")
-  <li> <b>Location:</> to-titlecase("IDAHO!")
-  <li>
-    <b>Age:
-    add(20, mul(4, 10))
-
-```
-
-### Easy inline JavaScript
-
-```
-<ul>
-    <li> <a onclick=(alert("Clicked me."))> Click me
-    <li> <a onclick=(alert("Oink!"))> 🐷
-    <li> <a onclick=(history.back())> Go back
-```
+- Define your own functions with `def name(x Type, b Type)`.
+- Define your own tags with `def <tag arg=Type>`.
+- Arity checking for functions.
+- Type checking for functions.
 
 ## TODO
 
+- [ ] `do` syntax
 - [ ] attribute=expr
   - [ ] .class=bool?
   - [ ] #id=bool?
@@ -158,21 +120,25 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
 - [ ] string interpolation
   - [ ] "hey {friend}"
   - [ ] not for ` or '
-- [ ] docs
-  - [ ] design
-  - [ ] layout
-  - [ ] generator
-  - [ ] outline
-  - [ ] content
-- [ ] bomb-ass test suite
-- [ ] docs for stdlib
-- [ ] stdlib
 - [ ] <!-- html comments -->
+- [ ] show error location when compiling
+- [ ] def <tag attr=Type>
+- [ ] def fn(arg Type, arg Type) Type
+- [ ] rewrite lexer based on https://github.com/nathanwhit/minimal-yaml
+
+### docs
+
+- [ ] design
+- [ ] layout
+- [ ] generator
+- [ ] outline
+- [ ] content
+- [ ] docs for stdlib
+
+### project
+
+- [ ] bomb-ass test suite
+- [ ] stdlib
 - [ ] VSCode Extension
 - [ ] VSCode + luacheck-style LSP
-- [ ] show error location when compiling
 - [ ] luacheck-style tool
-- [ ] post-release
-  - [ ] def <tag>
-  - [ ] def fn
-  - [ ] rewrite lexer based on https://github.com/nathanwhit/minimal-yaml

@@ -1,5 +1,9 @@
 <head>
     <link rel="stylesheet" href="new.css"/>
+    <style>
+        body {
+            background: url(memphis.jpg)
+        }
 <body>
     <h1> "Here we go..."
     <p> "Enjoy the journey."

@@ -80,6 +80,9 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
   - `for k, v in some-map do <td> k </> <td> v`
 - [x] if/else statements
   - `if logged_in? do <h2> Welcome back!`
+- [x] Error-checked assignmnent with `:=` and `=`:
+  - `name := 'Bob'`  will error if name **is** already set.
+  - `name = 'Bob'`  will error if name **isn't** already set.
 - [ ] Dynamic values for regular attributes:
   - `<div page-num=page.id>`
 - [ ] Conditionally set attributes or enable shorthand:
@@ -91,6 +94,8 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
   - `<span #page-{page.id} .is-{page.type}> page.title`
 - [x] Implicit divs:
   - `<#main>` becomes `<div id='main'>`
+- [x] Implicit closing tags:
+  - `<i>delicious</>` becomes `<i>delicious</i>`
 - [x] Call functions defined in Rust:
   - `<div.name> to-uppercase(name)`
 - [x] Easy inline JavaScript:
@@ -136,6 +141,9 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
   - [ ] .something-{expr}-else
   - [ ] #{expr}
   - [ ] @{expr}
+- [ ] := error checking
+- [ ] = error checking
+- [ ] HTMLized error page
 - [ ] def <tag attr=Type>
 - [ ] def fn(arg Type, arg Type) Type
 - [ ] rewrite lexer based on https://github.com/nathanwhit/minimal-yaml

@@ -1,6 +1,6 @@
 [package]
 name = "hatter"
-version = "0.1.0"
+version = "0.0.0-dev"
 authors = ["chris west <c@xvxx.io>"]
 edition = "2018"
 

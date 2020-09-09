@@ -61,7 +61,7 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
 </nav>
 
 <div id='main' class='markdown-body'>
-  <h1> Welcome back, <span class='aside'> The Mad Hatter </span> !
+  <h1> Welcome back, <span class='username'> The Mad Hatter </span> !
 </div>
 ```
 
@@ -115,6 +115,7 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
 ## TODO
 
 - [ ] `do` syntax
+- [ ] error when mixing tabs and spaces
 - [ ] `if (1 + 15) > 3`
 - [ ] <!DOCTYPE html>
 - [ ] <!-- html comments -->

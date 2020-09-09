@@ -8,7 +8,6 @@ struct Lexer<'s> {
     source: &'s str,                  // template source code
     pos: usize,                       // current position in `source`
     indents: Vec<usize>,              // current depth
-    in_tag: usize,                    // whether we're inside a <tag> or not
     chars: Peekable<CharIndices<'s>>, // iterator
     cur: char,                        // current character
 }
@@ -30,7 +29,6 @@ impl<'s> Lexer<'s> {
             tokens: vec![],
             chars: source.char_indices().peekable(),
             pos: 0,
-            in_tag: 0,
             indents: vec![],
             cur: '0',
         }
@@ -114,14 +112,9 @@ impl<'s> Lexer<'s> {
                     }
                 }
                 '<' => {
-                    self.in_tag += 1;
                     Syntax::Bracket('<')
                 }
                 '>' => {
-                    if self.in_tag == 0 {
-                        return scan_error!(self.pos, 1, "Got > with no tags open.");
-                    }
-                    self.in_tag -= 1;
                     Syntax::Bracket('>')
                 }
                 '(' => {

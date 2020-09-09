@@ -10,7 +10,7 @@
             --blue: #AEE7E8;
         }
         body {
-            background: url(memphis.jpg);
+            background: url(img/memphis.jpg);
             font-size: 1.2rem;
         }
         #mad-hatter {
@@ -19,6 +19,7 @@
         main {
             padding: 20px;
             background-color: var(--yellow);
+            background: url(img/light-memphis.png);
         }
         body, p, code {
             color: var(--black);
@@ -27,9 +28,17 @@
         h1, h2, h3 {
             color: #272925;
             border-bottom: 1px solid var(--black);
+            font-family: Impact;
         }
         h1 {
             border-bottom: none;
+            font-size: 5rem;
+        }
+        h2 {
+            font-size: 4rem;
+        }
+        h3 {
+            font-size: 3rem;
         }
         a, a:visited {
             color: var(--pink);
@@ -61,6 +70,7 @@
         #header, #logo {
             margin-top: 0;
             padding-top: 0;
+            height: 300px;
         }
         #logo {
             color: var(--pink);
@@ -69,10 +79,24 @@
             font-family: Impact;
             text-transform: uppercase;
             text-align: center;
+            position: relative;
+            z-index: 2;
         }
+        #rectangle {
+            width: 800px;
+            height: 200px;
+            background: white;
+            clip-path: polygon(25% 0%, 100% 0%, 75% 100%, 0% 100%);
+            position: absolute;
+            z-index: 1;
+            margin-top: 50px;
+            margin-left: 50px;
+        }
+
 <body>
     <script src="prism.js"></script>
     <main>
+        <#rectangle>
         <#header>
             <#logo> Hatter
         """

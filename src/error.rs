@@ -112,7 +112,7 @@ pub fn print_error<P: AsRef<std::path::Path>, S: AsRef<str>>(path: P, source: S,
         blue,
         red,
         " ".repeat(if col > 0 { col - 1 } else { 0 }),
-        "^".repeat(err.len),
+        "^".repeat(std::cmp::min(err.len, 20)),
         err.details,
         clear
     );

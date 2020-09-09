@@ -3,28 +3,44 @@
     <link href="prism.css" rel="stylesheet" />
     <title> Hatter
     <style>
+        :root {
+            --yellow: #F9F251;
+            --pink: #E9648F;
+            --black: #272925;
+            --blue: #AEE7E8;
+        }
         body {
-            background: url(memphis.jpg)
+            background: url(memphis.jpg);
+            font-size: 1.2rem;
         }
         #mad-hatter {
             margin-top: -22px;
         }
         main {
             padding: 20px;
-            background-color: #F9F251;
+            background-color: var(--yellow);
         }
         body, p, code {
-            color: #272925;
+            color: var(--black);
+            max-width: 950px;
         }
         h1, h2, h3 {
             color: #272925;
-            border-bottom: 1px solid #272925;
+            border-bottom: 1px solid var(--black);
         }
         h1 {
             border-bottom: none;
         }
         a, a:visited {
-            color: #E9648F;
+            color: var(--pink);
+            text-decoration: none;
+        }
+        a:hover {
+            background-color: var(--pink);
+            color: var(--yellow);
+        }
+        :not(pre) > code[class*="language-"], pre[class*="language-"] {
+            background: white;
         }
 <body>
     <script src="prism.js"></script>

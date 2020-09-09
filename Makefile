@@ -9,6 +9,13 @@ docs: target/release/hatter docs/index.hat
 serve: docs
 	serve -r docs/
 
+.PHONY: watch
+watch: docs
+	@fswatch --version > /dev/null
+	@fish --version > /dev/null
+	@make serve &
+	@fish -c 'while true; fswatch -1 docs/*.hat || break && make docs; end'
+
 .PHONY: clean
 clean:
 	rm -rf target

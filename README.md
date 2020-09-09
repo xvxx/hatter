@@ -110,21 +110,37 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
 ## TODO
 
 - [ ] `do` syntax
-- [ ] attribute=expr
+- [ ] <!-- html comments -->
+- [ ] Basic types
+  - [x] bool
+  - [x] number
+  - [x] string
+  - [ ] list
+    - [ ] literal syntax -> bytecode
+  - [ ] map
+    - [ ] literal syntax -> bytecode
+  - [ ] fn()
+    - [ ] literal syntax -> bytecode
+  - [ ] <tag>
+    - [ ] literal syntax -> bytecode
+- [ ] Dynamic values for regular attributes
+  - [ ] attribute=expr
+- [ ] Conditionally set attributes or enable shorthand
   - [ ] .class=bool?
   - [ ] #id=bool?
+  - [ ] data-id=bool?
+- [ ] String interpolation
+  - [ ] "hey {friend}"
+  - [ ] not for ` or '
+- [ ] Shorthand interpolation
   - [ ] .{expr}
   - [ ] .something-{expr}-else
   - [ ] #{expr}
   - [ ] @{expr}
-- [ ] string interpolation
-  - [ ] "hey {friend}"
-  - [ ] not for ` or '
-- [ ] <!-- html comments -->
-- [ ] show error location when compiling
 - [ ] def <tag attr=Type>
 - [ ] def fn(arg Type, arg Type) Type
 - [ ] rewrite lexer based on https://github.com/nathanwhit/minimal-yaml
+- [ ] show error location when compiling
 
 ### docs
 
@@ -142,3 +158,4 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
 - [ ] VSCode Extension
 - [ ] VSCode + luacheck-style LSP
 - [ ] luacheck-style tool
+

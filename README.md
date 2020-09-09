@@ -67,18 +67,18 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
 
 ## Features
 
-- [✓] Auto-closing HTML tags and code blocks based on indentation.
-- [✓] Shorthand for `id`, `class`, `type`, and `name` attributes:
+- [x] Auto-closing HTML tags and code blocks based on indentation.
+- [x] Shorthand for `id`, `class`, `type`, and `name` attributes:
   - `<div#id>`
   - `<div.class1.class2>`
   - `<input@form-field-name>`
   - `<input:text>`
 - [ ] Basic types:
   - `bool`, `float`, `string`, `list`, `map`, `fn()`
-- [✓] for loops over `list` and `map`:
+- [x] for loops over `list` and `map`:
   - `<ul> for page in pages do <li id=page-{page.id}> page.name`
   - `for k, v in some-map do <td> k </> <td> v`
-- [✓] if/else statements
+- [x] if/else statements
   - `if logged_in? do <h2> Welcome back!`
 - [ ] Dynamic values for regular attributes:
   - `<div page-num=page.id>`
@@ -89,15 +89,15 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
   - `<span.greeting> "Hey there {name}."`
 - [ ] Shorthand interpolation:
   - `<span #page-{page.id} .is-{page.type}> page.title`
-- [✓] Implicit divs:
+- [x] Implicit divs:
   - `<#main>` becomes `<div id='main'>`
-- [✓] Call functions defined in Rust:
+- [x] Call functions defined in Rust:
   - `<div.name> to-uppercase(name)`
-- [✓] Easy inline JavaScript:
+- [x] Easy inline JavaScript:
   - `<li> <a onclick=(alert("Oink!"))> 🐷`
-- [✓] Add your own operators:
+- [x] Add your own operators:
   - `op! ++ append`
-- [✓] Hatter will add a `<!DOCTYPE>` and wrap everything in `<html>` if
+- [x] Hatter will add a `<!DOCTYPE>` and wrap everything in `<html>` if
   the first tag in your template is `<head>`.
 
 ## Future Features

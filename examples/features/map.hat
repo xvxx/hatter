@@ -1,0 +1,8 @@
+{ first: "Bob", last: "Bobberson", age: 47}
+
+{
+    first: "Bilbo"
+    last: "Swaggins"
+    age: 111
+    "Place of Birth": "The Shire", "Favorite Food": "Pie"
+}

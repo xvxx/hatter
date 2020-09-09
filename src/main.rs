@@ -7,8 +7,7 @@ fn main() -> Result<(), io::Error> {
     let args = env::args().skip(1).collect::<Vec<_>>();
 
     if args.is_empty() {
-        print_usage();
-        return Ok(());
+        return print_usage();
     }
 
     let command;
@@ -23,8 +22,10 @@ fn main() -> Result<(), io::Error> {
 
     match path.as_ref() {
         "-h" | "-help" | "--help" | "help" => {
-            print_usage();
-            return Ok(());
+            return print_usage();
+        }
+        "-v" | "-version" | "--version" | "version" => {
+            return print_version();
         }
         _ => {}
     }
@@ -66,7 +67,7 @@ fn main() -> Result<(), io::Error> {
     Ok(())
 }
 
-fn print_usage() {
+fn print_usage() -> Result<(), io::Error> {
     print!(
         r#"Usage: hatter [COMMAND] <file.hat>
 
@@ -78,6 +79,7 @@ Commands:
   print       Print HTML. (default)
 "#
     );
+    Ok(())
 }
 
 fn print_tokens(mut tokens: TokenStream) {
@@ -107,4 +109,10 @@ fn print_codes(codes: Vec<Code>) {
 fn print_error<P: AsRef<std::path::Path>, S: AsRef<str>>(path: P, source: S, err: hatter::Error) {
     hatter::print_error(path, source, err);
     std::process::exit(1)
+}
+
+/// --version
+fn print_version() -> Result<(), io::Error> {
+    println!("hatter v{}", env!("CARGO_PKG_VERSION"));
+    Ok(())
 }

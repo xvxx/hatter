@@ -4,7 +4,7 @@
 
 > It is practically impossible to teach good programming to students
 > that have had a prior exposure to _Hatter_: as potential programmers
-> they are mentally mutilated beyond hope of regeneration
+> they are mentally mutilated beyond hope of regeneration.
 >
 > -– Edsger W. Dijkstra, certainly
 

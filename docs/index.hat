@@ -1,10 +1,15 @@
 <head>
     <link rel="stylesheet" href="new.css"/>
+    <title> Hatter
     <style>
         body {
             background: url(memphis.jpg)
         }
+        main {
+            padding: 20px;
+        }
 <body>
-    <h1> "Here we go..."
-    <p> "Enjoy the journey."
+    <main>
+        <h1> "Here we go..."
+        <p> "Enjoy the journey."
 

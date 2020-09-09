@@ -30,6 +30,10 @@ impl Token {
     /// Location in source code.
     pub fn range(&self) -> std::ops::Range<usize> {
         match self.kind {
+            Syntax::TripleString => {
+                let start = self.pos + 1;
+                start..start + self.len - 6
+            }
             Syntax::JS | Syntax::String => {
                 let start = self.pos + 1;
                 start..start + self.len - 2

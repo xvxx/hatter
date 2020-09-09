@@ -212,9 +212,28 @@ impl<'s> Lexer<'s> {
     fn scan_string(&mut self, delimiter: char) -> Result<Syntax> {
         let start = self.pos;
         let mut prev = '0'; // TODO: actual escape code parsing
+        let mut triple = false;
+
+        // """ or ''' or ```
+        if self.peek_is(delimiter) {
+            self.next();
+            if self.peek_is(delimiter) {
+                self.next();
+                triple = true;
+            }
+        }
+
         while let Some(c) = self.next() {
             if c == delimiter && prev != '\\' {
-                return Ok(Syntax::String);
+                if !triple {
+                    return Ok(Syntax::String);
+                } else if self.peek_is(delimiter) {
+                    self.next();
+                    if self.peek_is(delimiter) {
+                        self.next();
+                        return Ok(Syntax::TripleString);
+                    }
+                }
             }
             prev = c;
         }

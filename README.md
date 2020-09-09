@@ -13,7 +13,7 @@ produce static HTML. Its syntax is a cheap knock-off of
 [Imba](https://imba.io), without any of the fancy JavaScript parts.
 
 It's like a less powerful, 90s-era PHP. But we're talking PHP/FI, none
-of that easy bake oven PHP3 stuff that you could use to build actual
+of that Easy-Bake Oven PHP3 stuff that you could use to build actual
 sites.
 
 If you're feeling adventerous, or mad as a hatter, you can use the

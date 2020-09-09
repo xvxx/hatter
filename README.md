@@ -22,9 +22,11 @@ zero-dependency Rust library in your (web/cli/?) application.
 
 ---
 
+## Hello Hatter
+
 Here's what it looks like:
 
-```
+```html
 <nav .webview-app=webview?>
   <a href="/signin"> sign in
   <a href="/signup"> sign up

@@ -1,5 +1,5 @@
 <#example>
-    if gt(add(1,15), 3)
+    if 1 + 15 > 3
         <b> Greater!
     else if eq(1,2)
         <b> Equal

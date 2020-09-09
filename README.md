@@ -146,20 +146,32 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
 
 ## TODO
 
-- [ ] attribute=thing?
+- [ ] attribute=expr
+  - [ ] .class=bool?
+  - [ ] #id=bool?
+  - [ ] .{expr}
+  - [ ] .something-{expr}-else
+  - [ ] #{expr}
+  - [ ] @{expr}
 - [ ] string interpolation
+  - [ ] "hey {friend}"
+  - [ ] not for ` or '
 - [ ] operators
+- [ ] docs
+  - [ ] design
+  - [ ] layout
+  - [ ] generator
+  - [ ] outline
+  - [ ] content
+- [ ] bomb-ass test suite
+- [ ] docs for stdlib
+- [ ] stdlib
+- [ ] <!-- html comments -->
 - [ ] VSCode Extension
 - [ ] VSCode + luacheck-style LSP
-- [ ] bomb-ass test suite
-- [ ] stdlib
-- [ ] docs for stdlib
-- [ ] docs for how to use it
 - [ ] show error location when compiling
 - [ ] luacheck-style tool
-- [ ] <!-- html comments -->
-- [ ] shortcut interpolation
-      (ex: \<div .{name}> -> \<div class="dog"> when name="dog")
-- [ ] def <tag>
-- [ ] def fn
-- [ ] rewrite lexer based on https://github.com/nathanwhit/minimal-yaml
+- [ ] post-release
+  - [ ] def <tag>
+  - [ ] def fn
+  - [ ] rewrite lexer based on https://github.com/nathanwhit/minimal-yaml

@@ -38,9 +38,19 @@ impl Parser {
     /// Parse `TokenStream` into `AST`.
     pub fn parse(&mut self) -> Result<()> {
         let mut ast = AST::new();
+        let mut first = true;
+        let mut autohtml = false;
 
         while !self.peek_eof() {
             let mut block = self.block()?;
+            if first {
+                first = false;
+                if first_is_head(&block) {
+                    autohtml = true;
+                    ast.exprs.push(Expr::String("<!DOCTYPE html>".into()));
+                    ast.exprs.push(Expr::String("<html>".into()));
+                }
+            }
             ast.exprs.append(&mut block);
             match self.peek_kind() {
                 Syntax::Dedent | Syntax::Special(';') => {
@@ -48,6 +58,10 @@ impl Parser {
                 }
                 _ => {}
             }
+        }
+
+        if autohtml {
+            ast.exprs.push(Expr::String("</html>".into()));
         }
 
         self.ast = ast;
@@ -524,4 +538,16 @@ impl Parser {
         map.insert("<=".into(), "lte".into());
         map
     }
+}
+
+// Is the first expression a `<head>`? Used for auto-inserting
+// `<html>` and the doctype.
+#[inline]
+fn first_is_head(block: &[Expr]) -> bool {
+    if !block.is_empty() {
+        if let Expr::Tag(tag) = &block[0] {
+            return tag.tag == "head";
+        }
+    }
+    false
 }

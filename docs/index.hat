@@ -1,5 +1,6 @@
 <head>
-    <link rel="stylesheet" href="new.css"/>
+    <link href="new.css" rel="stylesheet" />
+    <link href="prism.css" rel="stylesheet" />
     <title> Hatter
     <style>
         body {
@@ -26,6 +27,7 @@
             color: #E9648F;
         }
 <body>
+    <script src="prism.js"></script>
     <main>
         """
 <!--<h1 id="hatter">Hatter</h1>-->
@@ -39,7 +41,11 @@
 <p>If you’re feeling adventerous, or mad as a hatter, you can use the standalone binary to turn templates into HTML files, or include the zero-dependency Rust library in your (web/cli/?) application.</p>
 <h2 id="hello-hatter">Hello Hatter</h2>
 <p>Here’s what it looks like:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode html"><code class="sourceCode html"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw">&lt;nav</span> <span class="er">.webview-app</span><span class="ot">=</span><span class="st">webview?</span><span class="kw">&gt;</span></span>
+<div class="sourceCode" id="cb1"><pre class="sourceCode html"><code
+class="language-html sourceCode html"><span id="cb1-1"><a
+href="#cb1-1"></a><span class="kw">&lt;nav</span> <span
+class="er">.webview-app</span><span class="ot">=</span><span
+class="st">webview?</span><span class="kw">&gt;</span></span>
 <span id="cb1-2"><a href="#cb1-2"></a>  <span class="kw">&lt;a</span><span class="ot"> href=</span><span class="st">&quot;/signin&quot;</span><span class="kw">&gt;</span> sign in</span>
 <span id="cb1-3"><a href="#cb1-3"></a>  <span class="kw">&lt;a</span><span class="ot"> href=</span><span class="st">&quot;/signup&quot;</span><span class="kw">&gt;</span> sign up</span>
 <span id="cb1-4"><a href="#cb1-4"></a>  <span class="kw">&lt;ul&gt;</span> for link in nav-links</span>
@@ -53,7 +59,7 @@
 <span id="cb1-12"><a href="#cb1-12"></a>  else</span>
 <span id="cb1-13"><a href="#cb1-13"></a>    <span class="kw">&lt;h1&gt;</span> Nice to, uh, see you. <span class="kw">&lt;span.aside&gt;</span> Have we met..?</span></code></pre></div>
 <p>Which, if we’re logged in as <code>The Mad Hatter</code> and <code>webview?</code> is <code>false</code>, will generate this:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode html"><code class="sourceCode html"><span id="cb2-1"><a href="#cb2-1"></a><span class="kw">&lt;nav&gt;</span></span>
+<div class="sourceCode" id="cb2"><pre class="sourceCode html"><code class="language-html sourceCode html"><span id="cb2-1"><a href="#cb2-1"></a><span class="kw">&lt;nav&gt;</span></span>
 <span id="cb2-2"><a href="#cb2-2"></a>  <span class="kw">&lt;a</span><span class="ot"> href=</span><span class="st">&#39;/signin&#39;</span><span class="kw">&gt;</span> sign in <span class="kw">&lt;/a&gt;</span></span>
 <span id="cb2-3"><a href="#cb2-3"></a>  <span class="kw">&lt;a</span><span class="ot"> href=</span><span class="st">&#39;/signup&#39;</span><span class="kw">&gt;</span> sign up <span class="kw">&lt;/a&gt;</span></span>
 <span id="cb2-4"><a href="#cb2-4"></a>  <span class="kw">&lt;ul&gt;</span></span>
@@ -68,7 +74,7 @@
 <span id="cb2-13"><a href="#cb2-13"></a><span class="kw">&lt;/nav&gt;</span></span>
 <span id="cb2-14"><a href="#cb2-14"></a></span>
 <span id="cb2-15"><a href="#cb2-15"></a><span class="kw">&lt;div</span><span class="ot"> id=</span><span class="st">&#39;main&#39;</span><span class="ot"> class=</span><span class="st">&#39;markdown-body&#39;</span><span class="kw">&gt;</span></span>
-<span id="cb2-16"><a href="#cb2-16"></a>  <span class="kw">&lt;h1&gt;</span> Welcome back, <span class="kw">&lt;span</span><span class="ot"> class=</span><span class="st">&#39;aside&#39;</span><span class="kw">&gt;</span> The Mad Hatter <span class="kw">&lt;/span&gt;</span> !</span>
+<span id="cb2-16"><a href="#cb2-16"></a>  <span class="kw">&lt;h1&gt;</span> Welcome back, <span class="kw">&lt;span</span><span class="ot"> class=</span><span class="st">&#39;username&#39;</span><span class="kw">&gt;</span> The Mad Hatter <span class="kw">&lt;/span&gt;</span> !</span>
 <span id="cb2-17"><a href="#cb2-17"></a><span class="kw">&lt;/div&gt;</span></span></code></pre></div>
 <h2 id="features">Features</h2>
 <ul>

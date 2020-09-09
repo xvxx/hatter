@@ -39,18 +39,48 @@
             background-color: var(--pink);
             color: var(--yellow);
         }
-        :not(pre) > code[class*="language-"], pre[class*="language-"] {
-            background: white;
+        code[class*="language-"], pre[class*="language-"] {
+            background-color: var(--black);
+            color: white;
+            text-shadow: none;
+        }
+        .token.namespace {
+            opacity: 1;
+        }
+        .token.property, .token.tag, .token.boolean, .token.number,
+        .token.constant, .token.symbol, .token.deleted {
+            color: var(--pink);
+        }
+        .token.selector, .token.attr-name, .token.string, .token.char,
+        .token.builtin, .token.inserted {
+            color: var(--blue);
+        }
+        .token.atrule, .token.attr-value, .token.keyword {
+            color: var(--yellow);
+        }
+        #header, #logo {
+            margin-top: 0;
+            padding-top: 0;
+        }
+        #logo {
+            color: var(--pink);
+            text-shadow: 10px 10px var(--blue);
+            font-size: 200px;
+            font-family: Impact;
+            text-transform: uppercase;
+            text-align: center;
         }
 <body>
     <script src="prism.js"></script>
     <main>
+        <#header>
+            <#logo> Hatter
         """
 <!--<h1 id="hatter">Hatter</h1>-->
 <p><img id='mad-hatter' src="./img/rhetoric.png" align="right" width="350" alt="The Mad Hatter discussing Hatter" /></p>
 <blockquote>
 <p>It is practically impossible to teach good programming to students that have had a prior exposure to <em>Hatter</em>: as potential programmers they are mentally mutilated beyond hope of regeneration.</p>
-<p>-– Edsger W. Dijkstra, certainly</p>
+<p>-– Edsger W. Dijkstra, allegedly</p>
 </blockquote>
 <p>Hatter is an HTML templating language that can be used server side to produce static HTML. Its syntax is a cheap knock-off of <a href="https://imba.io">Imba</a>, without any of the fancy JavaScript parts.</p>
 <p>It’s like a less powerful, 90s-era PHP. But we’re talking PHP/FI, none of that easy bake oven PHP3 stuff that you could use to build actual sites.</p>
@@ -71,7 +101,9 @@ class="st">webview?</span><span class="kw">&gt;</span></span>
 <span id="cb1-8"><a href="#cb1-8"></a></span>
 <span id="cb1-9"><a href="#cb1-9"></a><span class="er">&lt;</span>#main.markdown-body&gt;</span>
 <span id="cb1-10"><a href="#cb1-10"></a>  if logged-in?</span>
-<span id="cb1-11"><a href="#cb1-11"></a>    <span class="kw">&lt;h1&gt;</span> Welcome back, <span class="kw">&lt;span.username&gt;</span> name <span class="er">&lt;</span>/&gt;!</span>
+<span id="cb1-11"><a href="#cb1-11"></a>    <span
+class="kw">&lt;h1&gt;</span> Welcome back, <span
+class="kw">&lt;span.username&gt;</span> name <span class="token punctuation">&lt;</span>/<span class="token punctuation">&gt;</span>!</span>
 <span id="cb1-12"><a href="#cb1-12"></a>  else</span>
 <span id="cb1-13"><a href="#cb1-13"></a>    <span class="kw">&lt;h1&gt;</span> Nice to, uh, see you. <span class="kw">&lt;span.aside&gt;</span> Have we met..?</span></code></pre></div>
 <p>Which, if we’re logged in as <code>The Mad Hatter</code> and <code>webview?</code> is <code>false</code>, will generate this:</p>

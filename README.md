@@ -35,7 +35,7 @@ Here's what it looks like:
   <form GET="/search">
     <input@query:text placeholder="Search..." /> <input:submit/>
 
-<div#main.markdown-body>
+<#main.markdown-body>
   if logged-in?
     <h1> Welcome back, <span.username> name </>!
   else

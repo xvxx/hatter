@@ -267,6 +267,13 @@ impl Parser {
                                 block.push(self.for_expr()?);
                                 continue;
                             }
+                            // op! + add
+                            "op!" => {
+                                let op = self.expect(Syntax::Word)?.to_string();
+                                let f = self.expect(Syntax::Word)?.to_string();
+                                self.operators.insert(op, f);
+                                continue;
+                            }
                             _ => {}
                         }
                     }
@@ -493,5 +500,20 @@ impl Parser {
         let last = self.current();
         let end = last.pos + last.len;
         Ok(Expr::String(self.tokens.source()[start..end].into()))
+    }
+
+    fn default_operators() -> HashMap<String, String> {
+        let mut map = HashMap::new();
+        map.insert("==".into(), "eq".into());
+        map.insert("!=".into(), "neq".into());
+        map.insert("+".into(), "add".into());
+        map.insert("-".into(), "sub".into());
+        map.insert("*".into(), "mul".into());
+        map.insert("/".into(), "div".into());
+        map.insert(">".into(), "gt".into());
+        map.insert(">=".into(), "gte".into());
+        map.insert("<".into(), "lt".into());
+        map.insert("<=".into(), "lte".into());
+        map
     }
 }

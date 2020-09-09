@@ -31,6 +31,25 @@ impl Parser {
         }
     }
 
+    /// Parse `TokenStream` into `AST`.
+    pub fn parse(&mut self) -> Result<()> {
+        let mut ast = AST::new();
+
+        while !self.peek_eof() {
+            let mut block = self.block()?;
+            ast.exprs.append(&mut block);
+            match self.peek_kind() {
+                Syntax::Dedent | Syntax::Special(';') => {
+                    self.next();
+                }
+                _ => {}
+            }
+        }
+
+        self.ast = ast;
+        Ok(())
+    }
+    
     /// Peek at next `Token`.
     fn peek(&mut self) -> Option<TokenPos> {
         self.peeked += 1;
@@ -111,25 +130,6 @@ impl Parser {
         } else {
             Err(self.error(format!("{:?}", kind)))
         }
-    }
-
-    /// Parse `TokenStream` into `AST`.
-    pub fn parse(&mut self) -> Result<()> {
-        let mut ast = AST::new();
-
-        while !self.peek_eof() {
-            let mut block = self.block()?;
-            ast.exprs.append(&mut block);
-            match self.peek_kind() {
-                Syntax::Dedent | Syntax::Special(';') => {
-                    self.next();
-                }
-                _ => {}
-            }
-        }
-
-        self.ast = ast;
-        Ok(())
     }
 
     /// Parse a literal as a string expression.

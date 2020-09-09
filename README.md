@@ -8,9 +8,9 @@
 >
 > -– Edsger W. Dijkstra, certainly
 
-Hatter is an HTML templating language that produces static HTML. Its
-syntax is a cheap knock-off of [Imba](https://imba.io), without any
-of the fancy JavaScript parts.
+Hatter is an HTML templating language that can be used server side to
+produce static HTML. Its syntax is a cheap knock-off of
+[Imba](https://imba.io), without any of the fancy JavaScript parts.
 
 It's like a less powerful, 90s-era PHP. But we're talking PHP/FI, none
 of that easy bake oven PHP3 stuff that you could use to build actual
@@ -28,15 +28,39 @@ Here's what it looks like:
 <nav .webview-app=webview?>
   <a href="/signin"> sign in
   <a href="/signup"> sign up
-  <ul>
-  for link in nav-links
+  <ul> for link in nav-links
     <li.small-link> <a href=link.href> link.text
+  <form GET="/search">
+    <input@query:text placeholder="Search..." /> <input:submit/>
 
 <div#main.markdown-body>
   if logged-in?
     <h1> Welcome back, <span.username> name </>!
   else
     <h1> Nice to, uh, see you. <span.aside> Have we met..?
+```
+
+Which, if we're logged in as `The Mad Hatter` and `webview?` is
+`false`, will generate this:
+
+```html
+<nav>
+  <a href='/signin'> sign in </a>
+  <a href='/signup'> sign up </a>
+  <ul>
+    <li class='small-link'> <a href='/hats'> Hats </a> </li>
+    <li class='small-link'> <a href='/cards'> Cards </a> </li>
+    <li class='small-link'> <a href='/tea'> Tea </a> </li>
+  </ul>
+  <form method='GET' action='/search'>
+    <input name='query' type='text' placeholder='Search...' />
+    <input type='submit' />
+  </form>
+</nav>
+
+<div id='main' class='markdown-body'>
+  <h1> Welcome back, <span class='aside'> The Mad Hatter </span> !
+</div>
 ```
 
 ## Features

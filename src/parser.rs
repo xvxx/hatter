@@ -120,6 +120,12 @@ impl Parser {
         while !self.peek_eof() {
             let mut block = self.block()?;
             ast.exprs.append(&mut block);
+            match self.peek_kind() {
+                Syntax::Dedent | Syntax::Special(';') => {
+                    self.next();
+                }
+                _ => {}
+            }
         }
 
         self.ast = ast;

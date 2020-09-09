@@ -183,6 +183,11 @@ impl Parser {
         Ok(Expr::String(self.expect(Syntax::String)?.to_string()))
     }
 
+    /// Parse a """triple string""".
+    fn triple_string(&mut self) -> Result<Expr> {
+        Ok(Expr::String(self.expect(Syntax::TripleString)?.to_string()))
+    }
+
     /// Parse a word.
     fn word(&mut self) -> Result<Expr> {
         let word = self.expect(Syntax::Word)?;
@@ -220,6 +225,7 @@ impl Parser {
     fn atom(&mut self) -> Result<Expr> {
         match self.peek_kind() {
             Syntax::String => Ok(self.string()?),
+            Syntax::TripleString => Ok(self.triple_string()?),
             Syntax::Number => Ok(self.number()?),
             Syntax::Bool => Ok(self.boolean()?),
             Syntax::Word => {
@@ -281,7 +287,7 @@ impl Parser {
                 }
 
                 // Literal
-                Syntax::String | Syntax::Number => {
+                Syntax::String | Syntax::TripleString | Syntax::Number => {
                     block.push(self.expr()?);
                 }
 

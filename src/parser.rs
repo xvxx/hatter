@@ -425,7 +425,7 @@ impl Parser {
         }
 
         tag.contents = match tag.tag.as_ref() {
-            "style" | "script" => vec![self.raw()?],
+            "style" | "script" if tag.attrs.is_empty() => vec![self.raw()?],
             _ => self.block()?,
         };
 

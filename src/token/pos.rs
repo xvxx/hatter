@@ -46,17 +46,6 @@ impl<'s> TokenPos<'s> {
         }
     }
 
-    pub fn is_operator(&self) -> bool {
-        if self.kind == Syntax::Word {
-            match self.literal() {
-                "+" | "-" | "*" | "/" | ">" | ">=" | "<" | "<=" | "==" | "=" | ":=" => true,
-                _ => false,
-            }
-        } else {
-            false
-        }
-    }
-
     pub fn to_string(&self) -> String {
         self.literal().to_string()
     }

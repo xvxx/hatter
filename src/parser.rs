@@ -1,4 +1,7 @@
-use crate::{Error, Expr, Result, Syntax, Tag, TokenPos, TokenStream, AST};
+use {
+    crate::{Error, Expr, Result, Syntax, Tag, TokenPos, TokenStream, AST},
+    std::collections::HashMap,
+};
 
 const STACK_SIZE: usize = 1000; // infinite loop protection
 
@@ -8,8 +11,9 @@ pub struct Parser {
     tokens: TokenStream,
     pos: usize,
     indent: usize,
-    tags: usize,   // open tags
-    peeked: usize, // infinite loop protection hack
+    tags: usize,                        // open tags
+    peeked: usize,                      // infinite loop protection hack
+    operators: HashMap<String, String>, // operators like + - * /
 }
 
 pub fn parse(tokens: TokenStream) -> Result<AST> {
@@ -28,6 +32,7 @@ impl Parser {
             peeked: 0,
             indent: 0,
             tags: 0,
+            operators: Self::default_operators(),
         }
     }
 
@@ -49,7 +54,7 @@ impl Parser {
         self.ast = ast;
         Ok(())
     }
-    
+
     /// Peek at next `Token`.
     fn peek(&mut self) -> Option<TokenPos> {
         self.peeked += 1;
@@ -169,8 +174,10 @@ impl Parser {
     fn expr(&mut self) -> Result<Expr> {
         let left = self.atom()?;
         if let Some(next) = self.peek() {
-            if next.is_operator() {
-                let op = self.next().to_string();
+            let lit = next.to_string();
+            if let Some(f) = self.operators.get(&lit) {
+                let op = f.clone();
+                self.next();
                 let right = self.expr()?;
                 return Ok(Expr::Call(op, vec![left, right]));
             }

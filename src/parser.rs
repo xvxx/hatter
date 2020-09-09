@@ -29,7 +29,7 @@ impl Parser {
             tokens,
             ast: AST::new(),
             tags: 0,
-            operators: Self::default_operators(),
+            operators: default_operators(),
             #[cfg(debug_assertions)]
             peeked: 0,
         }
@@ -523,21 +523,23 @@ impl Parser {
         let end = last.pos + last.len;
         Ok(Expr::String(self.tokens.source()[start..end].into()))
     }
+}
 
-    fn default_operators() -> HashMap<String, String> {
-        let mut map = HashMap::new();
-        map.insert("==".into(), "eq".into());
-        map.insert("!=".into(), "neq".into());
-        map.insert("+".into(), "add".into());
-        map.insert("-".into(), "sub".into());
-        map.insert("*".into(), "mul".into());
-        map.insert("/".into(), "div".into());
-        map.insert(">".into(), "gt".into());
-        map.insert(">=".into(), "gte".into());
-        map.insert("<".into(), "lt".into());
-        map.insert("<=".into(), "lte".into());
-        map
-    }
+/// Probably a better way to do this, but it works for now and lets us
+/// define new operators in Hatter source code using `op!`.
+fn default_operators() -> HashMap<String, String> {
+    let mut map = HashMap::new();
+    map.insert("==".into(), "eq".into());
+    map.insert("!=".into(), "neq".into());
+    map.insert("+".into(), "add".into());
+    map.insert("-".into(), "sub".into());
+    map.insert("*".into(), "mul".into());
+    map.insert("/".into(), "div".into());
+    map.insert(">".into(), "gt".into());
+    map.insert(">=".into(), "gte".into());
+    map.insert("<".into(), "lt".into());
+    map.insert("<=".into(), "lte".into());
+    map
 }
 
 // Is the first expression a `<head>`? Used for auto-inserting

@@ -96,8 +96,15 @@ impl<'s> Lexer<'s> {
             let kind = match c {
                 '\n' => self.scan_newline()?,
                 ')' | '[' | ']' | '{' | '}' => Syntax::Bracket(c),
-                ';' | ',' | '#' | '.' | '@' | ':' | '=' | '/' => Syntax::Special(c),
+                ';' | ',' | '#' | '.' | '@' | ':' | '/' => Syntax::Special(c),
                 '"' | '\'' | '`' => self.scan_string(c)?,
+                '=' => {
+                    if self.peek_is('=') {
+                        self.scan_word()?
+                    } else {
+                        Syntax::Special(c)
+                    }
+                }
                 '-' => {
                     if self.peek().filter(|c| c.is_numeric()).is_some() {
                         self.scan_number()?

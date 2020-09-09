@@ -3,7 +3,7 @@
 <img src="./img/rhetoric.jpg" align="right" width="350" alt="The Mad Hatter discussing Hatter" />
 
 > It is practically impossible to teach good programming to students
-> that have had a prior exposure to *Hatter*: as potential programmers
+> that have had a prior exposure to _Hatter_: as potential programmers
 > they are mentally mutilated beyond hope of regeneration
 >
 > -– Edsger W. Dijkstra, certainly
@@ -20,7 +20,7 @@ If you're feeling adventerous, or mad as a hatter, you can use the
 standalone binary to turn templates into HTML files, or include the
 zero-dependency Rust library in your (web/cli/?) application.
 
------
+---
 
 Here's what it looks like:
 
@@ -156,7 +156,6 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
 - [ ] string interpolation
   - [ ] "hey {friend}"
   - [ ] not for ` or '
-- [ ] operators
 - [ ] docs
   - [ ] design
   - [ ] layout

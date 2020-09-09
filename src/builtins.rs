@@ -135,16 +135,26 @@ pub fn builtins() -> HashMap<String, Builtin> {
     }
 
     map.insert("eq".to_string(), eq);
+    map.insert("==".to_string(), eq);
     map.insert("neq".to_string(), neq);
+    map.insert("!=".to_string(), neq);
     map.insert("not".to_string(), not);
     map.insert("add".to_string(), add);
+    map.insert("+".to_string(), add);
     map.insert("sub".to_string(), sub);
+    map.insert("-".to_string(), sub);
     map.insert("mul".to_string(), mul);
+    map.insert("*".to_string(), mul);
     map.insert("div".to_string(), div);
+    map.insert("/".to_string(), div);
     map.insert("gt".to_string(), gt);
+    map.insert(">".to_string(), gt);
     map.insert("gte".to_string(), gte);
+    map.insert(">=".to_string(), gte);
     map.insert("lt".to_string(), lt);
+    map.insert("<".to_string(), lt);
     map.insert("lte".to_string(), lte);
+    map.insert("<=".to_string(), lte);
     map.insert("print".to_string(), print);
     map.insert("to-uppercase".to_string(), to_uppercase);
     map.insert("to-lowercase".to_string(), to_lowercase);

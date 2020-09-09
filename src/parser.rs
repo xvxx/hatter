@@ -167,6 +167,19 @@ impl Parser {
 
     /// Parse a code expression.
     fn expr(&mut self) -> Result<Expr> {
+        let left = self.atom()?;
+        if let Some(next) = self.peek() {
+            if next.is_operator() {
+                let op = self.next().to_string();
+                let right = self.expr()?;
+                return Ok(Expr::Call(op, vec![left, right]));
+            }
+        }
+        Ok(left)
+    }
+
+    /// Parse an indivisible unit, as the Ancient Greeks would say.
+    fn atom(&mut self) -> Result<Expr> {
         match self.peek_kind() {
             Syntax::String => Ok(self.string()?),
             Syntax::Number => Ok(self.number()?),
@@ -231,7 +244,7 @@ impl Parser {
 
                 // Literal
                 Syntax::String | Syntax::Number => {
-                    block.push(self.as_string()?);
+                    block.push(self.expr()?);
                 }
 
                 // Expression

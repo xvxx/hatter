@@ -31,7 +31,6 @@
             font-family: Impact;
         }
         h1 {
-            border-bottom: none;
             font-size: 5rem;
         }
         h2 {

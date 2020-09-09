@@ -97,7 +97,7 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
   - `<li> <a onclick=(alert("Oink!"))> 🐷`
 - [✓] Add your own operators:
   - `op! ++ append`
-- [ ] Hatter will add a `<!DOCTYPE>` and wrap everything in `<html>` if
+- [✓] Hatter will add a `<!DOCTYPE>` and wrap everything in `<html>` if
   the first tag in your template is `<head>`.
 
 ## Future Features
@@ -110,6 +110,7 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
 ## TODO
 
 - [ ] `do` syntax
+- [ ] <!DOCTYPE html>
 - [ ] <!-- html comments -->
 - [ ] Basic types
   - [ ] list

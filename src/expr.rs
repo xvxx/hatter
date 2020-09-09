@@ -11,6 +11,7 @@ pub enum Expr {
     Tag(Tag),
     If(Vec<(Expr, Vec<Expr>)>),
     For(Option<String>, String, Box<Expr>, Vec<Expr>), // key, val, iter, body
+    Assign(String, Box<Expr>, bool),
 }
 
 impl Expr {
@@ -22,6 +23,9 @@ impl Expr {
             Expr::String(s) => format!(r#""{}""#, s),
             Expr::Word(s) => s.clone(),
             Expr::Tag(tag) => format!("{:?}", tag),
+            Expr::Assign(var, expr, re) => {
+                format!("{} {}= {:?}", var, if *re { ":" } else { "" }, expr)
+            }
             Expr::If(..) => format!("{}", "IF: Coming Soon™"),
             Expr::For(..) => format!("{}", "FOR: Coming Soon™"),
             Expr::Call(name, args) => format!(

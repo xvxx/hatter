@@ -10,6 +10,7 @@ struct Lexer<'s> {
     indents: Vec<usize>,              // current depth
     chars: Peekable<CharIndices<'s>>, // iterator
     cur: char,                        // current character
+    in_tag: bool,                     // parsing <tag>?
 }
 
 /// Scans source code and produces a `TokenStream`.
@@ -31,6 +32,7 @@ impl<'s> Lexer<'s> {
             pos: 0,
             indents: vec![],
             cur: '0',
+            in_tag: false,
         }
     }
 
@@ -94,14 +96,24 @@ impl<'s> Lexer<'s> {
             let kind = match c {
                 '\n' => self.scan_newline()?,
                 ')' | '[' | ']' | '{' | '}' => Syntax::Bracket(c),
-                ';' | ',' | '#' | '.' | '@' | ':' | '/' => Syntax::Special(c),
+                ';' | ',' | '#' | '.' | '@' | '/' => Syntax::Special(c),
                 '"' | '\'' | '`' => self.scan_string(c)?,
-                '=' => {
+                ':' => {
                     if self.peek_is('=') {
                         self.next();
                         Syntax::Word
                     } else {
                         Syntax::Special(c)
+                    }
+                }
+                '=' => {
+                    if self.in_tag {
+                        Syntax::Special(c)
+                    } else if self.peek_is('=') {
+                        self.next();
+                        Syntax::Word
+                    } else {
+                        self.scan_word()?
                     }
                 }
                 '-' => {
@@ -112,10 +124,20 @@ impl<'s> Lexer<'s> {
                     }
                 }
                 '<' => {
-                    Syntax::Bracket('<')
+                    if self.in_tag || self.peek_is(' ') {
+                        Syntax::Word
+                    } else {
+                        self.in_tag = true;
+                        Syntax::Bracket('<')
+                    }
                 }
                 '>' => {
-                    Syntax::Bracket('>')
+                    if self.in_tag {
+                        self.in_tag = false;
+                        Syntax::Bracket('>')
+                    } else {
+                        Syntax::Word
+                    }
                 }
                 '(' => {
                     if self.prev_is(Syntax::Special('=')) {

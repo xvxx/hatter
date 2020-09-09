@@ -81,6 +81,12 @@ impl Compiler {
             Bool(b) => vec![Code::Print(b.into())],
             Number(n) => vec![Code::Print(n.into())],
             String(s) => vec![Code::Print(s.into())],
+            Tag(tag) => self.compile_tag(tag)?,
+            Assign(var, expr, _) => {
+                let mut inst = self.compile_expr(expr)?;
+                inst.push(Code::Set(var.clone()));
+                inst
+            }
             Word(word) => match word.as_ref() {
                 "break" => vec![Code::Break],
                 "continue" => vec![Code::Continue],
@@ -141,7 +147,6 @@ impl Compiler {
                 inst.push(Code::EndLoop);
                 inst
             }
-            Tag(tag) => self.compile_tag(tag)?,
         })
     }
 

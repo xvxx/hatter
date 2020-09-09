@@ -1,0 +1,4 @@
+name := "Linda"
+<h1> Welcome, <b> name </b>
+name = "Lynda"
+<p> Sorry, or was it <em> name </> ?

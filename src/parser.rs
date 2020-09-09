@@ -196,12 +196,21 @@ impl Parser {
     fn expr(&mut self) -> Result<Expr> {
         let left = self.atom()?;
         if let Some(next) = self.peek() {
-            let lit = next.to_string();
-            if let Some(f) = self.operators.get(&lit) {
-                let op = f.clone();
-                self.next();
-                let right = self.expr()?;
-                return Ok(Expr::Call(op, vec![left, right]));
+            if next.kind == Syntax::Word {
+                let lit = next.to_string();
+                if lit == ":=" || lit == "=" {
+                    self.next();
+                    return Ok(Expr::Assign(
+                        left.to_string(),
+                        Box::new(self.expr()?),
+                        lit == "=",
+                    ));
+                } else if let Some(f) = self.operators.get(&lit) {
+                    let op = f.clone();
+                    self.next();
+                    let right = self.expr()?;
+                    return Ok(Expr::Call(op, vec![left, right]));
+                }
             }
         }
         Ok(left)
@@ -239,7 +248,7 @@ impl Parser {
                     Ok(Expr::Call(name, args))
                 }
             }
-            _ => Err(self.error("Expression")),
+            _ => Err(self.error("Atom")),
         }
     }
 

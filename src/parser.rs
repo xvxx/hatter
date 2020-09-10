@@ -293,28 +293,19 @@ impl Parser {
 
                 // Expression
                 Syntax::Word => {
-                    let expr = self.expr()?;
-                    if let Expr::Word(word) = &expr {
-                        match word.as_ref() {
-                            "if" => {
-                                block.push(self.if_expr()?);
-                                continue;
-                            }
-                            "for" => {
-                                block.push(self.for_expr()?);
-                                continue;
-                            }
-                            // op! + add
+                    if let Some(word) = self.peek() {
+                        match word.literal() {
+                            "if" => block.push(self.if_expr()?),
+                            "for" => block.push(self.for_expr()?),
                             "op!" => {
+                                self.next();
                                 let op = self.expect(Syntax::Word)?.to_string();
                                 let f = self.expect(Syntax::Word)?.to_string();
                                 self.operators.insert(op, f);
-                                continue;
                             }
-                            _ => {}
+                            _ => block.push(self.expr()?),
                         }
                     }
-                    block.push(expr);
                 }
 
                 // keep going if we're indented
@@ -343,6 +334,7 @@ impl Parser {
     ///     for v in list
     ///     for k, v in map
     fn for_expr(&mut self) -> Result<Expr> {
+        self.expect(Syntax::Word)?; // for
         let mut key = None;
         let val;
 
@@ -373,6 +365,7 @@ impl Parser {
 
     /// Parse an if statement.
     fn if_expr(&mut self) -> Result<Expr> {
+        self.expect(Syntax::Word)?; // if
         let mut conds = vec![];
         let test = self.expr()?;
         let body = if self.peek_is(Syntax::Indent) {

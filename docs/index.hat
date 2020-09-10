@@ -100,7 +100,7 @@
         <#header>
             <#logo> Hatter
         """
-<img src="./img/rhetoric.png" align="right" width="350" alt="The Mad Hatter discussing Hatter" />
+<img id='mad-hatter' src="./img/rhetoric.png" align="right" width="350" alt="The Mad Hatter discussing Hatter" />
 <blockquote>
 <p>It is practically impossible to teach good programming to students
 that have had a prior exposure to <em>Hatter</em>: as potential programmers

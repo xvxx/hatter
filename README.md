@@ -116,7 +116,6 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
 
 - [ ] `do` syntax
 - [ ] error when mixing tabs and spaces
-- [ ] `if (1 + 15) > 3`
 - [ ] <!DOCTYPE html>
 - [ ] <!-- html comments -->
 - [ ] Basic types

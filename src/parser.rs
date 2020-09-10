@@ -243,6 +243,21 @@ impl Parser {
                 self.expect(Syntax::Bracket(')'))?;
                 Ok(expr)
             }
+            // List
+            Syntax::Bracket('[') => {
+                self.next();
+                let mut list = vec![];
+                while !self.peek_eof() {
+                    list.push(self.expr()?);
+                    if self.peek_is(Syntax::Bracket(']')) {
+                        break;
+                    } else {
+                        self.expect(Syntax::Special(','))?;
+                    }
+                }
+                self.expect(Syntax::Bracket(']'))?;
+                Ok(Expr::List(list))
+            }
             Syntax::Word => {
                 let word = self.word()?;
                 if !self.peek_is(Syntax::Bracket('(')) {
@@ -302,7 +317,7 @@ impl Parser {
                 }
 
                 // Literal
-                Syntax::String | Syntax::TripleString | Syntax::Number => {
+                Syntax::String | Syntax::TripleString | Syntax::Number | Syntax::Bracket('[') => {
                     block.push(self.expr()?);
                 }
 

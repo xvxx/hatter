@@ -167,6 +167,21 @@ impl VM {
                     self.set(name, val);
                     self.ip += 1;
                 }
+                Code::ListNew => {
+                    self.ip += 1;
+                    self.push(Value::List(vec![]));
+                }
+                Code::ListPush => {
+                    self.ip += 1;
+                    let val = self.pop_stack();
+                    match self.pop_stack() {
+                        Value::List(mut list) => {
+                            list.push(val);
+                            self.push(list);
+                        }
+                        v => return error!("can't ListPush onto {:?}", v),
+                    }
+                }
                 Code::Return => self.ip = self.pop_call(),
                 Code::Call(name, arity) => {
                     self.ip += 1;

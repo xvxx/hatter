@@ -7,6 +7,7 @@ pub enum Expr {
     Number(f64),
     String(String),
     Word(String),
+    List(Vec<Expr>),
     Call(String, Vec<Expr>),
     Tag(Tag),
     If(Vec<(Expr, Vec<Expr>)>),
@@ -23,6 +24,13 @@ impl Expr {
             Expr::String(s) => format!(r#""{}""#, s),
             Expr::Word(s) => s.clone(),
             Expr::Tag(tag) => format!("{:?}", tag),
+            Expr::List(list) => format!(
+                "[{}]",
+                list.iter()
+                    .map(|ex| ex.to_string())
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            ),
             Expr::Assign(var, expr, re) => {
                 format!("{} {}= {:?}", var, if *re { ":" } else { "" }, expr)
             }

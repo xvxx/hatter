@@ -15,6 +15,8 @@ pub enum Code {
     PrintVar(String),
     PrintPop,
     Pop,
+    ListNew,
+    ListPush,
     Lookup(String),
     Set(String),
     JumpTo(String),
@@ -92,7 +94,7 @@ impl Compiler {
                 "continue" => vec![Code::Continue],
                 _ => vec![Code::PrintVar(word.clone())],
             },
-            Call(..) => {
+            Call(..) | List(..) => {
                 let mut inst = self.compile_expr(expr)?;
                 inst.push(Code::PrintPop);
                 inst
@@ -223,6 +225,15 @@ impl Compiler {
             Number(n) => vec![Code::Push(n.into())],
             String(s) => vec![Code::Push(s.into())],
             Word(word) => vec![Code::Lookup(word.to_string())],
+            List(list) => {
+                let mut inst = vec![Code::ListNew];
+                for expr in list {
+                    let mut code = self.compile_expr(expr)?;
+                    inst.append(&mut code);
+                    inst.push(Code::ListPush);
+                }
+                inst
+            }
             Call(name, args) => {
                 let mut inst = vec![];
                 for expr in args {

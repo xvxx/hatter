@@ -1,3 +1,6 @@
 [1, 2, 3]
 
-["John", "Paul", "George", "Ringo Starr"]
+names := ["John", "Paul", "George", "Ringo Starr"]
+<ul#beatles>
+for name in names
+    <li.beatle> name

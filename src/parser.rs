@@ -102,6 +102,15 @@ impl Parser {
         self.peek_kind() == kind
     }
 
+    /// Check the next token's literal value.
+    fn peek_lit_is(&mut self, lit: &str) -> bool {
+        if let Some(p) = self.peek() {
+            p.literal() == lit
+        } else {
+            false
+        }
+    }
+
     /// Will self.next() deliver EOF?
     fn peek_eof(&mut self) -> bool {
         self.peek().is_none()

@@ -1,7 +1,7 @@
 <#example>
-    if 1 + 15 > 3
+    if (1 + 15) >= (8 * 3)
         <b> Greater!
-    else if eq(1,2)
+    else if ((2) == (2))
         <b> Equal
     else
         <b> "Lesser :("

@@ -80,13 +80,19 @@ impl<'s> Lexer<'s> {
 
     /// Consume and discard input while check(peek()) is true.
     /// Return value indicates whether anything was consumed.
-    fn eat(&mut self, check: fn(char) -> bool) -> bool {
+    fn eat(&mut self, check: impl Fn(char) -> bool) -> bool {
         let mut eaten = false;
         while self.peek().filter(|&&c| check(c)).is_some() {
             eaten = true;
             self.next();
         }
         eaten
+    }
+
+    /// Consume and discard input until check(peek()) is true.
+    /// Return value indicates whether anything was consumed.
+    fn eat_until(&mut self, check: impl Fn(char) -> bool) -> bool {
+        self.eat(|c| !check(c))
     }
 
     /// Turn `source` into vector of `Token`, or error.

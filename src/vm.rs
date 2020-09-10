@@ -70,7 +70,6 @@ impl VM {
                     panic!("{:?} should be handled in the compiler", inst)
                 }
                 Code::Debug(..) | Code::Label(..) => self.ip += 1,
-                Code::Noop => self.ip += 1,
                 Code::JumpTo(_) | Code::JumpToIfTrue(_) | Code::JumpToIfFalse(_) => {
                     self.ip += 1;
                 }
@@ -167,20 +166,10 @@ impl VM {
                     self.set(name, val);
                     self.ip += 1;
                 }
-                Code::ListNew => {
+                Code::List(len) => {
                     self.ip += 1;
-                    self.push(Value::List(vec![]));
-                }
-                Code::ListPush => {
-                    self.ip += 1;
-                    let val = self.pop_stack();
-                    match self.pop_stack() {
-                        Value::List(mut list) => {
-                            list.push(val);
-                            self.push(list);
-                        }
-                        v => return error!("can't ListPush onto {:?}", v),
-                    }
+                    let list: Vec<_> = self.stack.drain(self.stack.len() - len..).collect();
+                    self.push(list);
                 }
                 Code::Return => self.ip = self.pop_call(),
                 Code::Call(name, arity) => {

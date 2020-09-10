@@ -7,7 +7,6 @@ use {
 pub enum Code {
     Debug(String),
     Label(String),
-    Noop,
     Incr(String),
     Decr(String),
     Push(Value),
@@ -15,8 +14,7 @@ pub enum Code {
     PrintVar(String),
     PrintPop,
     Pop,
-    ListNew,
-    ListPush,
+    List(usize),
     Lookup(String),
     Set(String),
     JumpTo(String),
@@ -226,12 +224,12 @@ impl Compiler {
             String(s) => vec![Code::Push(s.into())],
             Word(word) => vec![Code::Lookup(word.to_string())],
             List(list) => {
-                let mut inst = vec![Code::ListNew];
+                let mut inst = vec![];
                 for expr in list {
                     let mut code = self.compile_expr(expr)?;
                     inst.append(&mut code);
-                    inst.push(Code::ListPush);
                 }
+                inst.push(Code::List(list.len()));
                 inst
             }
             Call(name, args) => {

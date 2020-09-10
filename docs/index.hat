@@ -19,7 +19,8 @@
         main {
             padding: 20px;
             background-color: var(--yellow);
-            background: url(img/light-memphis.png);
+            background-image: url(img/light-memphis.png);
+            background-repeat: repeat-x;
         }
         body, p, code {
             color: var(--black);

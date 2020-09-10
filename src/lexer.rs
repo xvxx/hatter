@@ -13,6 +13,18 @@ struct Lexer<'s> {
     in_tag: bool,                     // parsing <tag>?
 }
 
+trait Reserved {
+    fn is_reserved(&self) -> bool;
+}
+
+impl Reserved for char {
+    #[rustfmt::skip]
+    fn is_reserved(&self) -> bool {
+        matches!(self, '(' | ')' | '[' | ']' | '{' | '}' | '<' | '>' |
+            ';' | ',' | '.' | '#' | '@' | ':' | '=')
+    }
+}
+
 /// Scans source code and produces a `TokenStream`.
 pub fn scan<S: AsRef<str>>(source: S) -> Result<TokenStream> {
     let source = source.as_ref();
@@ -89,12 +101,6 @@ impl<'s> Lexer<'s> {
         eaten
     }
 
-    /// Consume and discard input until check(peek()) is true.
-    /// Return value indicates whether anything was consumed.
-    fn eat_until(&mut self, check: impl Fn(char) -> bool) -> bool {
-        self.eat(|c| !check(c))
-    }
-
     /// Turn `source` into vector of `Token`, or error.
     fn scan(&mut self) -> Result<()> {
         while let Some(c) = self.next() {
@@ -130,23 +136,29 @@ impl<'s> Lexer<'s> {
                     }
                 }
                 '<' => {
-                    if self.in_tag || self.peek_is(' ') {
-                        Syntax::Word
+                    if self.peek_is('=') || self.peek_is(c) {
+                        self.next(); // skip =
+                        self.scan_word()?
+                    } else if self.in_tag || self.peek_is(' ') {
+                        self.scan_word()?
                     } else {
                         self.in_tag = true;
                         Syntax::Bracket('<')
                     }
                 }
                 '>' => {
-                    if self.in_tag {
+                    if self.peek_is('=') || self.peek_is(c) {
+                        self.next(); // skip =
+                        self.scan_word()?
+                    } else if self.in_tag {
                         self.in_tag = false;
                         Syntax::Bracket('>')
                     } else {
-                        Syntax::Word
+                        self.scan_word()?
                     }
                 }
                 '(' => {
-                    if self.prev_is(Syntax::Special('=')) {
+                    if self.in_tag && self.prev_is(Syntax::Special('=')) {
                         let mut open = 0;
                         while let Some(&c) = self.peek() {
                             if c == ')' && open == 0 {
@@ -254,7 +266,7 @@ impl<'s> Lexer<'s> {
 
     /// Parse until we encounter a `token::RESERVED` char.
     fn scan_word(&mut self) -> Result<Syntax> {
-        self.eat(|c| !token::RESERVED.contains(&c));
+        self.eat(|c| !c.is_reserved() && !c.is_whitespace());
         Ok(Syntax::Word)
     }
 

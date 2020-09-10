@@ -368,11 +368,7 @@ impl Parser {
         }
 
         let iter = self.expr()?;
-        let body = if self.peek_is(Syntax::Indent) {
-            self.block()?
-        } else {
-            vec![self.expr()?]
-        };
+        let body = self.block()?;
 
         self.expect(Syntax::Dedent)?;
         Ok(Expr::For(key, val, Box::new(iter), body))
@@ -383,11 +379,7 @@ impl Parser {
         self.expect(Syntax::Word)?; // if
         let mut conds = vec![];
         let test = self.expr()?;
-        let body = if self.peek_is(Syntax::Indent) {
-            self.block()?
-        } else {
-            vec![self.expr()?]
-        };
+        let body = self.block()?;
         conds.push((test, body));
         while self.peek_is(Syntax::Dedent) {
             if let Some(next) = self.peek2() {

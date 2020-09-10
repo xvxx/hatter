@@ -228,6 +228,12 @@ impl Parser {
             Syntax::TripleString => Ok(self.triple_string()?),
             Syntax::Number => Ok(self.number()?),
             Syntax::Bool => Ok(self.boolean()?),
+            Syntax::Bracket('(') => {
+                self.next();
+                let expr = self.expr()?;
+                self.expect(Syntax::Bracket(')'))?;
+                Ok(expr)
+            }
             Syntax::Word => {
                 let word = self.word()?;
                 if !self.peek_is(Syntax::Bracket('(')) {

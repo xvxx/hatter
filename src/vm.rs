@@ -53,10 +53,6 @@ impl VM {
         None
     }
 
-    fn has_var(&self, key: &str) -> bool {
-        self.lookup(key).is_some()
-    }
-
     fn env(&mut self) -> &mut Env {
         let len = self.envs.len();
         &mut self.envs[len - 1]
@@ -151,12 +147,16 @@ impl VM {
                     self.ip += 1;
                 }
                 Code::Set(name) => {
-                    let val = self.pop_stack();
-                    self.set(name, val);
-                    self.ip += 1;
+                    if !self.lookup(name).is_some() {
+                        let val = self.pop_stack();
+                        self.set(name, val);
+                        self.ip += 1;
+                    } else {
+                        return error!("var already exists: {}", name);
+                    }
                 }
                 Code::SetIfSet(name) => {
-                    if self.has_var(name) {
+                    if self.lookup(name).is_some() {
                         let val = self.pop_stack();
                         self.set(name, val);
                         self.ip += 1;

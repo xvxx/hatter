@@ -119,9 +119,13 @@ impl Compiler {
             Number(n) => vec![Code::Print(n.into())],
             String(s) => vec![Code::Print(s.into())],
             Tag(tag) => self.compile_tag(tag)?,
-            Assign(var, expr, _) => {
+            Assign(var, expr, reassign) => {
                 let mut inst = self.compile_expr(expr)?;
-                inst.push(Code::Set(var.clone()));
+                if *reassign {
+                    inst.push(Code::SetIfSet(var.clone()));
+                } else {
+                    inst.push(Code::Set(var.clone()));
+                }
                 inst
             }
             Word(word) => match word.as_ref() {

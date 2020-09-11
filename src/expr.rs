@@ -13,7 +13,7 @@ pub enum Expr {
     Tag(Tag),
     If(Vec<(Expr, Vec<Expr>)>),
     For(Option<String>, String, Box<Expr>, Vec<Expr>), // key, val, iter, body
-    Assign(String, Box<Expr>, bool),
+    Assign(String, Box<Expr>, bool), // var, val, reassign?
 }
 
 impl Expr {

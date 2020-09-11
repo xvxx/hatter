@@ -1,4 +1,9 @@
 [1, 2, 3]
+[
+    4
+    5
+    60, 70, 80
+]
 
 names := ["John", "Paul", "George", "Ringo Starr"]
 <ul#beatles>

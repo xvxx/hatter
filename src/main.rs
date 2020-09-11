@@ -1,6 +1,6 @@
 use {
     hatter::{compile, parse, scan, vm, Code, Token, AST},
-    std::{env, io},
+    std::{env, io, path},
 };
 
 fn main() -> Result<(), io::Error> {
@@ -18,6 +18,20 @@ fn main() -> Result<(), io::Error> {
     } else {
         command = &args[0];
         path = &args[1];
+    }
+
+    if !matches!(command, "scan" | "parse" | "check" | "compile" | "print") {
+        return Err(io::Error::new(
+            io::ErrorKind::Other,
+            format!("unknown command: {}", command),
+        ));
+    }
+
+    if !path::Path::new(path).exists() {
+        return Err(io::Error::new(
+            io::ErrorKind::NotFound,
+            format!("file not found: {}", path),
+        ));
     }
 
     match path.as_ref() {

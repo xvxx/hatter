@@ -17,6 +17,9 @@ mod token;
 mod value;
 pub mod vm;
 
+#[cfg(feature = "repl")]
+pub mod repl;
+
 pub use {
     ast::AST,
     builtins::builtins,

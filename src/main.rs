@@ -20,6 +20,11 @@ fn main() -> Result<(), io::Error> {
         path = &args[1];
     }
 
+    #[cfg(feature = "repl")]
+    if command == "repl" || path == "repl" {
+        return hatter::repl::run();
+    }
+
     if !matches!(command, "scan" | "parse" | "check" | "compile" | "print") {
         return Err(io::Error::new(
             io::ErrorKind::Other,

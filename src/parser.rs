@@ -489,6 +489,7 @@ impl<'s, 't> Parser<'s, 't> {
             let next = self.next();
             let pos = next.pos;
             match next.kind {
+                Syntax::Special(';') => {}
                 Syntax::Bracket('>') => break,
                 Syntax::Special('/') => {
                     tag.close();

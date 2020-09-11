@@ -41,7 +41,7 @@ fn banner() {
         ("", "", "", "", "")
     } else {
         (
-            "\x1b[95m",
+            "\x1b[0;95m",
             "\x1b[1;94m",
             "\x1b[1;93m",
             "\x1b[0;1m",
@@ -52,12 +52,12 @@ fn banner() {
         r#"{gold}
     ,------------.                ,.--""-._
     |   {purple}WELCOME!{gold}  `.           __/         `.
-    | {purple}TO THE HATTER{gold} |     _,**"   "*-.       `.
-    |  {purple}REPL v0.0.1{gold}  |   ,'            `.       \
+    |  {purple}TO THE REPL{gold} |     _,**"   "*-.       `.
+    | {purple}HATTER v0.0.1{gold}|   ,'            `.       \
     `---------------'  ;    _,.---._    \  ,'\  \
                       :   ,'   ,-.. `.   \'   \ :
                       |  ;_\  (___)`  `-..__  : |
-                      ;-'`{white}*{gold}'"  `{white}*{gold}'    `--._ ` | ;
+                      ;-'`{purple}*{gold}'"  `{purple}*{gold}'    `--._ ` | ;
                      /,-'/  -.        `---.`  |"
                      /_,'`--='.       `-.._,-" _
                       (/\\,--. \    ___-.`:   //___

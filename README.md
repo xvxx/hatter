@@ -120,7 +120,11 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
   - [ ] redo tags
   - [ ] dynamic tag attributes
   - [x] string interpolation
+  - [ ] strict mode / mad mode
   - [ ] test suite
+  - [ ] rust api
+    - [ ] helpers
+    - [ ] functions
 - [ ] small
   - [ ] hash/array/string index
   - [ ] do syntax

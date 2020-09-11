@@ -18,10 +18,9 @@ pub fn run() -> Result<(), io::Error> {
         match readline {
             Ok(line) => {
                 rl.add_history_entry(line.as_str());
-                let codes = compiler::compile(&line)?;
-                if let Err(err) = vm.run(codes) {
-                    eprintln!("Error: {:?}", err);
-                }
+                let _ = compiler::compile(&line)
+                    .and_then(|codes| vm.run(codes))
+                    .map_err(|e| eprintln!("Error: {:?}", e));
             }
             Err(ReadlineError::Interrupted) | Err(ReadlineError::Eof) => {
                 println!("Bye!");

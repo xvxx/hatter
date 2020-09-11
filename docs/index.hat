@@ -22,9 +22,14 @@
             background-image: url(img/light-memphis.png);
             background-repeat: repeat-x;
         }
-        body, p, code {
+        body, p {
             color: var(--black);
             max-width: 950px;
+        }
+        code {
+            color: var(--pink);
+            border: none;
+            background-color: transparent;
         }
         h1, h2, h3 {
             color: #272925;

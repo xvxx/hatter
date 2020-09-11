@@ -7,7 +7,7 @@ use {
 /// Start the REPL.
 pub fn run() -> Result<(), io::Error> {
     banner();
-    let mut vm = VM::new();
+    let mut vm = VM::new(true);
     let history_file = ".hatter_history";
 
     // `()` can be used when no completer is required

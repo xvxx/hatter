@@ -6,6 +6,7 @@ use {
 pub type Env = HashMap<String, Value>;
 
 pub struct VM {
+    strict: bool,      // strict mode?
     stack: Vec<Value>, // value stack
     calls: Vec<usize>, // call stack
     envs: Vec<Env>,
@@ -14,14 +15,15 @@ pub struct VM {
 }
 
 pub fn run(inst: Vec<Code>) -> Result<()> {
-    let mut vm = VM::new();
+    let mut vm = VM::new(false);
     vm.run(inst)?;
     Ok(())
 }
 
 impl VM {
-    pub fn new() -> VM {
+    pub fn new(strict: bool) -> VM {
         VM {
+            strict,
             ip: 0,
             stack: vec![],
             calls: vec![],
@@ -131,6 +133,8 @@ impl VM {
                 Code::PrintVar(name) => {
                     if let Some(v) = self.lookup(name) {
                         println!("{}", v);
+                    } else if self.strict {
+                        return error!("can't find {}", name);
                     } else {
                         println!("{}", name);
                     }

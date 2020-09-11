@@ -49,6 +49,13 @@ pub fn builtins() -> HashMap<String, Builtin> {
             Value::None
         }
     }
+    fn concat(_: &mut VM, args: &[Value]) -> Value {
+        let mut sum = String::new();
+        for arg in args {
+            sum.push_str(&arg.to_string());
+        }
+        return Value::String(sum);
+    }
     fn add(_: &mut VM, args: &[Value]) -> Value {
         if let Some(Value::Number(_)) = args.get(0) {
             let mut sum = 0.0;
@@ -153,6 +160,7 @@ pub fn builtins() -> HashMap<String, Builtin> {
     builtin!("eq" => eq);
     builtin!("neq" => neq);
     builtin!("not" => not);
+    builtin!("concat" => concat);
     builtin!("add" => add);
     builtin!("sub" => sub);
     builtin!("mul" => mul);

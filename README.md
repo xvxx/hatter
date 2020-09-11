@@ -88,8 +88,8 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
 - [ ] Conditionally set attributes or enable shorthand:
   - `<div .logged-in=logged-in?>`
   - `<div data-map=is-map?>`
-- [ ] String interpolation:
-  - `<span.greeting> "Hey there {name}."`
+- [x] String interpolation:
+  - `<span.greeting> "Hey there ${name}."`
 - [ ] Shorthand interpolation:
   - `<span #page-{page.id} .is-{page.type}> page.title`
 - [x] Implicit divs:
@@ -109,7 +109,7 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
 
 - Define your own functions with `def name(x Type, b Type)`.
 - Define your own tags with `def <tag arg=Type>`.
-- Arity checking for functions.
+- Arity checking for builtin functions.
 - Type checking for functions.
 
 ## TODO
@@ -119,9 +119,8 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
 - [ ] big
   - [ ] redo tags
   - [ ] dynamic tag attributes
-  - [ ] string interpolation
-  - [ ] def <tag>
-  - [ ] def func
+  - [x] string interpolation
+  - [ ] test suite
 - [ ] small
   - [ ] hash/array/string index
   - [ ] do syntax

@@ -102,7 +102,7 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
   - `<li> <a onclick=(alert("Oink!"))> 🐷`
 - [x] Add your own operators:
   - `op! ++ append`
-- [x] Hatter will add a `<!DOCTYPE>` and wrap everything in `<html>` if
+- [ ] Hatter will add a `<!DOCTYPE>` and wrap everything in `<html>` if
   the first tag in your template is `<head>`.
 
 ## Future Features
@@ -114,6 +114,7 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
 
 ## TODO
 
+- [ ] HTMLized error page
 - [ ] `do` syntax
 - [ ] Basic types
   - [ ] fn()
@@ -134,7 +135,7 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
   - [ ] .something-{expr}-else
   - [ ] #{expr}
   - [ ] @{expr}
-- [ ] HTMLized error page
+
 - [ ] def <tag attr=Type>
 - [ ] def fn(arg Type, arg Type) Type
 - [ ] convert lexer to bytes ala https://github.com/nathanwhit/minimal-yaml
@@ -157,3 +158,7 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
 - [ ] VSCode + luacheck-style LSP
 - [ ] luacheck-style tool
 
+## License
+
+Hatter is licensed under the MIT License. Please see[COPYING](COPYING)
+or http://opensource.org/licenses/MIT for details.

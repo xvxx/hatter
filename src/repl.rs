@@ -1,5 +1,5 @@
 use {
-    crate::{compiler, VM},
+    crate::{compile, parse, scan, VM},
     rustyline::{error::ReadlineError, Editor},
     std::io,
 };
@@ -18,9 +18,11 @@ pub fn run() -> Result<(), io::Error> {
         match readline {
             Ok(line) => {
                 rl.add_history_entry(line.as_str());
-                let _ = compiler::compile(&line)
+                let _ = scan(&line)
+                    .and_then(|t| parse(&t))
+                    .and_then(|ast| compile(ast))
                     .and_then(|codes| vm.run(codes))
-                    .map_err(|e| eprintln!("Error: {:?}", e));
+                    .map_err(|e| eprintln!("{}", e));
             }
             Err(ReadlineError::Interrupted) | Err(ReadlineError::Eof) => {
                 println!("Bye!");

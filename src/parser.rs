@@ -3,6 +3,7 @@ use {
     std::collections::HashMap,
 };
 
+#[cfg(debug_assertions)]
 const STACK_SIZE: usize = 1000; // infinite loop protection
 
 #[derive(Debug)]

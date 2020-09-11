@@ -115,7 +115,6 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
 ## TODO
 
 - [ ] `do` syntax
-- [ ] error when mixing tabs and spaces
 - [ ] Basic types
   - [ ] fn()
     - [ ] literal syntax -> bytecode
@@ -135,12 +134,10 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
   - [ ] .something-{expr}-else
   - [ ] #{expr}
   - [ ] @{expr}
-- [ ] := error checking
-- [ ] = error checking
 - [ ] HTMLized error page
 - [ ] def <tag attr=Type>
 - [ ] def fn(arg Type, arg Type) Type
-- [ ] rewrite lexer based on https://github.com/nathanwhit/minimal-yaml
+- [ ] convert lexer to bytes ala https://github.com/nathanwhit/minimal-yaml
 - [ ] show error location when compiling
 
 ### docs

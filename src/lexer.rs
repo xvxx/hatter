@@ -135,7 +135,15 @@ impl<'s> Lexer<'s> {
                     }
                 }
                 '<' => {
-                    if self.peek_is('=') || self.peek_is(c) {
+                    if self.peek_is('!') {
+                        while let Some(&c) = self.peek() {
+                            self.next();
+                            if c == '>' {
+                                break;
+                            }
+                        }
+                        Syntax::String
+                    } else if self.peek_is('=') || self.peek_is(c) {
                         self.next(); // skip =
                         self.scan_word()?
                     } else if self.in_tag || self.peek_is(' ') {

@@ -116,8 +116,6 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
 
 - [ ] `do` syntax
 - [ ] error when mixing tabs and spaces
-- [ ] <!DOCTYPE html>
-- [ ] <!-- html comments -->
 - [ ] Basic types
   - [ ] fn()
     - [ ] literal syntax -> bytecode

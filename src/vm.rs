@@ -53,6 +53,10 @@ impl VM {
         None
     }
 
+    fn has_var(&self, key: &str) -> bool {
+        self.lookup(key).is_some()
+    }
+
     fn env(&mut self) -> &mut Env {
         let len = self.envs.len();
         &mut self.envs[len - 1]
@@ -73,7 +77,6 @@ impl VM {
                 Code::JumpTo(_) | Code::JumpToIfTrue(_) | Code::JumpToIfFalse(_) => {
                     self.ip += 1;
                 }
-                Code::Jump(n) => self.ip = *n,
                 Code::JumpBy(_, n) => self.ip = (self.ip as isize + n) as usize,
                 Code::JumpByIfTrue(_, n) => {
                     if self.pop_stack().to_bool() {
@@ -104,20 +107,6 @@ impl VM {
                 }
                 Code::Pop => {
                     self.stack.pop();
-                    self.ip += 1;
-                }
-                Code::Incr(name) => {
-                    if let Some(Value::Number(n)) = self.lookup(name) {
-                        let n = *n;
-                        self.set(name, n + 1.0);
-                    }
-                    self.ip += 1;
-                }
-                Code::Decr(name) => {
-                    if let Some(Value::Number(n)) = self.lookup(name) {
-                        let n = *n;
-                        self.set(name, n - 1.0);
-                    }
                     self.ip += 1;
                 }
                 Code::TestShouldLoop => {
@@ -165,6 +154,15 @@ impl VM {
                     let val = self.pop_stack();
                     self.set(name, val);
                     self.ip += 1;
+                }
+                Code::SetIfSet(name) => {
+                    if self.has_var(name) {
+                        let val = self.pop_stack();
+                        self.set(name, val);
+                        self.ip += 1;
+                    } else {
+                        return error!("var doesn't exist: {}", name);
+                    }
                 }
                 Code::List(len) => {
                     self.ip += 1;

@@ -46,9 +46,7 @@ impl<'s, 't> Parser<'s, 't> {
             let mut block = self.block()?;
             ast.exprs.append(&mut block);
             match self.peek_kind() {
-                Syntax::Dedent | Syntax::Special(';') => {
-                    self.next();
-                }
+                Syntax::Dedent | Syntax::Special(';') => self.skip(),
                 _ => {}
             }
         }
@@ -125,10 +123,15 @@ impl<'s, 't> Parser<'s, 't> {
         *self.tokens.get(pos).unwrap()
     }
 
-    /// Skip token.
+    /// Skip one token.
+    fn skip(&mut self) {
+        let _ = self.next();
+    }
+
+    /// Skip all tokens of `kind`.
     fn eat(&mut self, kind: Syntax) {
         while self.peek_is(kind) {
-            self.next();
+            self.skip();
         }
     }
 
@@ -185,7 +188,7 @@ impl<'s, 't> Parser<'s, 't> {
             if p.kind == Syntax::Word && matches!(p.literal(), ":=" | "=") {
                 let reassign = p.literal() == "=";
                 let name = self.expect(Syntax::Word)?.to_string();
-                self.next(); // skip op
+                self.skip(); // skip op
                 return Ok(Expr::Assign(name, Box::new(self.expr()?), reassign));
             }
         }
@@ -196,7 +199,7 @@ impl<'s, 't> Parser<'s, 't> {
                 let lit = next.to_string();
                 if let Some(f) = self.operators.get(&lit) {
                     let op = f.clone();
-                    self.next();
+                    self.skip();
                     let right = self.expr()?;
                     return Ok(Expr::Call(op, vec![left, right]));
                 }
@@ -212,20 +215,20 @@ impl<'s, 't> Parser<'s, 't> {
             Syntax::Number => Ok(self.number()?),
             Syntax::Bool => Ok(self.boolean()?),
             Syntax::Bracket('(') => {
-                self.next();
+                self.skip();
                 let expr = self.expr()?;
                 self.expect(Syntax::Bracket(')'))?;
                 Ok(expr)
             }
             // List
             Syntax::Bracket('[') => {
-                self.next();
+                self.skip();
                 self.eat(Syntax::Special(';'));
                 let mut list = vec![];
                 while !self.peek_eof() && !self.peek_is(Syntax::Bracket(']')) {
                     list.push(self.expr()?);
                     if self.peek_is(Syntax::Special(';')) {
-                        self.next();
+                        self.skip();
                     } else if self.peek_is(Syntax::Bracket(']')) {
                         break;
                     } else {
@@ -238,7 +241,7 @@ impl<'s, 't> Parser<'s, 't> {
             }
             // Map
             Syntax::Bracket('{') => {
-                self.next();
+                self.skip();
                 self.eat(Syntax::Special(';'));
                 let mut map = vec![];
                 while !self.peek_eof() && !self.peek_is(Syntax::Bracket('}')) {
@@ -250,7 +253,7 @@ impl<'s, 't> Parser<'s, 't> {
                     let val = self.expr()?;
                     map.push((key, val));
                     if self.peek_is(Syntax::Special(';')) {
-                        self.next();
+                        self.skip();
                     } else if self.peek_is(Syntax::Bracket('}')) {
                         break;
                     } else {
@@ -272,12 +275,10 @@ impl<'s, 't> Parser<'s, 't> {
                     while let Some(tok) = self.peek() {
                         match tok.kind {
                             Syntax::Bracket(')') => {
-                                self.next();
+                                self.skip();
                                 break;
                             }
-                            Syntax::Special(',') => {
-                                self.next();
-                            }
+                            Syntax::Special(',') => self.skip(),
                             Syntax::String | Syntax::Number | Syntax::Bool | Syntax::Word => {
                                 args.push(self.expr()?);
                             }
@@ -300,7 +301,7 @@ impl<'s, 't> Parser<'s, 't> {
         let mut indented = false;
 
         if self.peek_is(Syntax::Indent) {
-            self.next();
+            self.skip();
             indented = true;
         }
 
@@ -331,7 +332,7 @@ impl<'s, 't> Parser<'s, 't> {
                             "if" => block.push(self.if_expr()?),
                             "for" => block.push(self.for_expr()?),
                             "op!" => {
-                                self.next();
+                                self.skip();
                                 let op = self.expect(Syntax::Word)?.to_string();
                                 let f = self.expect(Syntax::Word)?.to_string();
                                 self.operators.insert(op, f);
@@ -343,7 +344,7 @@ impl<'s, 't> Parser<'s, 't> {
 
                 // keep going if we're indented
                 Syntax::Special(';') if indented => {
-                    self.next();
+                    self.skip();
                 }
 
                 // pass these up the food chain
@@ -351,7 +352,7 @@ impl<'s, 't> Parser<'s, 't> {
 
                 // probably implicit text...
                 Syntax::Special(c) => {
-                    self.next();
+                    self.skip();
                     block.push(Expr::Word(c.to_string()));
                 }
 
@@ -373,7 +374,7 @@ impl<'s, 't> Parser<'s, 't> {
 
         let word = self.expect(Syntax::Word)?.to_string();
         if self.peek_is(Syntax::Special(',')) {
-            self.next();
+            self.skip();
             key = Some(word);
             val = self.next().to_string();
         } else {
@@ -402,12 +403,12 @@ impl<'s, 't> Parser<'s, 't> {
         while self.peek_is(Syntax::Dedent) {
             if let Some(next) = self.peek2() {
                 if next.literal() == "else" {
-                    self.next(); // skip dedent
-                    self.next(); // skip else
+                    self.skip(); // skip dedent
+                    self.skip(); // skip else
                     let mut test = Expr::Bool(true);
                     if let Some(word) = self.peek() {
                         if word.literal() == "if" {
-                            self.next();
+                            self.skip();
                             test = self.expr()?;
                         }
                     }
@@ -448,7 +449,7 @@ impl<'s, 't> Parser<'s, 't> {
             Syntax::Special(';') => self.tags -= 1,
             Syntax::Dedent => {
                 self.tags -= 1;
-                self.next();
+                self.skip();
             }
             _ => self.close_tag()?,
         }
@@ -466,7 +467,7 @@ impl<'s, 't> Parser<'s, 't> {
         self.expect(Syntax::Special('/'))?;
         // </>
         if self.peek_is(Syntax::Bracket('>')) {
-            self.next();
+            self.skip();
             return Ok(());
         }
         self.expect(Syntax::Word)?;

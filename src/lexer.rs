@@ -139,7 +139,7 @@ impl<'s> Lexer<'s> {
                                 break;
                             }
                         }
-                        Syntax::String
+                        Syntax::String(true)
                     } else if self.peek_is('=') || self.peek_is(c) {
                         self.next(); // skip =
                         self.scan_word()?
@@ -265,7 +265,7 @@ impl<'s> Lexer<'s> {
                 if !triple {
                     let len = self.pos - start - 1;
                     self.tokens.push(Token::new(
-                        Syntax::String,
+                        Syntax::String(delimiter == '"'),
                         start,
                         len,
                         &self.source[start..=start + len],
@@ -277,7 +277,7 @@ impl<'s> Lexer<'s> {
                         self.next();
                         let len = self.pos - start - 3;
                         self.tokens.push(Token::new(
-                            Syntax::String,
+                            Syntax::String(false),
                             start,
                             len,
                             &self.source[start..=start + len],

@@ -7,7 +7,7 @@ pub enum Syntax {
     Special(char), // ; # . , @ : = /
     Bool,          // true false
     Number,        // 123 3.14
-    String,        // "string" 'or string' `or string`
+    String(bool),  // "string", bool is `interpolated?` or not
     Word,          // ident, symbol, etc
     JS,            // (JavaScript)
 }

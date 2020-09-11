@@ -89,7 +89,7 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
   - `<div .logged-in=logged-in?>`
   - `<div data-map=is-map?>`
 - [x] String interpolation:
-  - `<span.greeting> "Hey there ${name}."`
+  - `<span.greeting> "Hey there {name}."`
 - [ ] Shorthand interpolation:
   - `<span #page-{page.id} .is-{page.type}> page.title`
 - [x] Implicit divs:
@@ -141,8 +141,8 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
   - [ ] #id=bool?
   - [ ] data-id=bool?
 - [ ] String interpolation
-  - [ ] "hey {friend}"
-  - [ ] not for ` or '
+  - [x] "hey {friend}"
+  - [ ] not for ` or ' or triples
 - [ ] Shorthand interpolation
   - [ ] .{expr}
   - [ ] .something-{expr}-else

@@ -170,14 +170,19 @@ impl<'s, 't> Parser<'s, 't> {
 
     /// Parse a string.
     fn string(&mut self) -> Result<Expr> {
-        let tok = self.expect(Syntax::String)?;
+        let tok = self.next();
+        let is_interpolated = match tok.kind {
+            Syntax::String(is) => is,
+            _ => return self.error("String"),
+        };
+
         let lit = tok.to_string();
-        if lit.contains("${") {
+        if is_interpolated && lit.contains('{') {
             let mut parts = vec![];
             let mut idx = 0;
-            while let Some(i) = lit[idx..].find("${") {
+            while let Some(i) = lit[idx..].find('{') {
                 parts.push(Expr::String(lit[idx..i + idx].into()));
-                idx += i + 2;
+                idx += i + 1;
                 let mut end = idx;
                 for (x, b) in lit[idx..].bytes().enumerate() {
                     if b == b'}' {
@@ -242,7 +247,7 @@ impl<'s, 't> Parser<'s, 't> {
     /// Parse an indivisible unit, as the Ancient Greeks would say.
     fn atom(&mut self) -> Result<Expr> {
         match self.peek_kind() {
-            Syntax::String => Ok(self.string()?),
+            Syntax::String(..) => Ok(self.string()?),
             Syntax::Number => Ok(self.number()?),
             Syntax::Bool => Ok(self.boolean()?),
             Syntax::Bracket('(') => {
@@ -277,7 +282,9 @@ impl<'s, 't> Parser<'s, 't> {
                 let mut map = vec![];
                 while !self.peek_eof() && !self.peek_is(Syntax::Bracket('}')) {
                     let key = match self.peek_kind() {
-                        Syntax::Word | Syntax::String | Syntax::Number => self.next().to_string(),
+                        Syntax::Word | Syntax::String(..) | Syntax::Number => {
+                            self.next().to_string()
+                        }
                         _ => return self.error("String key name"),
                     };
                     self.expect(Syntax::Special(':'))?;
@@ -310,7 +317,7 @@ impl<'s, 't> Parser<'s, 't> {
                                 break;
                             }
                             Syntax::Special(',') => self.skip(),
-                            Syntax::String | Syntax::Number | Syntax::Bool | Syntax::Word => {
+                            Syntax::String(..) | Syntax::Number | Syntax::Bool | Syntax::Word => {
                                 args.push(self.expr()?);
                             }
                             _ => return self.error(")"),
@@ -352,7 +359,10 @@ impl<'s, 't> Parser<'s, 't> {
                 }
 
                 // Literal
-                Syntax::String | Syntax::Number | Syntax::Bracket('[') | Syntax::Bracket('{') => {
+                Syntax::String(..)
+                | Syntax::Number
+                | Syntax::Bracket('[')
+                | Syntax::Bracket('{') => {
                     block.push(self.expr()?);
                 }
 
@@ -534,7 +544,7 @@ impl<'s, 't> Parser<'s, 't> {
                     let name = next.to_string();
                     self.expect(Syntax::Special('='))?;
                     match self.peek_kind() {
-                        Syntax::Number | Syntax::String | Syntax::Word => {
+                        Syntax::Number | Syntax::String(..) | Syntax::Word => {
                             tag.add_attr(name, self.next().to_string())
                         }
                         Syntax::JS => tag.add_attr(

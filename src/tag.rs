@@ -1,6 +1,6 @@
 use {crate::Expr, std::collections::HashMap};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Tag {
     pub tag: String,                    // tag name
     pub classes: Vec<String>,           // classes

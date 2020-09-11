@@ -1,6 +1,10 @@
 .PHONY: build
 build: target/release/hatter
 
+.PHONY: repl
+repl:
+	@cargo run -q --features repl -- repl
+
 .PHONY: docs
 docs: target/release/hatter docs/index.hat
 	@cargo run -q --release docs/index.hat > docs/index.html

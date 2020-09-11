@@ -1,6 +1,6 @@
 use {
     crate::{token, Result, Syntax, Token},
-    std::{iter::Peekable, str::CharIndices},
+    std::{fmt, iter::Peekable, str::CharIndices},
 };
 
 struct Lexer<'s> {
@@ -12,6 +12,14 @@ struct Lexer<'s> {
     cur: char,                        // current character
     in_tag: bool,                     // parsing <tag>?
     in_container: usize,              // parsing inside [] {} <> ?
+    style: Style,                     // tabs or spaces?
+}
+
+#[derive(Debug, PartialEq)]
+enum Style {
+    None,
+    Tabs,
+    Spaces,
 }
 
 trait Reserved {
@@ -43,6 +51,7 @@ impl<'s> Lexer<'s> {
             pos: 0,
             indents: vec![],
             cur: '0',
+            style: Style::None,
             in_tag: false,
             in_container: 0,
         }
@@ -317,6 +326,27 @@ impl<'s> Lexer<'s> {
         loop {
             // ignore stacked newlines
             self.eat(|c| c == '\n');
+
+            // tabs vs spaces error checking
+            let style = if self.peek_is(' ') {
+                Style::Spaces
+            } else if self.peek_is('\t') {
+                Style::Tabs
+            } else {
+                Style::None
+            };
+
+            if self.style == Style::None {
+                self.style = style;
+            } else if style != Style::None && self.style != style {
+                return scan_error!(
+                    start + 1,
+                    self.pos - start + 1,
+                    "Can't mix tabs and spaces. Expected {:?}, found {:?}",
+                    self.style,
+                    style
+                );
+            }
 
             // count indent
             while self.peek_is(' ') || self.peek_is('\t') {

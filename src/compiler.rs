@@ -5,35 +5,71 @@ use {
 
 #[derive(Debug)]
 pub enum Code {
+    /// No-op. Just here to help debugging.
     Debug(String),
+    /// No-op. Used by compiler to rewrite Jump instructions.
     Label(String),
-    Incr(String),
-    Decr(String),
-    Push(Value),
+
+    /// Print `Value`.
     Print(Value),
+    /// Print the value of the variable named `String`.
     PrintVar(String),
+    /// Pop the top of the stack and print it.
     PrintPop,
+
+    /// Push `Value` onto stack.
+    Push(Value),
+    /// Pop the top of the stack.
     Pop,
+
+    /// Create a list of the `usize` top elements on the stack.
     List(usize),
+    /// Create a map of the `usize * 2` top elements on the stack,
+    /// where the even elements are keys and odd are values.
     Map(usize),
+
+    /// Push the value of the variable named `String` onto the stack.
     Lookup(String),
+    /// Pops the top of the stack and puts it in the variable named `String`.
     Set(String),
-    JumpTo(String),
-    JumpToIfTrue(String),
-    JumpToIfFalse(String),
-    Jump(usize),
-    JumpBy(String, isize),
-    JumpByIfTrue(String, isize),
-    JumpByIfFalse(String, isize),
-    InitLoop,
-    EndLoop,
-    Loop(Option<String>, String),
-    TestShouldLoop,
-    Break,
-    Continue,
+    /// Pops the top of the stack and puts it in the variable named
+    /// `String` if the variable already exists.
+    SetIfSet(String),
+
+    /// Calls the function named `String` with `usize` arguments,
+    /// which need to be popped off the stack.
     Call(String, usize),
-    Exit,
+    /// End a function call.
     Return,
+    /// End the program.
+    Exit,
+
+    /// Jumps to a Label. Consumed by the compiler.
+    JumpTo(String),
+    /// Jumps to a Label if the top of the stack is true. Pops it.
+    JumpToIfTrue(String),
+    /// Jumps to a Label if the top of the stack is false. Pops it.
+    JumpToIfFalse(String),
+    /// Jumps by `isize`, relative to the current location.
+    JumpBy(String, isize),
+    /// Pops the top of the stack and, if it's true, jumps by `isize.`
+    JumpByIfTrue(String, isize),
+    /// Pops the top of the stack and, if it's false, jumps by `isize.`
+    JumpByIfFalse(String, isize),
+
+    /// No-op. Should be handled by the compiler.
+    Break,
+    /// No-op. Should be handled by the compiler.
+    Continue,
+
+    /// Used to start a loop. TODO: remove
+    InitLoop,
+    /// Run at the top of each loop iteration. TODO: remove
+    Loop(Option<String>, String),
+    /// Used before `EndLoop`, to see if we should jump. TODO: remove
+    TestShouldLoop,
+    /// Used to end a loop. TODO: remove
+    EndLoop,
 }
 
 pub fn compile(ast: AST) -> Result<Vec<Code>> {

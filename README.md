@@ -114,6 +114,20 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
 
 ## TODO
 
+### next
+
+- [ ] big
+  - [ ] redo tags
+  - [ ] dynamic tag attributes
+  - [ ] string interpolation
+  - [ ] def <tag>
+  - [ ] def func
+- [ ] small
+  - [ ] hash/array/string index
+  - [ ] do syntax
+
+----
+
 - [ ] HTMLized error page
 - [ ] `do` syntax
 - [ ] Basic types

@@ -170,7 +170,8 @@ impl<'s, 't> Parser<'s, 't> {
 
     /// Parse a string.
     fn string(&mut self) -> Result<Expr> {
-        let lit = self.expect(Syntax::String)?.to_string();
+        let tok = self.expect(Syntax::String)?;
+        let lit = tok.to_string();
         if lit.contains("${") {
             let mut parts = vec![];
             let mut idx = 0;
@@ -185,7 +186,12 @@ impl<'s, 't> Parser<'s, 't> {
                     }
                 }
                 // What! Rust 'lifetime magic.
-                let mut ast = scan(&lit[idx..end]).and_then(|t| parse(&t))?; // TODO: convert pos # in errors
+                let mut ast = scan(&lit[idx..end])
+                    .and_then(|t| parse(&t))
+                    .map_err(|mut e| {
+                        e.pos += tok.pos + idx - 1; // probably not right yet...
+                        e
+                    })?;
                 parts.append(&mut ast.exprs);
                 idx = end + 1;
             }

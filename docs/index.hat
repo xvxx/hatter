@@ -2,7 +2,7 @@
     <link href="new.css" rel="stylesheet" />
     <link href="prism.css" rel="stylesheet" />
     <title> Hatter
-    <style>
+    <style> ```
         :root {
             --yellow: #F9F251;
             --pink: #E9648F;
@@ -92,6 +92,7 @@
             margin-top: 50px;
             margin-left: 50px;
         }
+    ```
 
 <body>
     <script src="prism.js"></script>

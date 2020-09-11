@@ -54,6 +54,10 @@ pub fn builtins() -> HashMap<String, Builtin> {
             if let Some(Value::Number(b)) = args.get(1) {
                 return Value::Number(a + b);
             }
+        } else if let Some(Value::String(a)) = args.get(0) {
+            if let Some(Value::String(b)) = args.get(1) {
+                return Value::String(format!("{}{}", a, b));
+            }
         }
         Value::None
     }

@@ -6,7 +6,7 @@
 > that have had a prior exposure to _Hatter_: as potential programmers
 > they are mentally mutilated beyond hope of regeneration.
 >
-> -– Edsger W. Dijkstra, certainly
+> -– Edsger W. Dijkstra, allegedly
 
 Hatter is an HTML templating language that can be used server side to
 produce static HTML. Its syntax is a cheap knock-off of

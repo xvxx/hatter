@@ -258,6 +258,32 @@ impl Parser {
                 self.expect(Syntax::Bracket(']'))?;
                 Ok(Expr::List(list))
             }
+            // Map
+            Syntax::Bracket('{') => {
+                self.next();
+                if self.peek_is(Syntax::Special(';')) {
+                    self.next();
+                }
+                let mut map = vec![];
+                while !self.peek_eof() && !self.peek_is(Syntax::Bracket('}')) {
+                    let key = match self.peek_kind() {
+                        Syntax::Word | Syntax::String | Syntax::Number => self.next().to_string(),
+                        _ => return Err(self.error("String key name")),
+                    };
+                    self.expect(Syntax::Special(':'))?;
+                    let val = self.expr()?;
+                    map.push((key, val));
+                    if self.peek_is(Syntax::Special(';')) {
+                        self.next();
+                    } else if self.peek_is(Syntax::Bracket('}')) {
+                        break;
+                    } else {
+                        self.expect(Syntax::Special(','))?;
+                    }
+                }
+                self.expect(Syntax::Bracket('}'))?;
+                Ok(Expr::Map(map))
+            }
             Syntax::Word => {
                 let word = self.word()?;
                 if !self.peek_is(Syntax::Bracket('(')) {
@@ -317,7 +343,11 @@ impl Parser {
                 }
 
                 // Literal
-                Syntax::String | Syntax::TripleString | Syntax::Number | Syntax::Bracket('[') => {
+                Syntax::String
+                | Syntax::TripleString
+                | Syntax::Number
+                | Syntax::Bracket('[')
+                | Syntax::Bracket('{') => {
                     block.push(self.expr()?);
                 }
 

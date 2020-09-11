@@ -11,6 +11,7 @@ struct Lexer<'s> {
     chars: Peekable<CharIndices<'s>>, // iterator
     cur: char,                        // current character
     in_tag: bool,                     // parsing <tag>?
+    in_container: usize,              // parsing in [] or {} ?
 }
 
 trait Reserved {
@@ -45,6 +46,7 @@ impl<'s> Lexer<'s> {
             indents: vec![],
             cur: '0',
             in_tag: false,
+            in_container: 0,
         }
     }
 
@@ -107,7 +109,6 @@ impl<'s> Lexer<'s> {
             let start = self.pos;
             let kind = match c {
                 '\n' => self.scan_newline()?,
-                ')' | '[' | ']' | '{' | '}' => Syntax::Bracket(c),
                 ';' | ',' | '#' | '.' | '@' | '/' => Syntax::Special(c),
                 '"' | '\'' | '`' => self.scan_string(c)?,
                 ':' => {
@@ -157,6 +158,15 @@ impl<'s> Lexer<'s> {
                         self.scan_word()?
                     }
                 }
+                '[' | '{' => {
+                    self.in_container += 1;
+                    Syntax::Bracket(c)
+                }
+                ']' | '}' => {
+                    self.in_container -= 1;
+                    Syntax::Bracket(c)
+                }
+                ')' => Syntax::Bracket(c),
                 '(' => {
                     if self.in_tag && self.prev_is(Syntax::Special('=')) {
                         let mut open = 0;
@@ -272,6 +282,10 @@ impl<'s> Lexer<'s> {
 
     /// Figure out indents and dedents.
     fn scan_newline(&mut self) -> Result<Syntax> {
+        if self.in_container > 0 {
+            return Ok(Syntax::Special(';'));
+        }
+
         let start = self.pos;
         let mut indent = 0;
         loop {

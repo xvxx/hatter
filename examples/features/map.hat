@@ -1,8 +1,14 @@
 { first: "Bob", last: "Bobberson", age: 47}
 
-{
+bilbo := {
     first: "Bilbo"
     last: "Swaggins"
     age: 111
     "Place of Birth": "The Shire", "Favorite Food": "Pie"
 }
+
+<table>
+    for k, v in bilbo
+        <tr>
+            <td> k </>
+            <td> v </>

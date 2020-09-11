@@ -8,6 +8,7 @@ pub enum Expr {
     String(String),
     Word(String),
     List(Vec<Expr>),
+    Map(Vec<(String, Expr)>),
     Call(String, Vec<Expr>),
     Tag(Tag),
     If(Vec<(Expr, Vec<Expr>)>),
@@ -28,6 +29,13 @@ impl Expr {
                 "[{}]",
                 list.iter()
                     .map(|ex| ex.to_string())
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            ),
+            Expr::Map(map) => format!(
+                "{{{}}}",
+                map.iter()
+                    .map(|(k, v)| format!("{}: {}", k.to_string(), v.to_string()))
                     .collect::<Vec<_>>()
                     .join(", ")
             ),

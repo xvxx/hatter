@@ -1,6 +1,6 @@
 use {
     crate::{builtins, Builtin, Code, Result, Value},
-    std::collections::HashMap,
+    std::collections::{BTreeMap, HashMap},
 };
 
 pub type Env = HashMap<String, Value>;
@@ -170,6 +170,20 @@ impl VM {
                     self.ip += 1;
                     let list: Vec<_> = self.stack.drain(self.stack.len() - len..).collect();
                     self.push(list);
+                }
+                Code::Map(len) => {
+                    self.ip += 1;
+                    let mut map = BTreeMap::new();
+                    let (keys, values): (Vec<_>, Vec<_>) = self
+                        .stack
+                        .drain(self.stack.len() - (len * 2)..)
+                        .enumerate()
+                        .partition(|(i, _)| i % 2 == 0);
+                    for (i, (_, k)) in keys.iter().enumerate() {
+                        let (_, v) = &values[i];
+                        map.insert(k.to_string(), v.clone());
+                    }
+                    self.push(Value::Map(map));
                 }
                 Code::Return => self.ip = self.pop_call(),
                 Code::Call(name, arity) => {

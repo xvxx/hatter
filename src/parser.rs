@@ -165,7 +165,7 @@ impl<'s, 't> Parser<'s, 't> {
 
     /// Parse a number.
     fn number(&mut self) -> Result<Expr> {
-        Ok(Expr::Number(self.expect(Syntax::Number)?.to_string()))
+        Ok(Expr::Number(self.expect(Syntax::Number)?.to_f64()?))
     }
 
     /// Parse a string.

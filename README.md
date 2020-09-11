@@ -136,6 +136,7 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
   - [ ] #{expr}
   - [ ] @{expr}
 
+- [ ] repl
 - [ ] def <tag attr=Type>
 - [ ] def fn(arg Type, arg Type) Type
 - [ ] convert lexer to bytes ala https://github.com/nathanwhit/minimal-yaml

@@ -190,7 +190,10 @@ impl VM {
                         args.push(self.pop_stack());
                     }
                     let args = args.into_iter().rev().collect::<Vec<_>>();
-                    if let Some(f) = self.builtins.get(name) {
+                    if let Some(Value::Fn(f)) = self.lookup(name) {
+                        let retval = f(self, &args);
+                        self.push(retval);
+                    } else if let Some(f) = self.builtins.get(name) {
                         let retval = f(self, &args);
                         self.push(retval);
                     } else {

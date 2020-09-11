@@ -53,6 +53,17 @@ macro_rules! scan_error {
     };
 }
 
+/// Create an error at a position in the source.
+macro_rules! pos_error {
+    ($pos:expr, $msg:expr) => {{
+        use crate::Error;
+        Err(Error::new($msg.into(), $pos, 1))
+    }};
+    ($msg:expr, $($args:expr),*) => {
+        pos_error!(format!($msg, $($args),*));
+    };
+}
+
 /// Convenient way to create an Err(Error{}).
 macro_rules! error {
     ($msg:expr) => {{

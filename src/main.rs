@@ -1,5 +1,5 @@
 use {
-    hatter::{compile, parse, scan, vm, Code, TokenStream, AST},
+    hatter::{compile, parse, scan, vm, Code, Token, AST},
     std::{env, io},
 };
 
@@ -40,7 +40,7 @@ fn main() -> Result<(), io::Error> {
         return Ok(());
     }
 
-    let ast = parse(tokens)
+    let ast = parse(&tokens)
         .map_err(|e| print_error(&path, &source, e))
         .unwrap();
     if command == "parse" {
@@ -82,8 +82,9 @@ Commands:
     Ok(())
 }
 
-fn print_tokens(mut tokens: TokenStream) {
-    while let Some(tok) = tokens.next() {
+fn print_tokens(mut tokens: Vec<Token>) {
+    while !tokens.is_empty() {
+        let tok = tokens.remove(0);
         println!(
             "({:>03}:{:>03}) {:<15} {}",
             tok.pos,

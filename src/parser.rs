@@ -1,5 +1,5 @@
 use {
-    crate::{Error, Expr, Result, Syntax, Tag, TokenPos, TokenStream, AST},
+    crate::{Error, Expr, Result, Syntax, Tag, Token, AST},
     std::collections::HashMap,
 };
 
@@ -7,9 +7,10 @@ use {
 const STACK_SIZE: usize = 1000; // infinite loop protection
 
 #[derive(Debug)]
-pub struct Parser {
+pub struct Parser<'s, 't> {
     ast: AST,                           // what we're building
-    tokens: TokenStream,                // code
+    tokens: &'t [Token<'s>],            // code
+    pos: usize,                         // position in tokens vec
     tags: usize,                        // open tags
     operators: HashMap<String, String>, // operators like + - * /
 
@@ -17,19 +18,20 @@ pub struct Parser {
     peeked: usize, // infinite loop protection hack
 }
 
-pub fn parse(tokens: TokenStream) -> Result<AST> {
+pub fn parse<'t>(tokens: &'t [Token]) -> Result<AST> {
     let mut parser = Parser::from(tokens);
     parser.parse()?;
     Ok(parser.ast)
 }
 
-impl Parser {
+impl<'s, 't> Parser<'s, 't> {
     /// Create a `Parser` from a `TokenStream`.
-    pub fn from(tokens: TokenStream) -> Parser {
+    pub fn from(tokens: &'t [Token<'s>]) -> Parser<'s, 't> {
         Parser {
             tokens,
             ast: AST::new(),
             tags: 0,
+            pos: 0,
             operators: default_operators(),
             #[cfg(debug_assertions)]
             peeked: 0,
@@ -39,19 +41,9 @@ impl Parser {
     /// Parse `TokenStream` into `AST`.
     pub fn parse(&mut self) -> Result<()> {
         let mut ast = AST::new();
-        let mut first = true;
-        let mut autohtml = false;
 
         while !self.peek_eof() {
             let mut block = self.block()?;
-            if first {
-                first = false;
-                if first_is_head(&block) {
-                    autohtml = true;
-                    ast.exprs.push(Expr::String("<!DOCTYPE html>".into()));
-                    ast.exprs.push(Expr::String("<html>".into()));
-                }
-            }
             ast.exprs.append(&mut block);
             match self.peek_kind() {
                 Syntax::Dedent | Syntax::Special(';') => {
@@ -61,36 +53,32 @@ impl Parser {
             }
         }
 
-        if autohtml {
-            ast.exprs.push(Expr::String("</html>".into()));
-        }
-
         self.ast = ast;
         Ok(())
     }
 
     /// Peek at next `Token`.
-    fn peek(&mut self) -> Option<TokenPos> {
+    fn peek(&mut self) -> Option<Token> {
         #[cfg(debug_assertions)]
         {
             self.peeked += 1;
             if self.peeked > STACK_SIZE {
-                panic!("infinite loop while peek()ing: {:?}", self.tokens.peek());
+                panic!("infinite loop while peek()ing: {:?}", self.tokens.get(0));
             }
         }
-        self.tokens.peek()
+        self.tokens.get(self.pos).map(|t| *t)
     }
 
     /// Peek two ahead.
-    fn peek2(&mut self) -> Option<TokenPos> {
+    fn peek2(&mut self) -> Option<Token> {
         #[cfg(debug_assertions)]
         {
             self.peeked += 1;
             if self.peeked > STACK_SIZE {
-                panic!("infinite loop while peek()ing: {:?}", self.tokens.peek());
+                panic!("infinite loop while peek()ing: {:?}", self.tokens.get(0));
             }
         }
-        self.tokens.peek2()
+        self.tokens.get(self.pos + 1).map(|t| *t)
     }
 
     /// Get the next token's kind.
@@ -118,17 +106,23 @@ impl Parser {
     }
 
     /// Advance iterator an return next `Token`.
-    fn try_next(&mut self) -> Option<TokenPos> {
-        self.tokens.next()
+    fn try_next(&mut self) -> Option<Token> {
+        if !self.tokens.is_empty() {
+            Some(self.next())
+        } else {
+            None
+        }
     }
 
     /// Advance iterator an return next `Token`.
-    fn next(&mut self) -> TokenPos {
+    fn next(&mut self) -> Token {
         #[cfg(debug_assertions)]
         {
             self.peeked = 0;
         }
-        self.tokens.next().unwrap()
+        let pos = self.pos;
+        self.pos += 1;
+        *self.tokens.get(pos).unwrap()
     }
 
     /// Skip token.
@@ -136,11 +130,6 @@ impl Parser {
         while self.peek_is(kind) {
             self.next();
         }
-    }
-
-    /// Return current `Token`.
-    fn current(&mut self) -> TokenPos {
-        self.tokens.current().unwrap()
     }
 
     /// Trigger parse error for next() token.
@@ -156,32 +145,13 @@ impl Parser {
         }
     }
 
-    /// Trigger parse error for current() token.
-    fn error_current<S: AsRef<str>>(&mut self, msg: S) -> Error {
-        let got = self.current();
-        Error::new(
-            format!("expected {}, got {:?}", msg.as_ref(), got.kind),
-            got.pos,
-            got.len,
-        )
-    }
-
     /// Consumes and returns the next token if it's of `kind`,
     /// otherwise errors.
-    fn expect(&mut self, kind: Syntax) -> Result<TokenPos> {
+    fn expect(&mut self, kind: Syntax) -> Result<Token> {
         if self.peek_kind() == kind {
             Ok(self.next())
         } else {
             Err(self.error(format!("{:?}", kind)))
-        }
-    }
-
-    /// Parse a literal as a string expression.
-    fn as_string(&mut self) -> Result<Expr> {
-        if let Some(next) = self.try_next() {
-            Ok(Expr::String(next.to_string()))
-        } else {
-            Err(self.error("a literal"))
         }
     }
 
@@ -192,17 +162,12 @@ impl Parser {
 
     /// Parse a number.
     fn number(&mut self) -> Result<Expr> {
-        Ok(Expr::Number(self.expect(Syntax::Number)?.to_f64()?))
+        Ok(Expr::Number(self.expect(Syntax::Number)?.to_string()))
     }
 
     /// Parse a string.
     fn string(&mut self) -> Result<Expr> {
         Ok(Expr::String(self.expect(Syntax::String)?.to_string()))
-    }
-
-    /// Parse a """triple string""".
-    fn triple_string(&mut self) -> Result<Expr> {
-        Ok(Expr::String(self.expect(Syntax::TripleString)?.to_string()))
     }
 
     /// Parse a word.
@@ -216,18 +181,20 @@ impl Parser {
 
     /// Parse a code expression.
     fn expr(&mut self) -> Result<Expr> {
+        if let Some(p) = self.peek2() {
+            if p.kind == Syntax::Word && matches!(p.literal(), ":=" | "=") {
+                let reassign = p.literal() == "=";
+                let name = self.expect(Syntax::Word)?.to_string();
+                self.next(); // skip op
+                return Ok(Expr::Assign(name, Box::new(self.expr()?), reassign));
+            }
+        }
+
         let left = self.atom()?;
         if let Some(next) = self.peek() {
             if next.kind == Syntax::Word {
                 let lit = next.to_string();
-                if lit == ":=" || lit == "=" {
-                    self.next();
-                    return Ok(Expr::Assign(
-                        left.to_string(),
-                        Box::new(self.expr()?),
-                        lit == "=",
-                    ));
-                } else if let Some(f) = self.operators.get(&lit) {
+                if let Some(f) = self.operators.get(&lit) {
                     let op = f.clone();
                     self.next();
                     let right = self.expr()?;
@@ -242,7 +209,6 @@ impl Parser {
     fn atom(&mut self) -> Result<Expr> {
         match self.peek_kind() {
             Syntax::String => Ok(self.string()?),
-            Syntax::TripleString => Ok(self.triple_string()?),
             Syntax::Number => Ok(self.number()?),
             Syntax::Bool => Ok(self.boolean()?),
             Syntax::Bracket('(') => {
@@ -354,11 +320,7 @@ impl Parser {
                 }
 
                 // Literal
-                Syntax::String
-                | Syntax::TripleString
-                | Syntax::Number
-                | Syntax::Bracket('[')
-                | Syntax::Bracket('{') => {
+                Syntax::String | Syntax::Number | Syntax::Bracket('[') | Syntax::Bracket('{') => {
                     block.push(self.expr()?);
                 }
 
@@ -480,10 +442,7 @@ impl Parser {
             return Ok(Expr::Tag(tag));
         }
 
-        tag.contents = match tag.tag.as_ref() {
-            "style" | "script" if tag.attrs.is_empty() => vec![self.raw()?],
-            _ => self.block()?,
-        };
+        tag.contents = self.block()?;
 
         match self.peek_kind() {
             Syntax::Special(';') => self.tags -= 1,
@@ -527,6 +486,7 @@ impl Parser {
 
         loop {
             let next = self.next();
+            let pos = next.pos;
             match next.kind {
                 Syntax::Bracket('>') => break,
                 Syntax::Special('/') => {
@@ -552,47 +512,14 @@ impl Parser {
                             ),
                         ),
 
-                        _ => return Err(self.error_current("Word, Number, or String")),
+                        _ => return pos_error!(pos, "Expected Word, Number, or String"),
                     }
                 }
-                _ => return Err(self.error_current("Attribute or >")),
+                _ => return pos_error!(pos, "Expected Attribute or >"),
             }
         }
 
         Ok(tag)
-    }
-
-    /// Parse text between INDENT and DEDENT as a single string.
-    /// Mostly for <style> and <script>.
-    ///
-    /// ~ Eventually we'll want to dip into parsing <style> and adding
-    /// features there too... ~
-    fn raw(&mut self) -> Result<Expr> {
-        let mut indents = 0;
-        let tok = self.expect(Syntax::Indent)?;
-        let start = tok.pos;
-        while !self.peek_eof() {
-            match self.peek_kind() {
-                Syntax::Indent => {
-                    self.next();
-                    indents += 1;
-                }
-                Syntax::Dedent => {
-                    if indents > 0 {
-                        self.next();
-                        indents -= 1;
-                    } else {
-                        break;
-                    }
-                }
-                _ => {
-                    self.next();
-                }
-            }
-        }
-        let last = self.current();
-        let end = last.pos + last.len;
-        Ok(Expr::String(self.tokens.source()[start..end].into()))
     }
 }
 

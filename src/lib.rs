@@ -27,7 +27,7 @@ pub use {
     parser::parse,
     syntax::Syntax,
     tag::Tag,
-    token::{Token, TokenPos, TokenStream},
+    token::Token,
     value::{Builtin, Value},
     vm::{Env, VM},
 };

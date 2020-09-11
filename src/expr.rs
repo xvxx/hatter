@@ -4,7 +4,7 @@ use crate::Tag;
 pub enum Expr {
     None,
     Bool(bool),
-    Number(f64),
+    Number(String),
     String(String),
     Word(String),
     List(Vec<Expr>),

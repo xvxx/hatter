@@ -1,10 +1,10 @@
 use {
-    crate::{token, Result, Syntax, Token, TokenStream},
+    crate::{token, Result, Syntax, Token},
     std::{iter::Peekable, str::CharIndices},
 };
 
 struct Lexer<'s> {
-    tokens: Vec<Token>,               // list we're building
+    tokens: Vec<Token<'s>>,           // list we're building
     source: &'s str,                  // template source code
     pos: usize,                       // current position in `source`
     indents: Vec<usize>,              // current depth
@@ -26,13 +26,11 @@ impl Reserved for char {
     }
 }
 
-/// Scans source code and produces a `TokenStream`.
-pub fn scan<S: AsRef<str>>(source: S) -> Result<TokenStream> {
-    let source = source.as_ref();
+/// Scans source code and produces a list of `Token`s.
+pub fn scan<'s>(source: &'s str) -> Result<Vec<Token<'s>>> {
     let mut lexer = Lexer::from(source);
     lexer.scan()?;
-    let tokens = lexer.tokens;
-    Ok(TokenStream::from(source.to_string(), tokens))
+    Ok(lexer.tokens)
 }
 
 impl<'s> Lexer<'s> {
@@ -88,7 +86,7 @@ impl<'s> Lexer<'s> {
 
     /// Add single Syntax to tokens list.
     fn append(&mut self, kind: Syntax) -> Result<()> {
-        self.tokens.push(Token::new(kind, self.pos, 1));
+        self.tokens.push(Token::new(kind, self.pos, 1, ""));
         Ok(())
     }
 
@@ -114,7 +112,7 @@ impl<'s> Lexer<'s> {
                 ':' => {
                     if self.peek_is('=') {
                         self.next();
-                        Syntax::Word
+                        self.scan_word()?
                     } else {
                         Syntax::Special(c)
                     }
@@ -124,7 +122,7 @@ impl<'s> Lexer<'s> {
                         Syntax::Special(c)
                     } else if self.peek_is('=') {
                         self.next();
-                        Syntax::Word
+                        self.scan_word()?
                     } else {
                         self.scan_word()?
                     }
@@ -199,8 +197,13 @@ impl<'s> Lexer<'s> {
                 continue;
             }
 
-            let end = self.pos - start + self.cur.len_utf8();
-            self.tokens.push(Token::new(kind, start, end));
+            let len = self.pos - start + self.cur.len_utf8();
+            self.tokens.push(Token::new(
+                kind,
+                start,
+                len,
+                &self.source[start..start + len],
+            ));
         }
 
         // Add final semicolon before EOF, if not present.
@@ -238,7 +241,7 @@ impl<'s> Lexer<'s> {
     /// Scan until closing delimiter.
     /// Call when the first char of the string will be `next()`.
     fn scan_string(&mut self, delimiter: char) -> Result<Syntax> {
-        let start = self.pos;
+        let mut start = self.pos + 1;
         let mut prev = '0'; // TODO: actual escape code parsing
         let mut triple = false;
 
@@ -248,18 +251,33 @@ impl<'s> Lexer<'s> {
             if self.peek_is(delimiter) {
                 self.next();
                 triple = true;
+                start += 2;
             }
         }
 
         while let Some(c) = self.next() {
             if c == delimiter && prev != '\\' {
                 if !triple {
-                    return Ok(Syntax::String);
+                    let len = self.pos - start - 1;
+                    self.tokens.push(Token::new(
+                        Syntax::String,
+                        start,
+                        len,
+                        &self.source[start..=start + len],
+                    ));
+                    return Ok(Syntax::None);
                 } else if self.peek_is(delimiter) {
                     self.next();
                     if self.peek_is(delimiter) {
                         self.next();
-                        return Ok(Syntax::TripleString);
+                        let len = self.pos - start - 3;
+                        self.tokens.push(Token::new(
+                            Syntax::String,
+                            start,
+                            len,
+                            &self.source[start..=start + len],
+                        ));
+                        return Ok(Syntax::None);
                     }
                 }
             }
@@ -317,7 +335,7 @@ impl<'s> Lexer<'s> {
         // greater indent than current depth: Indent
         if indent > last {
             // set pos to first \n we saw, we may have skipped some
-            self.tokens.push(Token::new(Syntax::Indent, start, 1));
+            self.tokens.push(Token::new(Syntax::Indent, start, 1, ""));
             self.indents.push(indent);
             return Ok(Syntax::None);
         }

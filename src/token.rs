@@ -3,37 +3,36 @@ use {
     std::{fmt, ops},
 };
 
-mod pos;
-mod stream;
-
-pub use pos::TokenPos;
-pub use stream::TokenStream;
-
-#[derive(Debug)]
-pub struct Token {
+#[derive(Debug, Clone, Copy)]
+pub struct Token<'s> {
     pub pos: usize,
     pub len: usize,
     pub kind: Syntax,
+    lit: &'s str,
 }
 
-impl Token {
+impl<'s> Token<'s> {
     /// Create a Token.
-    pub fn new(kind: Syntax, pos: usize, len: usize) -> Token {
-        Token { kind, pos, len }
+    pub fn new(kind: Syntax, pos: usize, len: usize, lit: &'s str) -> Token<'s> {
+        Token {
+            kind,
+            pos,
+            len,
+            lit,
+        }
     }
 
-    /// Location in source code.
-    pub fn range(&self) -> std::ops::Range<usize> {
+    /// Get the literal value in source code, if it has one.
+    pub fn literal(&self) -> &str {
         match self.kind {
-            Syntax::TripleString => {
-                let start = self.pos + 3;
-                start..start + self.len - 7
-            }
-            Syntax::JS | Syntax::String => {
-                let start = self.pos + 1;
-                start..start + self.len - 2
-            }
-            _ => self.pos..self.pos + self.len,
+            Syntax::Dedent | Syntax::Indent => "",
+            Syntax::Special(..) | Syntax::Bracket(..) => "",
+            _ => self.lit,
         }
+    }
+
+    /// Create a string of the literal value.
+    pub fn to_string(&self) -> String {
+        self.literal().to_string()
     }
 }

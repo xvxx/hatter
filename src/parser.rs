@@ -136,8 +136,8 @@ impl<'s, 't> Parser<'s, 't> {
     }
 
     /// Trigger parse error for next() token.
-    fn error<S: AsRef<str>>(&mut self, msg: S) -> Error {
-        if let Some(got) = self.try_next() {
+    fn error<T, S: AsRef<str>>(&mut self, msg: S) -> Result<T> {
+        Err(if let Some(got) = self.try_next() {
             Error::new(
                 format!("expected {}, got {:?}", msg.as_ref(), got.kind),
                 got.pos,
@@ -145,7 +145,7 @@ impl<'s, 't> Parser<'s, 't> {
             )
         } else {
             Error::new(format!("expected {}, got EOF", msg.as_ref()), 0, 0)
-        }
+        })
     }
 
     /// Consumes and returns the next token if it's of `kind`,
@@ -154,7 +154,7 @@ impl<'s, 't> Parser<'s, 't> {
         if self.peek_kind() == kind {
             Ok(self.next())
         } else {
-            Err(self.error(format!("{:?}", kind)))
+            self.error(format!("{:?}", kind))
         }
     }
 
@@ -247,7 +247,7 @@ impl<'s, 't> Parser<'s, 't> {
                 while !self.peek_eof() && !self.peek_is(Syntax::Bracket('}')) {
                     let key = match self.peek_kind() {
                         Syntax::Word | Syntax::String | Syntax::Number => self.next().to_string(),
-                        _ => return Err(self.error("String key name")),
+                        _ => return self.error("String key name"),
                     };
                     self.expect(Syntax::Special(':'))?;
                     let val = self.expr()?;
@@ -282,13 +282,13 @@ impl<'s, 't> Parser<'s, 't> {
                             Syntax::String | Syntax::Number | Syntax::Bool | Syntax::Word => {
                                 args.push(self.expr()?);
                             }
-                            _ => return Err(self.error(")")),
+                            _ => return self.error(")"),
                         }
                     }
                     Ok(Expr::Call(name, args))
                 }
             }
-            _ => Err(self.error("Atom")),
+            _ => self.error("Atom"),
         }
     }
 
@@ -357,7 +357,7 @@ impl<'s, 't> Parser<'s, 't> {
                 }
 
                 // Unexpected
-                _ => return Err(self.error("Block stmt")),
+                _ => return self.error("Block stmt"),
             };
         }
 
@@ -383,7 +383,7 @@ impl<'s, 't> Parser<'s, 't> {
 
         let in_word = self.expect(Syntax::Word)?;
         if in_word.literal() != "in" {
-            return Err(self.error("in"));
+            return self.error("in");
         }
 
         let iter = self.expr()?;
@@ -460,7 +460,7 @@ impl<'s, 't> Parser<'s, 't> {
     /// Parse just a closing tag, starting after the <
     fn close_tag(&mut self) -> Result<()> {
         if self.tags == 0 {
-            return Err(self.error("open tags"));
+            return self.error("open tags");
         }
         self.tags -= 1;
         self.expect(Syntax::Bracket('<'))?;

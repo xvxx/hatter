@@ -61,6 +61,7 @@ impl VM {
     }
 
     pub fn run(&mut self, inst: Vec<Code>) -> Result<()> {
+        self.ip = 0;
         while let Some(inst) = inst.get(self.ip) {
             // println!("\n>> VM: {:?}\nSTACK: {:?}\n", inst, self.stack);
             match inst {

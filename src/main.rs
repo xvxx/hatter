@@ -96,7 +96,7 @@ fn print_tokens(mut tokens: TokenStream) {
 
 fn print_ast(ast: AST) {
     for expr in ast.exprs {
-        println!("{:?}", expr);
+        println!("{:#?}", expr);
     }
 }
 

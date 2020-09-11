@@ -11,7 +11,7 @@ struct Lexer<'s> {
     chars: Peekable<CharIndices<'s>>, // iterator
     cur: char,                        // current character
     in_tag: bool,                     // parsing <tag>?
-    in_container: usize,              // parsing in [] or {} ?
+    in_container: usize,              // parsing inside [] {} <> ?
 }
 
 trait Reserved {
@@ -300,7 +300,7 @@ impl<'s> Lexer<'s> {
 
     /// Figure out indents and dedents.
     fn scan_newline(&mut self) -> Result<Syntax> {
-        if self.in_container > 0 {
+        if self.in_tag || self.in_container > 0 {
             return Ok(Syntax::Special(';'));
         }
 

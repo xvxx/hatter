@@ -1,0 +1,5 @@
+a := "one"
+b := "two"
+c := a + " and " + b + " and " + "three "
+<b> "the answer is: ${c}"
+<b> "aka ${a + b} or ${a} + ${b}"

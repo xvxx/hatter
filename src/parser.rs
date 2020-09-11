@@ -1,5 +1,5 @@
 use {
-    crate::{Error, Expr, Result, Syntax, Tag, Token, AST},
+    crate::{scan, Error, Expr, Result, Syntax, Tag, Token, AST},
     std::collections::HashMap,
 };
 
@@ -170,7 +170,32 @@ impl<'s, 't> Parser<'s, 't> {
 
     /// Parse a string.
     fn string(&mut self) -> Result<Expr> {
-        Ok(Expr::String(self.expect(Syntax::String)?.to_string()))
+        let lit = self.expect(Syntax::String)?.to_string();
+        if lit.contains("${") {
+            let mut parts = vec![];
+            let mut idx = 0;
+            while let Some(i) = lit[idx..].find("${") {
+                parts.push(Expr::String(lit[idx..i + idx].into()));
+                idx += i + 2;
+                let mut end = idx;
+                for (x, b) in lit[idx..].bytes().enumerate() {
+                    if b == b'}' {
+                        end = idx + x;
+                        break;
+                    }
+                }
+                // What! Rust 'lifetime magic.
+                let mut ast = scan(&lit[idx..end]).and_then(|t| parse(&t))?; // TODO: convert pos # in errors
+                parts.append(&mut ast.exprs);
+                idx = end + 1;
+            }
+            if idx < lit.len() {
+                parts.push(Expr::String(lit[idx..].into()));
+            }
+            Ok(Expr::Call("concat".into(), parts))
+        } else {
+            Ok(Expr::String(lit))
+        }
     }
 
     /// Parse a word.

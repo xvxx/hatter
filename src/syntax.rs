@@ -20,6 +20,6 @@ impl Reserved for char {
     #[rustfmt::skip]
     fn is_reserved(&self) -> bool {
         matches!(self, '(' | ')' | '[' | ']' | '{' | '}' | '<' | '>' |
-            ';' | ',' | '.' | '#' | '@' | ':' | '=' )
+            ';' | ',' | '.' | '#' | '@' | ':' | '=' | '/' )
     }
 }

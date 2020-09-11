@@ -10,24 +10,22 @@ pub struct VM {
     calls: Vec<usize>, // call stack
     envs: Vec<Env>,
     ip: usize,
-    out: String,
     builtins: HashMap<String, Builtin>,
 }
 
-pub fn run(inst: Vec<Code>) -> Result<String> {
+pub fn run(inst: Vec<Code>) -> Result<()> {
     let mut vm = VM::new();
     vm.run(inst)?;
-    Ok(vm.out)
+    Ok(())
 }
 
 impl VM {
-    fn new() -> VM {
+    pub fn new() -> VM {
         VM {
             ip: 0,
             stack: vec![],
             calls: vec![],
             envs: vec![Env::new()],
-            out: String::new(),
             builtins: builtins(),
         }
     }
@@ -62,7 +60,7 @@ impl VM {
         self.env().insert(key.as_ref().to_string(), val.into());
     }
 
-    fn run(&mut self, inst: Vec<Code>) -> Result<()> {
+    pub fn run(&mut self, inst: Vec<Code>) -> Result<()> {
         while let Some(inst) = inst.get(self.ip) {
             // println!("\n>> VM: {:?}\nSTACK: {:?}\n", inst, self.stack);
             match inst {

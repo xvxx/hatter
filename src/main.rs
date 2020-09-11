@@ -74,10 +74,9 @@ fn main() -> Result<(), io::Error> {
         return Ok(());
     }
 
-    let out = vm::run(compiled)
+    vm::run(compiled)
         .map_err(|e| print_error(&path, &source, e))
         .unwrap();
-    println!("{}", out);
     Ok(())
 }
 

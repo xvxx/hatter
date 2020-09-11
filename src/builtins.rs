@@ -50,14 +50,20 @@ pub fn builtins() -> HashMap<String, Builtin> {
         }
     }
     fn add(_: &mut VM, args: &[Value]) -> Value {
-        if let Some(Value::Number(a)) = args.get(0) {
-            if let Some(Value::Number(b)) = args.get(1) {
-                return Value::Number(a + b);
+        if let Some(Value::Number(_)) = args.get(0) {
+            let mut sum = 0.0;
+            let mut iter = args.iter();
+            while let Some(Value::Number(x)) = iter.next() {
+                sum += x;
             }
-        } else if let Some(Value::String(a)) = args.get(0) {
-            if let Some(Value::String(b)) = args.get(1) {
-                return Value::String(format!("{}{}", a, b));
+            return Value::Number(sum);
+        } else if let Some(Value::String(_)) = args.get(0) {
+            let mut sum = String::new();
+            let mut iter = args.iter();
+            while let Some(Value::String(x)) = iter.next() {
+                sum += x;
             }
+            return Value::String(sum);
         }
         Value::None
     }

@@ -11,3 +11,15 @@ pub enum Syntax {
     Word,          // ident, symbol, etc
     JS,            // (JavaScript)
 }
+
+pub trait Reserved {
+    fn is_reserved(&self) -> bool;
+}
+
+impl Reserved for char {
+    #[rustfmt::skip]
+    fn is_reserved(&self) -> bool {
+        matches!(self, '(' | ')' | '[' | ']' | '{' | '}' | '<' | '>' |
+            ';' | ',' | '.' | '#' | '@' | ':' | '=' )
+    }
+}

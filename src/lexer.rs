@@ -1,5 +1,5 @@
 use {
-    crate::{token, Result, Syntax, Token},
+    crate::{syntax::Reserved, token, Result, Syntax, Token},
     std::{fmt, iter::Peekable, str::CharIndices},
 };
 
@@ -20,18 +20,6 @@ enum Style {
     None,
     Tabs,
     Spaces,
-}
-
-trait Reserved {
-    fn is_reserved(&self) -> bool;
-}
-
-impl Reserved for char {
-    #[rustfmt::skip]
-    fn is_reserved(&self) -> bool {
-        matches!(self, '(' | ')' | '[' | ']' | '{' | '}' | '<' | '>' |
-            ';' | ',' | '.' | '#' | '@' | ':' | '=')
-    }
 }
 
 /// Scans source code and produces a list of `Token`s.

@@ -140,20 +140,20 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
   - [ ] .class=bool?
   - [ ] #id=bool?
   - [ ] data-id=bool?
-- [ ] String interpolation
-  - [x] "hey {friend}"
-  - [ ] not for ` or ' or triples
 - [ ] Shorthand interpolation
   - [ ] .{expr}
   - [ ] .something-{expr}-else
   - [ ] #{expr}
   - [ ] @{expr}
 
-- [ ] repl
 - [ ] def <tag attr=Type>
 - [ ] def fn(arg Type, arg Type) Type
 - [ ] convert lexer to bytes ala https://github.com/nathanwhit/minimal-yaml
 - [ ] show error location when compiling
+- [ ] repl: help
+- [ ] repl: show variables
+- [ ] repl: show functions
+- [ ] repl: tab completion
 
 ### docs
 

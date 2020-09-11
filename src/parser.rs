@@ -130,6 +130,13 @@ impl Parser {
         self.tokens.next().unwrap()
     }
 
+    /// Skip token.
+    fn eat(&mut self, kind: Syntax) {
+        while self.peek_is(kind) {
+            self.next();
+        }
+    }
+
     /// Return current `Token`.
     fn current(&mut self) -> TokenPos {
         self.tokens.current().unwrap()
@@ -246,24 +253,26 @@ impl Parser {
             // List
             Syntax::Bracket('[') => {
                 self.next();
+                self.eat(Syntax::Special(';'));
                 let mut list = vec![];
-                while !self.peek_eof() {
+                while !self.peek_eof() && !self.peek_is(Syntax::Bracket(']')) {
                     list.push(self.expr()?);
-                    if self.peek_is(Syntax::Bracket(']')) {
+                    if self.peek_is(Syntax::Special(';')) {
+                        self.next();
+                    } else if self.peek_is(Syntax::Bracket(']')) {
                         break;
                     } else {
                         self.expect(Syntax::Special(','))?;
                     }
                 }
+                self.eat(Syntax::Special(';'));
                 self.expect(Syntax::Bracket(']'))?;
                 Ok(Expr::List(list))
             }
             // Map
             Syntax::Bracket('{') => {
                 self.next();
-                if self.peek_is(Syntax::Special(';')) {
-                    self.next();
-                }
+                self.eat(Syntax::Special(';'));
                 let mut map = vec![];
                 while !self.peek_eof() && !self.peek_is(Syntax::Bracket('}')) {
                     let key = match self.peek_kind() {
@@ -281,6 +290,7 @@ impl Parser {
                         self.expect(Syntax::Special(','))?;
                     }
                 }
+                self.eat(Syntax::Special(';'));
                 self.expect(Syntax::Bracket('}'))?;
                 Ok(Expr::Map(map))
             }

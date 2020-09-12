@@ -1,4 +1,5 @@
-use crate::Tag;
+mod tag;
+pub use tag::Tag;
 
 #[derive(Debug, Clone)]
 pub enum Expr {
@@ -10,10 +11,10 @@ pub enum Expr {
     List(Vec<Expr>),
     Map(Vec<(String, Expr)>),
     Call(String, Vec<Expr>),
-    Tag(Tag),
     If(Vec<(Expr, Vec<Expr>)>),
     For(Option<String>, String, Box<Expr>, Vec<Expr>), // key, val, iter, body
     Assign(String, Box<Expr>, bool),                   // var, val, reassign?
+    Tag(Tag),
 }
 
 impl Expr {

@@ -1,5 +1,4 @@
-<style>
-    label { display:block }
+<style> ` label { display:block } `
 
 <form GET="/search">
     <input:text@query/>

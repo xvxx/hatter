@@ -1,3 +1,5 @@
+abc := [1,2,3]
+
 <#list>
     <h2> "List"
     for i in abc
@@ -5,7 +7,7 @@
         <hr/>
 
 <#index>
-    <h2> List w/ indices
+    <h2> "List w/ indices"
     for i, v in abc
         <.item>
             i
@@ -15,7 +17,7 @@
 <#break>
     <h2> Testing break
     for i, v in abc
-        if gt(i, 1)
+        if i > 1
             break
             <b> "ok"
         <.item> i
@@ -23,7 +25,7 @@
 <#continue>
     <h2> Testing continue
     for i, v in abc
-        if eq(i, 1)
+        if i == 1
             continue
             <b> "ok"
         <.item> v

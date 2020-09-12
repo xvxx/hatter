@@ -1,5 +1,5 @@
 use {
-    hatter::{compile, parse, scan, vm, Code, Token, AST},
+    hatter::{compile, parse, scan, vm, Code, Syntax, Token, AST},
     std::{env, io, path},
 };
 
@@ -101,10 +101,17 @@ Commands:
 }
 
 fn print_tokens(mut tokens: Vec<Token>) {
+    let mut indent = 0;
     while !tokens.is_empty() {
         let tok = tokens.remove(0);
+        match tok.kind {
+            Syntax::Indent => indent += 1,
+            Syntax::Dedent => indent -= 1,
+            _ => {}
+        }
         println!(
-            "({:>03}:{:>03}) {:<15} {}",
+            "{}({:>03}:{:>03}) {:<15} {}",
+            "  ".repeat(indent),
             tok.pos,
             tok.len,
             format!("{:?}", tok.kind),

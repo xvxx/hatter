@@ -56,6 +56,25 @@ pub fn builtins() -> HashMap<String, Builtin> {
         }
         return Value::String(sum);
     }
+    fn index(_: &mut VM, args: &[Value]) -> Value {
+        if args.len() != 2 {
+            return Value::None;
+        }
+        let subject = &args[0];
+        let verb = &args[1];
+
+        match subject {
+            Value::Map(map) => map.get(&verb.to_string()).unwrap_or(&Value::None).clone(),
+            Value::List(list) => {
+                if let Value::Number(n) = verb {
+                    list.get(*n as usize).unwrap_or(&Value::None).clone()
+                } else {
+                    Value::None
+                }
+            }
+            _ => Value::None,
+        }
+    }
     fn add(_: &mut VM, args: &[Value]) -> Value {
         if let Some(Value::Number(_)) = args.get(0) {
             let mut sum = 0.0;
@@ -161,6 +180,7 @@ pub fn builtins() -> HashMap<String, Builtin> {
     builtin!("neq" => neq);
     builtin!("not" => not);
     builtin!("concat" => concat);
+    builtin!("index" => index);
     builtin!("add" => add);
     builtin!("sub" => sub);
     builtin!("mul" => mul);

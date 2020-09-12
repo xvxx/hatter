@@ -3,13 +3,13 @@ use {
     std::collections::{BTreeMap, HashMap},
 };
 
-pub type Env = HashMap<String, Value>;
+pub type Scope = HashMap<String, Value>;
 
 pub struct VM {
     strict: bool,      // strict mode?
     stack: Vec<Value>, // value stack
     calls: Vec<usize>, // call stack
-    envs: Vec<Env>,
+    scopes: Vec<Scope>,
     ip: usize,
     builtins: HashMap<String, Builtin>,
 }
@@ -27,7 +27,7 @@ impl VM {
             ip: 0,
             stack: vec![],
             calls: vec![],
-            envs: vec![Env::new()],
+            scopes: vec![Scope::new()],
             builtins: builtins(),
         }
     }
@@ -45,21 +45,21 @@ impl VM {
     }
 
     fn lookup(&self, key: &str) -> Option<&Value> {
-        for env in &self.envs {
-            if let Some(v) = env.get(key) {
+        for scope in &self.scopes {
+            if let Some(v) = scope.get(key) {
                 return Some(v);
             }
         }
         None
     }
 
-    fn env(&mut self) -> &mut Env {
-        let len = self.envs.len();
-        &mut self.envs[len - 1]
+    fn scope(&mut self) -> &mut Scope {
+        let len = self.scopes.len();
+        &mut self.scopes[len - 1]
     }
 
     fn set<S: AsRef<str>, V: Into<Value>>(&mut self, key: S, val: V) {
-        self.env().insert(key.as_ref().to_string(), val.into());
+        self.scope().insert(key.as_ref().to_string(), val.into());
     }
 
     pub fn run(&mut self, inst: Vec<Code>) -> Result<()> {
@@ -213,13 +213,13 @@ impl VM {
         self.ip += 1;
         self.pop_stack(); // pop counter
         self.pop_stack(); // pop iterator/list
-        self.envs.pop();
+        self.scopes.pop();
         Ok(())
     }
 
     fn init_loop(&mut self) -> Result<()> {
         self.ip += 1;
-        self.envs.push(Env::new());
+        self.scopes.push(Scope::new());
         let iter = self.pop_stack();
         match iter {
             Value::List(list) => {

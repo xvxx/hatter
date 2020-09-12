@@ -32,7 +32,7 @@ pub use {
     tag::Tag,
     token::Token,
     value::{Builtin, Value},
-    vm::{Env, VM},
+    vm::{Scope, VM},
 };
 
 pub type Result<T> = std::result::Result<T, Error>;

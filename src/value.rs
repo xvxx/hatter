@@ -1,5 +1,5 @@
 use {
-    crate::{Env, VM},
+    crate::{Scope, VM},
     std::{collections::BTreeMap, fmt},
 };
 

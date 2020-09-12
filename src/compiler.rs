@@ -1,5 +1,5 @@
 use {
-    crate::{Env, Expr, Result, Tag, Value, AST},
+    crate::{Expr, Result, Scope, Tag, Value, AST},
     std::collections::HashMap,
 };
 

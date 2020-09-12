@@ -4,6 +4,12 @@ version = "0.0.0-dev"
 authors = ["chris west <c@xvxx.io>"]
 edition = "2018"
 
+[profile.release]
+# Optimize for build speed, for now.
+lto = false
+codegen-units = 16
+opt-level = 0
+
 [features]
 repl = ["rustyline"]
 

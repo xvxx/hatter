@@ -89,15 +89,6 @@ impl<'s, 't> Parser<'s, 't> {
         self.peek_kind() == kind
     }
 
-    /// Check the next token's literal value.
-    fn peek_lit_is(&mut self, lit: &str) -> bool {
-        if let Some(p) = self.peek() {
-            p.literal() == lit
-        } else {
-            false
-        }
-    }
-
     /// Will self.next() deliver EOF?
     fn peek_eof(&mut self) -> bool {
         self.peek().is_none()
@@ -561,12 +552,13 @@ impl<'s, 't> Parser<'s, 't> {
                     tag.close();
                     self.tags -= 1;
                 }
-                Syntax::Special('#') => tag.set_id(self.expr()?),
-                Syntax::Special('.') => tag.add_class(self.expr()?),
-                Syntax::Special('@') => tag.add_attr("name", self.expr()?),
-                Syntax::Special(':') => tag.add_attr("type", self.expr()?),
+                Syntax::Special('#') => tag.set_id(self.attr()?),
+                Syntax::Special('.') => tag.add_class(self.attr()?),
+                Syntax::Special('@') => tag.add_attr(Expr::String("name".into()), self.attr()?),
+                Syntax::Special(':') => tag.add_attr(Expr::String("type".into()), self.attr()?),
                 Syntax::Word => {
-                    let name = next.to_string();
+                    self.back();
+                    let name = self.attr()?;
                     self.expect(Syntax::Special('='))?;
                     match self.peek_kind() {
                         Syntax::Number | Syntax::String(..) | Syntax::Word => {
@@ -588,6 +580,29 @@ impl<'s, 't> Parser<'s, 't> {
         }
 
         Ok(tag)
+    }
+
+    /// Parse a tag attribute, which may have {interpolation}.
+    fn attr(&mut self) -> Result<Expr> {
+        let mut parts = vec![];
+        while let Some(p) = self.peek() {
+            match p.kind {
+                Syntax::Word => parts.push(self.word()?),
+                Syntax::String(..) | Syntax::Number => parts.push(self.atom()?),
+                Syntax::Bracket('>') => break,
+                Syntax::Bracket('{') => {
+                    self.next();
+                    parts.push(self.expr()?);
+                    self.expect(Syntax::Bracket('}'))?;
+                }
+                _ => return self.error("literal or {code}"),
+            }
+        }
+        Ok(match parts.len() {
+            0 => Expr::None,
+            1 => parts.remove(0),
+            _ => Expr::Call("concat".into(), parts),
+        })
     }
 }
 

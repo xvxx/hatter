@@ -1,7 +1,6 @@
-<#coming-soon>
-    "Heya "
-    add(2, 3)
-    if gt(2,1)
-        <b> Greater
-    else
-        <i> Lesser
+"Heya "
+2 + 3
+if 2 > 1
+    <b> Greater
+else
+    <i> Lesser

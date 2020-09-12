@@ -1,3 +1,6 @@
+name := "Yoda"
+age := 800
+age = age - 1
 <ul>
     <li> <b>Name:</> name
     <li> <b>Age:</> age

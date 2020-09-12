@@ -243,6 +243,8 @@ impl<'s, 't> Parser<'s, 't> {
                     self.skip(); // skip op
                     return Ok(Expr::Assign(name, Box::new(self.expr()?), reassign));
                 } else {
+                    // if we have two or more words in a row, convert
+                    // to a string, ex: <b> Hey Friends -> <b> "Hey Friends"
                     let mut parts = vec![];
                     while let Some(p) = self.peek() {
                         match p.kind {

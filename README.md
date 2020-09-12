@@ -83,14 +83,14 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
 - [x] Error-checked assignmnent with `:=` and `=`:
   - `name := 'Bob'`  will error if name **is** already set.
   - `name = 'Bob'`  will error if name **isn't** already set.
-- [ ] Dynamic values for regular attributes:
+- [x] Dynamic values for regular attributes:
   - `<div page-num=page.id>`
 - [ ] Conditionally set attributes or enable shorthand:
   - `<div .logged-in=logged-in?>`
   - `<div data-map=is-map?>`
 - [x] String interpolation:
   - `<span.greeting> "Hey there {name}."`
-- [ ] Shorthand interpolation:
+- [x] Shorthand interpolation:
   - `<span #page-{page.id} .is-{page.type}> page.title`
 - [x] Implicit divs:
   - `<#main>` becomes `<div id='main'>`
@@ -117,8 +117,9 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
 ### next
 
 - [ ] big
-  - [ ] redo tags
-  - [ ] dynamic tag attributes
+  - [x] redo tags
+  - [x] dynamic tag attributes
+  - [ ] dynamically set shothands
   - [x] string interpolation
   - [x] strict mode for variables
   - [ ] test suite
@@ -127,7 +128,7 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
     - [ ] functions
   - [ ] pratt parser
 - [ ] small
-  - [ ] hash/array/string index
+  - [x] hash/array/string index
   - [ ] do syntax
 
 ----
@@ -137,19 +138,10 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
 - [ ] Basic types
   - [ ] fn()
     - [ ] literal syntax -> bytecode
-  - [ ] <tag>
-    - [ ] literal syntax -> bytecode
-- [ ] Dynamic values for regular attributes
-  - [ ] attribute=expr
 - [ ] Conditionally set attributes or enable shorthand
   - [ ] .class=bool?
   - [ ] #id=bool?
   - [ ] data-id=bool?
-- [ ] Shorthand interpolation
-  - [ ] .{expr}
-  - [ ] .something-{expr}-else
-  - [ ] #{expr}
-  - [ ] @{expr}
 
 - [ ] def <tag attr=Type>
 - [ ] def fn(arg Type, arg Type) Type

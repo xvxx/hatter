@@ -199,7 +199,27 @@ impl<'s> Lexer<'s> {
                 }
                 '{' => {
                     if self.in_tag() {
-                        self.scan_attr()?
+                        if self.prev_is(Syntax::Special('=')) {
+                            let mut curlies = 0;
+                            while let Some(c) = self.peek() {
+                                match c {
+                                    '{' => curlies += 1,
+                                    '}' => {
+                                        if curlies == 0 {
+                                            break;
+                                        } else {
+                                            curlies -= 1;
+                                        }
+                                    }
+                                    _ => {}
+                                }
+                                self.next();
+                            }
+                            self.next();
+                            Syntax::String(true)
+                        } else {
+                            self.scan_attr()?
+                        }
                     } else {
                         self.set_mode(Mode::Container);
                         Syntax::Bracket(c)
@@ -240,7 +260,11 @@ impl<'s> Lexer<'s> {
                 }
                 _ => {
                     if self.in_tag() {
-                        self.scan_attr()?
+                        if self.prev_is(Syntax::Special('=')) {
+                            self.scan_word()?
+                        } else {
+                            self.scan_attr()?
+                        }
                     } else {
                         self.scan_word()?
                     }

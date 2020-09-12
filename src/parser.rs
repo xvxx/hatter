@@ -112,6 +112,13 @@ impl<'s, 't> Parser<'s, 't> {
         }
     }
 
+    /// Move iterator back.
+    fn back(&mut self) {
+        if self.pos > 0 {
+            self.pos -= 1;
+        }
+    }
+
     /// Advance iterator an return next `Token`.
     fn next(&mut self) -> Token {
         #[cfg(debug_assertions)]

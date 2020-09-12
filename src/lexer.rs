@@ -197,7 +197,15 @@ impl<'s> Lexer<'s> {
                         self.scan_word()?
                     }
                 }
-                '[' | '{' => {
+                '{' => {
+                    if self.in_tag() {
+                        self.scan_attr()?
+                    } else {
+                        self.set_mode(Mode::Container);
+                        Syntax::Bracket(c)
+                    }
+                }
+                '[' => {
                     self.set_mode(Mode::Container);
                     Syntax::Bracket(c)
                 }
@@ -230,7 +238,13 @@ impl<'s> Lexer<'s> {
                     self.eat(|c| c.is_whitespace());
                     continue;
                 }
-                _ => self.scan_word()?,
+                _ => {
+                    if self.in_tag() {
+                        self.scan_attr()?
+                    } else {
+                        self.scan_word()?
+                    }
+                }
             };
 
             // skip empty tokens
@@ -337,6 +351,34 @@ impl<'s> Lexer<'s> {
     fn scan_word(&mut self) -> Result<Syntax> {
         self.eat(|c| !c.is_reserved() && !c.is_whitespace());
         Ok(Syntax::Word)
+    }
+
+    /// Parse a word in an attribute, which can have {interpolation}.
+    fn scan_attr(&mut self) -> Result<Syntax> {
+        let mut in_code = false;
+        let mut curlies = 0;
+        while let Some(&c) = self.peek() {
+            if in_code {
+                if c == '}' {
+                    if curlies == 0 {
+                        in_code = false;
+                    } else {
+                        curlies -= 0;
+                    }
+                } else if c == '{' {
+                    curlies += 1;
+                }
+            } else {
+                if c == '{' {
+                    in_code = true;
+                } else if c.is_whitespace() || c == '>' || c == '=' {
+                    break;
+                }
+            }
+
+            self.next();
+        }
+        Ok(Syntax::String(true))
     }
 
     /// Figure out indents and dedents.

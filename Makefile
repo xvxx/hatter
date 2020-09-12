@@ -32,3 +32,4 @@ clean:
 
 target/release/hatter: src/*.rs src/**/*.rs
 	cargo build --release
+	strip $@

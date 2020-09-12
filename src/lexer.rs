@@ -1,6 +1,6 @@
 use {
     crate::{syntax::Reserved, Result, Syntax, Token},
-    std::{iter::Peekable, str::CharIndices},
+    std::{iter::Peekable, mem, str::CharIndices},
 };
 
 struct Lexer<'s> {
@@ -10,9 +10,16 @@ struct Lexer<'s> {
     indents: Vec<usize>,              // current depth
     chars: Peekable<CharIndices<'s>>, // iterator
     cur: char,                        // current character
-    in_tag: bool,                     // parsing <tag>?
-    in_container: usize,              // parsing inside [] {} <> ?
+    mode: Mode,                       // lexing mode
+    modes: Vec<Mode>,                 // stack of recent modes
     style: Style,                     // tabs or spaces?
+}
+
+#[derive(Debug, PartialEq)]
+enum Mode {
+    None,      // Regular
+    Container, // [List] or {Map}
+    Tag,       // <Tag>
 }
 
 #[derive(Debug, PartialEq)]
@@ -40,8 +47,8 @@ impl<'s> Lexer<'s> {
             indents: vec![],
             cur: '0',
             style: Style::None,
-            in_tag: false,
-            in_container: 0,
+            mode: Mode::None,
+            modes: vec![],
         }
     }
 
@@ -98,6 +105,28 @@ impl<'s> Lexer<'s> {
         eaten
     }
 
+    /// Change the lexing mode.
+    fn set_mode(&mut self, mode: Mode) {
+        self.modes.push(mem::replace(&mut self.mode, mode));
+    }
+
+    /// Set lexing mode to most recent mode, i.e. pop the mode stack.
+    fn pop_mode(&mut self) {
+        if !self.modes.is_empty() {
+            self.mode = self.modes.remove(self.modes.len() - 1);
+        }
+    }
+
+    /// Are we lexing a tag?
+    fn in_tag(&self) -> bool {
+        matches!(self.mode, Mode::Tag)
+    }
+
+    /// Are we lexing a container?
+    fn in_container(&self) -> bool {
+        matches!(self.mode, Mode::Container)
+    }
+
     /// Turn `source` into vector of `Token`, or error.
     fn scan(&mut self) -> Result<()> {
         while let Some(c) = self.next() {
@@ -106,7 +135,7 @@ impl<'s> Lexer<'s> {
                 '\n' => self.scan_newline()?,
                 ';' | ',' | '#' => Syntax::Special(c),
                 '.' | '@' | '/' => {
-                    if self.in_tag {
+                    if self.in_tag() {
                         Syntax::Special(c)
                     } else {
                         Syntax::Word
@@ -122,7 +151,7 @@ impl<'s> Lexer<'s> {
                     }
                 }
                 '=' => {
-                    if self.in_tag {
+                    if self.in_tag() {
                         Syntax::Special(c)
                     } else if self.peek_is('=') {
                         self.next();
@@ -150,10 +179,10 @@ impl<'s> Lexer<'s> {
                     } else if self.peek_is('=') || self.peek_is(c) {
                         self.next(); // skip =
                         self.scan_word()?
-                    } else if self.in_tag || self.peek_is(' ') {
+                    } else if self.in_tag() || self.peek_is(' ') {
                         self.scan_word()?
                     } else {
-                        self.in_tag = true;
+                        self.mode = Mode::Tag;
                         Syntax::Bracket('<')
                     }
                 }
@@ -161,24 +190,24 @@ impl<'s> Lexer<'s> {
                     if self.peek_is('=') || self.peek_is(c) {
                         self.next(); // skip =
                         self.scan_word()?
-                    } else if self.in_tag {
-                        self.in_tag = false;
+                    } else if self.in_tag() {
+                        self.mode = Mode::None;
                         Syntax::Bracket('>')
                     } else {
                         self.scan_word()?
                     }
                 }
                 '[' | '{' => {
-                    self.in_container += 1;
+                    self.set_mode(Mode::Container);
                     Syntax::Bracket(c)
                 }
                 ']' | '}' => {
-                    self.in_container -= 1;
+                    self.pop_mode();
                     Syntax::Bracket(c)
                 }
                 ')' => Syntax::Bracket(c),
                 '(' => {
-                    if self.in_tag && self.prev_is(Syntax::Special('=')) {
+                    if self.in_tag() && self.prev_is(Syntax::Special('=')) {
                         let mut open = 0;
                         while let Some(&c) = self.peek() {
                             if c == ')' && open == 0 {
@@ -312,7 +341,7 @@ impl<'s> Lexer<'s> {
 
     /// Figure out indents and dedents.
     fn scan_newline(&mut self) -> Result<Syntax> {
-        if self.in_tag || self.in_container > 0 {
+        if self.in_tag() || self.in_container() {
             return Ok(Syntax::Special(';'));
         }
 

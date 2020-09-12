@@ -206,7 +206,7 @@ impl VM {
                         .partition(|(i, _)| i % 2 == 0);
                     let closed = matches!(self.pop_stack(), Value::Bool(true));
                     let name = self.pop_stack().to_string();
-                    out.push(format!("<{} ", name));
+                    out.push(format!("<{}", name));
                     if !closed {
                         self.push_tag(name);
                     }
@@ -220,17 +220,16 @@ impl VM {
                                     continue;
                                 }
                             }
-                            out.push(format!("{}='{}' ", k, v));
+                            out.push(format!("{}='{}'", k, v));
                         }
                     }
                     if !classes.is_empty() {
-                        out.push(format!("class='{}' ", classes.join(" ")));
+                        out.push(format!("class='{}'", classes.join(" ")));
                     }
                     if closed {
                         out.push("/".into());
                     }
-                    out.push(">".into());
-                    println!("{}", out.join(""));
+                    println!("{}>", out.join(" "));
                 }
                 Code::CloseTag => {
                     self.ip += 1;

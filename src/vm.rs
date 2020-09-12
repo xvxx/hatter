@@ -6,11 +6,12 @@ use {
 pub type Scope = HashMap<String, Value>;
 
 pub struct VM {
-    strict: bool,      // strict mode?
-    stack: Vec<Value>, // value stack
-    calls: Vec<usize>, // call stack
-    scopes: Vec<Scope>,
-    ip: usize,
+    strict: bool,       // strict mode?
+    stack: Vec<Value>,  // value stack
+    calls: Vec<usize>,  // call stack
+    scopes: Vec<Scope>, // stack of scopes
+    tags: Vec<String>,  // track tags to auto-close
+    ip: usize,          // instruction pointer
     builtins: HashMap<String, Builtin>,
 }
 
@@ -27,6 +28,7 @@ impl VM {
             ip: 0,
             stack: vec![],
             calls: vec![],
+            tags: vec![],
             scopes: vec![Scope::new()],
             builtins: builtins(),
         }
@@ -38,6 +40,14 @@ impl VM {
 
     fn pop_stack(&mut self) -> Value {
         self.stack.pop().unwrap_or(Value::None)
+    }
+
+    fn pop_tag(&mut self) -> String {
+        self.tags.pop().unwrap_or_else(|| "".into())
+    }
+
+    fn push_tag(&mut self, tag: String) {
+        self.tags.push(tag);
     }
 
     fn push<T: Into<Value>>(&mut self, v: T) {
@@ -185,6 +195,36 @@ impl VM {
                         map.insert(k.to_string(), v.clone());
                     }
                     self.push(Value::Map(map));
+                }
+                Code::Tag(len) => {
+                    self.ip += 1;
+                    let mut out = vec![];
+                    let (keys, values): (Vec<_>, Vec<_>) = self
+                        .stack
+                        .drain(self.stack.len() - (len * 2)..)
+                        .enumerate()
+                        .partition(|(i, _)| i % 2 == 0);
+                    let closed = matches!(self.pop_stack(), Value::Bool(true));
+                    let name = self.pop_stack().to_string();
+                    out.push(format!("<{} ", name));
+                    if !closed {
+                        self.push_tag(name);
+                    }
+                    for (i, (_, k)) in keys.iter().enumerate() {
+                        let (_, v) = &values[i];
+                        if !matches!(v, Value::Bool(false) | Value::None) {
+                            out.push(format!("{}={} ", k, v));
+                        }
+                    }
+                    if closed {
+                        out.push("/".into());
+                    }
+                    out.push(">".into());
+                    println!("{}", out.join(""));
+                }
+                Code::CloseTag => {
+                    self.ip += 1;
+                    println!("</{}>", self.pop_tag());
                 }
                 Code::Return => self.ip = self.pop_call(),
                 Code::Call(name, arity) => {

@@ -537,10 +537,10 @@ impl<'s, 't> Parser<'s, 't> {
     fn open_tag(&mut self) -> Result<Tag> {
         self.tags += 1;
         self.expect(Syntax::Bracket('<'))?;
-        let mut tag = Tag::new(Expr::String(match self.peek_kind() {
-            Syntax::Special(_) => "div".into(),
-            _ => self.expect(Syntax::Word)?.to_string(),
-        }));
+        let mut tag = Tag::new(match self.peek_kind() {
+            Syntax::Special(_) => Expr::String("div".into()),
+            _ => self.attr()?,
+        });
 
         loop {
             let next = self.next();
@@ -587,7 +587,7 @@ impl<'s, 't> Parser<'s, 't> {
         let mut parts = vec![];
         while let Some(p) = self.peek() {
             match p.kind {
-                Syntax::Word => parts.push(self.word()?),
+                Syntax::Word => parts.push(Expr::String(self.word()?.to_string())),
                 Syntax::String(..) | Syntax::Number => parts.push(self.atom()?),
                 Syntax::Bracket('>') => break,
                 Syntax::Bracket('{') => {

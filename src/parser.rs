@@ -172,7 +172,7 @@ impl<'s, 't> Parser<'s, 't> {
 
     /// Parse a number.
     fn number(&mut self) -> Result<Expr> {
-        Ok(Expr::Number(self.expect(Syntax::Number)?.to_f64()?))
+        Ok(Expr::Number(self.expect(Syntax::Number)?.to_usize()?))
     }
 
     /// Parse a string.

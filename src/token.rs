@@ -34,6 +34,13 @@ impl<'s> Token<'s> {
     }
 
     /// Convert into native number or error. No weak typing.
+    pub fn to_usize(&self) -> Result<usize> {
+        self.literal()
+            .parse::<usize>()
+            .map_err(|e| Error::new(e.to_string(), self.pos, 1))
+    }
+
+    /// Convert into native number or error. No weak typing.
     pub fn to_f64(&self) -> Result<f64> {
         self.literal()
             .parse::<f64>()

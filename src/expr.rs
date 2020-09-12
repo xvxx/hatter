@@ -5,7 +5,7 @@ pub use tag::Tag;
 pub enum Expr {
     None,
     Bool(bool),
-    Number(f64),
+    Number(usize),
     String(String),
     Word(String),
     List(Vec<Expr>),

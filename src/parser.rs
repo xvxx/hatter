@@ -236,11 +236,22 @@ impl<'s, 't> Parser<'s, 't> {
     /// Parse a code expression.
     fn expr(&mut self) -> Result<Expr> {
         if let Some(p) = self.peek2() {
-            if p.kind == Syntax::Word && matches!(p.literal(), ":=" | "=") {
-                let reassign = p.literal() == "=";
-                let name = self.expect(Syntax::Word)?.to_string();
-                self.skip(); // skip op
-                return Ok(Expr::Assign(name, Box::new(self.expr()?), reassign));
+            if p.kind == Syntax::Word {
+                if matches!(p.literal(), ":=" | "=") {
+                    let reassign = p.literal() == "=";
+                    let name = self.expect(Syntax::Word)?.to_string();
+                    self.skip(); // skip op
+                    return Ok(Expr::Assign(name, Box::new(self.expr()?), reassign));
+                } else {
+                    let mut parts = vec![];
+                    while let Some(p) = self.peek() {
+                        match p.kind {
+                            Syntax::Bracket('<') | Syntax::Special(';') => break,
+                            _ => parts.push(self.next().to_string()),
+                        }
+                    }
+                    return Ok(Expr::String(parts.join(" ")));
+                }
             }
         }
 

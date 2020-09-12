@@ -241,7 +241,16 @@ impl<'s, 't> Parser<'s, 't> {
         if let Some(next) = self.peek() {
             if next.kind == Syntax::Word {
                 let lit = next.to_string();
-                if let Some(f) = self.operators.get(&lit) {
+                if lit == "." {
+                    // convert word to str, ex: map.key => index(map, "key")
+                    self.skip();
+                    let right = self.expr()?;
+                    if let Expr::Word(word) = right {
+                        return Ok(Expr::Call("index".into(), vec![left, Expr::String(word)]));
+                    } else {
+                        return Ok(Expr::Call("index".into(), vec![left, right]));
+                    }
+                } else if let Some(f) = self.operators.get(&lit) {
                     let op = f.clone();
                     self.skip();
                     let right = self.expr()?;
@@ -369,6 +378,7 @@ impl<'s, 't> Parser<'s, 't> {
                 // Literal
                 Syntax::String(..)
                 | Syntax::Number
+                | Syntax::Bracket('(')
                 | Syntax::Bracket('[')
                 | Syntax::Bracket('{') => {
                     block.push(self.expr()?);

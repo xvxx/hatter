@@ -104,7 +104,14 @@ impl<'s> Lexer<'s> {
             let start = self.pos;
             let kind = match c {
                 '\n' => self.scan_newline()?,
-                ';' | ',' | '#' | '.' | '@' | '/' => Syntax::Special(c),
+                ';' | ',' | '#' => Syntax::Special(c),
+                '.' | '@' | '/' => {
+                    if self.in_tag {
+                        Syntax::Special(c)
+                    } else {
+                        Syntax::Word
+                    }
+                }
                 '"' | '\'' | '`' => self.scan_string(c)?,
                 ':' => {
                     if self.peek_is('=') {

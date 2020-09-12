@@ -97,6 +97,10 @@
             margin-top: 50px;
             margin-left: 50px;
         }
+        .code-col {
+            float: left;
+            width: 50%;
+        }
     ```
 
 <body>
@@ -105,14 +109,14 @@
         <#rectangle>
         <#header>
             <#logo> Hatter
+
+        <img#mad-hatter src="./img/rhetoric.png" align="right" width="350"/>
+        <blockquote>
+            <p> """ It is practically impossible to teach good programming to students
+            that have had a prior exposure to <em>Hatter</em>: as potential programmers
+            they are mentally mutilated beyond hope of regeneration. """
+            <p> "-– Edsger W. Dijkstra, certainly"
         """
-<img id='mad-hatter' src="./img/rhetoric.png" align="right" width="350" alt="The Mad Hatter discussing Hatter" />
-<blockquote>
-<p>It is practically impossible to teach good programming to students
-that have had a prior exposure to <em>Hatter</em>: as potential programmers
-they are mentally mutilated beyond hope of regeneration.</p>
-<p>-– Edsger W. Dijkstra, certainly</p>
-</blockquote>
 <p>Hatter is an HTML templating language that can be used server side to
 produce static HTML. Its syntax is a cheap knock-off of
 <a href="https://imba.io">Imba</a>, without any of the fancy JavaScript parts.</p>
@@ -122,7 +126,43 @@ sites.</p>
 <p>If you're feeling adventerous, or mad as a hatter, you can use the
 standalone binary to turn templates into HTML files, or include the
 zero-dependency Rust library in your (web/cli/?) application.</p>
-<hr />
+"""
+
+        <h2> Examples
+        <.code-cols>
+            <.code-col>
+                <pre.language-html.left>
+                    <code>
+                        "&lt;#main&gt; Hi there!"
+            <.code-col>
+                <pre.language-html.left>
+                    <code>
+                        "&lt;div id='main'&gt;Hi there!&lt;/div&gt;"
+        <.code-cols>
+            <.code-col>
+                <pre.language-html.left>
+                    <code>
+                        "&lt;span.big.bold&gt; Welcome!"
+            <.code-col>
+                <pre.language-html.left>
+                    <code>
+                        "&lt;span class='big bold'&gt;Welcome!&lt;/span&gt;"
+        <.code-cols>
+            <.code-col>
+                <pre.language-html.left>
+                    <code>
+                        "&lt;.links&gt; for link in nav-links"
+                        "  &lt;a href=link.href&gt; link.text"
+            <.code-col>
+                <pre.language-html.left>
+                    <code>
+                        "&lt;div class='links'&gt;"
+                        "  &lt;a href='/link1'&gt;First Link&lt;/a&gt;"
+                        "  &lt;a href='/link2'&gt;2nd Link&lt;/a&gt;"
+                        "  &lt;a href='/link3'&gt;Final Link&lt;/a&gt;"
+                        " &lt;/div&gt;"
+
+        """
 <h2>Hello Hatter</h2>
 <p>Here's what it looks like:</p>
 <pre><code class="language-html">&lt;nav .webview-app=webview?&gt;

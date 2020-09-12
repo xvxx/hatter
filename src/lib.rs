@@ -1,6 +1,12 @@
 #![deny(unused_must_use)]
 #![deny(unreachable_patterns)]
 
+macro_rules! bx {
+    ($ex:expr) => {
+        Box::new($ex)
+    };
+}
+
 #[macro_use]
 mod error;
 mod ast;

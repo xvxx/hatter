@@ -85,7 +85,7 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
   - `name = 'Bob'`  will error if name **isn't** already set.
 - [x] Dynamic values for regular attributes:
   - `<div page-num=page.id>`
-- [ ] Conditionally set attributes or enable shorthand:
+- [x] Conditionally set attributes or enable shorthand:
   - `<div .logged-in=logged-in?>`
   - `<div data-map=is-map?>`
 - [x] String interpolation:
@@ -119,7 +119,7 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
 - [ ] big
   - [x] redo tags
   - [x] dynamic tag attributes
-  - [ ] dynamically set shothands
+  - [x] dynamically set shothands
   - [x] string interpolation
   - [x] strict mode for variables
   - [ ] test suite
@@ -138,10 +138,6 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
 - [ ] Basic types
   - [ ] fn()
     - [ ] literal syntax -> bytecode
-- [ ] Conditionally set attributes or enable shorthand
-  - [ ] .class=bool?
-  - [ ] #id=bool?
-  - [ ] data-id=bool?
 
 - [ ] def <tag attr=Type>
 - [ ] def fn(arg Type, arg Type) Type

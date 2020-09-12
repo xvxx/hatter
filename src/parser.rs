@@ -187,7 +187,12 @@ impl<'s, 't> Parser<'s, 't> {
                     continue;
                 }
 
-                parts.push(Expr::String(lit[idx..i + idx].into()));
+                {
+                    let s = &lit[idx..i + idx];
+                    if !s.is_empty() {
+                        parts.push(Expr::String(s.into()));
+                    }
+                }
                 idx += i + 1;
                 let mut end = idx;
                 for (x, b) in lit[idx..].bytes().enumerate() {
@@ -209,7 +214,11 @@ impl<'s, 't> Parser<'s, 't> {
             if idx < lit.len() {
                 parts.push(Expr::String(lit[idx..].into()));
             }
-            Ok(Expr::Call("concat".into(), parts))
+            if parts.len() == 1 {
+                Ok(parts.remove(0))
+            } else {
+                Ok(Expr::Call("concat".into(), parts))
+            }
         } else {
             Ok(Expr::String(lit))
         }

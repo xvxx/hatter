@@ -1,13 +1,50 @@
-use {crate::Expr, std::collections::HashMap};
+use {
+    crate::Expr,
+    std::{
+        collections::HashMap,
+        hash::{Hash, Hasher},
+    },
+};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq)]
 pub struct Tag {
-    tag: Box<Expr>,               // tag name
-    id: Box<Expr>,                // tag id
-    classes: Vec<Expr>,           // classes
-    attrs: HashMap<String, Expr>, // other attributes
-    body: Vec<Expr>,              // Bunch o' expressions
-    closed: bool,                 // <self-closing/> ?
+    pub tag: Box<Expr>,             // tag name
+    pub id: Box<Expr>,              // tag id
+    pub classes: Vec<Expr>,         // classes
+    pub attrs: HashMap<Expr, Expr>, // other attributes
+    pub body: Vec<Expr>,            // Bunch o' expressions
+    pub closed: bool,               // <self-closing/> ?
+}
+
+impl Hash for Tag {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.tag.hash(state);
+        self.id.hash(state);
+        self.classes.hash(state);
+        self.body.hash(state);
+        self.closed.hash(state);
+        for (k, v) in &self.attrs {
+            k.hash(state);
+            v.hash(state);
+        }
+    }
+}
+
+impl PartialEq for Tag {
+    fn eq(&self, other: &Tag) -> bool {
+        self.tag == other.tag
+            && self.id == other.id
+            && self.classes == other.classes
+            && self.body == other.body
+            && self.closed == other.closed
+            && self.attrs.iter().all(|(k, v)| {
+                if let Some(o) = other.attrs.get(k) {
+                    o == v
+                } else {
+                    false
+                }
+            })
+    }
 }
 
 impl Tag {
@@ -42,7 +79,7 @@ impl Tag {
         self.classes.push(class);
     }
 
-    pub fn add_attr<S: AsRef<str>>(&mut self, name: S, val: Expr) {
-        self.attrs.insert(name.as_ref().to_string(), val);
+    pub fn add_attr(&mut self, name: Expr, val: Expr) {
+        self.attrs.insert(name, val);
     }
 }

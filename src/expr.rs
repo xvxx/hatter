@@ -1,7 +1,7 @@
 mod tag;
 pub use tag::Tag;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Expr {
     None,
     Bool(bool),

@@ -59,8 +59,8 @@ macro_rules! pos_error {
         use crate::Error;
         Err(Error::new($msg.into(), $pos, 1))
     }};
-    ($msg:expr, $($args:expr),*) => {
-        pos_error!(format!($msg, $($args),*));
+    ($pos:expr, $msg:expr, $($args:expr),+) => {
+        pos_error!($pos, format!($msg, $($args),+));
     };
 }
 

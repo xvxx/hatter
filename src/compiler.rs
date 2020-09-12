@@ -28,6 +28,28 @@ pub enum Code {
     /// where the even elements are keys and odd are values.
     Map(usize),
 
+    /// Create a tag with `usize` number of attributes, which has the
+    /// same structure as Map: KEY then VALUE.
+    /// This pops `usize * 2` off the stack, as well as two more items
+    /// for the tag name and self-closing? status.
+    ///
+    /// This should be the stack when calling:
+    ///   09 PUSH "A"              ; tag name
+    ///   08 PUSH false            ; self-closing?
+    ///   07 PUSH "ID"             ; attr name
+    ///   06 PUSH "main-link"      ; attr value
+    ///   05 PUSH "CLASS"          ; "class" attr is additive
+    ///   04 PUSH "blue"           ; ...
+    ///   03 PUSH "HREF"
+    ///   02 PUSH "giggle.com"
+    ///   01 PUSH "DATA-ITEM-ID"
+    ///   00 PUSH 44
+    /// Which produces:
+    ///   <a id="main-link" class="blue" href="giggle.com" data-item-id="44">
+    Tag(usize),
+    /// Close the most recently opened tag.
+    CloseTag,
+
     /// Push the value of the variable named `String` onto the stack.
     Lookup(String),
     /// Pops the top of the stack and puts it in the variable named `String`.
@@ -191,68 +213,62 @@ impl Compiler {
         })
     }
 
+    // Stack should be:
+    // - TAG NAME
+    // - BOOL: CLOSED?
+    // - ATTR NAME
+    // - ATTR VALUE
+    // - TAG-OP (# of attrs)
     fn compile_tag(&mut self, tag: &Tag) -> Result<Vec<Code>> {
-        let mut out = String::new();
-        out.push('<');
-        let is_form = tag.tag == "form";
-        out.push_str(&tag.tag);
+        let mut inst = self.compile_expr(&tag.tag)?; // TAG NAME
+        inst.push(Code::Push(tag.closed.into())); // CLOSED?
 
-        if !tag.classes.is_empty() {
-            out.push_str(" class='");
-            let len = tag.classes.len();
-            for (i, class) in tag.classes.iter().enumerate() {
-                out.push_str(class);
-                if i < len - 1 {
-                    out.push(' ');
+        // need to know if it's a <form>
+        let is_form = if let Expr::String(s) = &*tag.tag {
+            s == "form"
+        } else {
+            false
+        };
+
+        // ID
+        let mut id = self.compile_expr(&tag.id)?;
+        if !id.is_empty() {
+            inst.push(Code::Push("id".into()));
+            inst.append(&mut id);
+        }
+
+        // CLASSES
+        for class in &tag.classes {
+            inst.push(Code::Push("class".into()));
+            inst.append(&mut self.compile_expr(class)?);
+        }
+
+        // ATTRS
+        for (name, val) in &tag.attrs {
+            if is_form {
+                if let Expr::String(s) = name {
+                    if s == "GET" || s == "POST" {
+                        continue;
+                    }
                 }
             }
-            out.push_str("'");
+
+            inst.append(&mut self.compile_expr(&name)?);
+            inst.append(&mut self.compile_expr(&val)?);
         }
 
-        for (name, val) in &tag.attrs {
-            if is_form && (name == "GET" || name == "POST") {
-                out.push_str(&format!(" method='{}' action='{}'", name, val));
-                continue;
+        inst.push(Code::Tag(
+            tag.attrs.len() + tag.classes.len() + if let Expr::None = &*tag.id { 0 } else { 1 },
+        ));
+
+        if !tag.closed {
+            if !tag.body.is_empty() {
+                inst.append(&mut self.compile_stmts(&tag.body)?);
             }
-            out.push(' ');
-            out.push_str(&name);
-            out.push('=');
-            out.push('\'');
-            out.push_str(&val);
-            out.push('\'');
+            inst.push(Code::CloseTag);
         }
-
-        if tag.tag == "a" && !tag.attrs.contains_key("href") {
-            out.push_str(" href='#'");
-        }
-
-        if tag.is_closed() {
-            out.push('/');
-            out.push('>');
-            return Ok(vec![Code::Print(out.into())]);
-        } else {
-            out.push('>');
-        }
-
-        let mut inst = vec![Code::Print(out.into())];
-
-        if !tag.contents.is_empty() {
-            let mut body = self.compile_stmts(&tag.contents)?;
-            inst.append(&mut body);
-        }
-
-        inst.push(Code::Print(format!("</{}>", tag.tag).into()));
 
         Ok(inst)
-    }
-
-    fn compile_exprs(&mut self, exprs: &[Expr]) -> Result<Vec<Code>> {
-        let mut out = vec![];
-        for expr in exprs {
-            let mut e = self.compile_expr(expr)?;
-            out.append(&mut e);
-        }
-        Ok(out)
     }
 
     fn compile_expr(&mut self, expr: &Expr) -> Result<Vec<Code>> {

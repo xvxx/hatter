@@ -16,7 +16,6 @@ mod expr;
 mod lexer;
 mod parser;
 mod syntax;
-mod tag;
 mod token;
 mod value;
 pub mod vm;
@@ -29,11 +28,10 @@ pub use {
     builtins::builtins,
     compiler::{compile, Code},
     error::{print_error, Error},
-    expr::Expr,
+    expr::{Expr, Tag},
     lexer::scan,
     parser::parse,
     syntax::Syntax,
-    tag::Tag,
     token::Token,
     value::{Builtin, Value},
     vm::{Scope, VM},

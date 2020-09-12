@@ -588,6 +588,7 @@ fn default_operators() -> HashMap<String, String> {
     map.insert(">=".into(), "gte".into());
     map.insert("<".into(), "lt".into());
     map.insert("<=".into(), "lte".into());
+    map.insert(".".into(), "index".into());
     map
 }
 

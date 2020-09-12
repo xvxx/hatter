@@ -556,7 +556,7 @@ impl<'s, 't> Parser<'s, 't> {
                 Syntax::Special('.') => tag.add_class(self.attr()?),
                 Syntax::Special('@') => tag.add_attr(Expr::String("name".into()), self.attr()?),
                 Syntax::Special(':') => tag.add_attr(Expr::String("type".into()), self.attr()?),
-                Syntax::Word => {
+                Syntax::String(true) => {
                     self.back();
                     let name = self.attr()?;
                     self.expect(Syntax::Special('='))?;
@@ -575,7 +575,7 @@ impl<'s, 't> Parser<'s, 't> {
                         _ => return pos_error!(pos, "Expected Word, Number, or String"),
                     }
                 }
-                _ => return pos_error!(pos, "Expected Attribute or >"),
+                _ => return pos_error!(pos, "Expected Attribute or >, got {:?}", next),
             }
         }
 
@@ -584,25 +584,7 @@ impl<'s, 't> Parser<'s, 't> {
 
     /// Parse a tag attribute, which may have {interpolation}.
     fn attr(&mut self) -> Result<Expr> {
-        let mut parts = vec![];
-        while let Some(p) = self.peek() {
-            match p.kind {
-                Syntax::Word => parts.push(Expr::String(self.word()?.to_string())),
-                Syntax::String(..) | Syntax::Number => parts.push(self.atom()?),
-                Syntax::Bracket('>') => break,
-                Syntax::Bracket('{') => {
-                    self.next();
-                    parts.push(self.expr()?);
-                    self.expect(Syntax::Bracket('}'))?;
-                }
-                _ => return self.error("literal or {code}"),
-            }
-        }
-        Ok(match parts.len() {
-            0 => Expr::None,
-            1 => parts.remove(0),
-            _ => Expr::Call("concat".into(), parts),
-        })
+        self.string()
     }
 }
 

@@ -237,12 +237,13 @@ impl<'s, 't> Parser<'s, 't> {
     fn expr(&mut self) -> Result<Expr> {
         if let Some(p) = self.peek2() {
             if p.kind == Syntax::Word {
+                let lit = p.to_string();
                 if matches!(p.literal(), ":=" | "=") {
                     let reassign = p.literal() == "=";
                     let name = self.expect(Syntax::Word)?.to_string();
                     self.skip(); // skip op
                     return Ok(Expr::Assign(name, Box::new(self.expr()?), reassign));
-                } else {
+                } else if !self.operators.contains_key(&lit) {
                     // if we have two or more words in a row, convert
                     // to a string, ex: <b> Hey Friends -> <b> "Hey Friends"
                     let mut parts = vec![];
@@ -356,6 +357,7 @@ impl<'s, 't> Parser<'s, 't> {
                             Syntax::Special(',') => self.skip(),
                             Syntax::String(..) | Syntax::Number | Syntax::Bool | Syntax::Word => {
                                 args.push(self.expr()?);
+                                println!("{} - {:?}", name, args);
                             }
                             _ => return self.error(")"),
                         }

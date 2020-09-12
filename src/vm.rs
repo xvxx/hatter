@@ -210,11 +210,21 @@ impl VM {
                     if !closed {
                         self.push_tag(name);
                     }
+                    let mut classes = vec![];
                     for (i, (_, k)) in keys.iter().enumerate() {
                         let (_, v) = &values[i];
                         if !matches!(v, Value::Bool(false) | Value::None) {
+                            if let Value::String(s) = k {
+                                if s == "class" {
+                                    classes.push(v.to_string());
+                                    continue;
+                                }
+                            }
                             out.push(format!("{}='{}' ", k, v));
                         }
+                    }
+                    if !classes.is_empty() {
+                        out.push(format!("class='{}' ", classes.join(" ")));
                     }
                     if closed {
                         out.push("/".into());

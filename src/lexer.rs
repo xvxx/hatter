@@ -371,7 +371,7 @@ impl<'s> Lexer<'s> {
             } else {
                 if c == '{' {
                     in_code = true;
-                } else if c.is_whitespace() || c == '>' || c == '=' {
+                } else if c.is_whitespace() || c.is_attr_reserved() {
                     break;
                 }
             }

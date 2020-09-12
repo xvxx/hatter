@@ -505,7 +505,7 @@ impl<'s, 't> Parser<'s, 't> {
         tag.contents = self.block()?;
 
         match self.peek_kind() {
-            Syntax::Special(';') => self.tags -= 1,
+            Syntax::Special(';') | Syntax::None => self.tags -= 1,
             Syntax::Dedent => {
                 self.tags -= 1;
                 self.skip();

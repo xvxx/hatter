@@ -56,6 +56,13 @@ pub fn builtins() -> HashMap<String, Builtin> {
         }
         return Value::String(sum);
     }
+    fn when(_: &mut VM, args: &[Value]) -> Value {
+        if matches!(&args[0], Value::None | Value::Bool(false)) {
+            return Value::None;
+        } else {
+            return args[1].clone();
+        }
+    }
     fn index(_: &mut VM, args: &[Value]) -> Value {
         if args.len() != 2 {
             return Value::None;
@@ -176,6 +183,7 @@ pub fn builtins() -> HashMap<String, Builtin> {
         };
     }
 
+    builtin!("when" => when);
     builtin!("eq" => eq);
     builtin!("neq" => neq);
     builtin!("not" => not);

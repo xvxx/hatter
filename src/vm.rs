@@ -206,6 +206,10 @@ impl VM {
                         .partition(|(i, _)| i % 2 == 0);
                     let closed = matches!(self.pop_stack(), Value::Bool(true));
                     let name = self.pop_stack().to_string();
+                    if name == "head" && self.tags.is_empty() {
+                        out.push("<!DOCTYPE html>\n<html>".into());
+                        self.tags.push("html".into());
+                    }
                     out.push(format!("<{}", name));
                     if !closed {
                         self.push_tag(name);
@@ -253,6 +257,11 @@ impl VM {
                         return error!("can't find fn named {}", name);
                     }
                 }
+            }
+        }
+        if !self.tags.is_empty() {
+            for tag in self.tags.drain(..) {
+                println!("</{}>", tag);
             }
         }
         Ok(())

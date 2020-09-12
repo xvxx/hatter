@@ -72,20 +72,7 @@ pub enum Code {
     EndLoop,
 }
 
-impl Into<AST> for &str {
-    fn into(self) -> AST {
-        let tokens = crate::scan(self).unwrap();
-        crate::parse(&tokens).unwrap()
-    }
-}
-
-impl Into<AST> for &String {
-    fn into(self) -> AST {
-        self[..].into()
-    }
-}
-
-pub fn compile<A: Into<AST>>(ast: A) -> Result<Vec<Code>> {
+pub fn compile(ast: AST) -> Result<Vec<Code>> {
     let mut compiler = Compiler::new();
     compiler.compile(ast.into())
 }

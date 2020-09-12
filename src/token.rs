@@ -1,7 +1,4 @@
-use {
-    crate::{Error, Result, Syntax},
-    std::{fmt, ops},
-};
+use crate::{Error, Result, Syntax};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Token<'s> {

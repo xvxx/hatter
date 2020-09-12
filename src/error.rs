@@ -1,5 +1,5 @@
 #![allow(unused_macros)]
-use std::{error, fmt, io, option};
+use std::{error, fmt, io};
 
 #[derive(Debug, PartialEq)]
 pub struct Error {

@@ -1,6 +1,6 @@
 use {
-    crate::{syntax::Reserved, token, Result, Syntax, Token},
-    std::{fmt, iter::Peekable, str::CharIndices},
+    crate::{syntax::Reserved, Result, Syntax, Token},
+    std::{iter::Peekable, str::CharIndices},
 };
 
 struct Lexer<'s> {

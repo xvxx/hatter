@@ -502,7 +502,7 @@ impl<'s, 't> Parser<'s, 't> {
             return Ok(Expr::Tag(tag));
         }
 
-        tag.contents = self.block()?;
+        tag.set_body(self.block()?);
 
         match self.peek_kind() {
             Syntax::Special(';') | Syntax::None => self.tags -= 1,
@@ -539,10 +539,10 @@ impl<'s, 't> Parser<'s, 't> {
     fn open_tag(&mut self) -> Result<Tag> {
         self.tags += 1;
         self.expect(Syntax::Bracket('<'))?;
-        let mut tag = Tag::new(match self.peek_kind() {
-            Syntax::Special(_) => "div".to_string(),
+        let mut tag = Tag::new(Expr::String(match self.peek_kind() {
+            Syntax::Special(_) => "div".into(),
             _ => self.expect(Syntax::Word)?.to_string(),
-        });
+        }));
 
         loop {
             let next = self.next();
@@ -554,23 +554,23 @@ impl<'s, 't> Parser<'s, 't> {
                     tag.close();
                     self.tags -= 1;
                 }
-                Syntax::Special('#') => tag.add_attr("id", self.expect(Syntax::Word)?.literal()),
-                Syntax::Special('.') => tag.add_class(self.expect(Syntax::Word)?.to_string()),
-                Syntax::Special('@') => tag.add_attr("name", self.expect(Syntax::Word)?.literal()),
-                Syntax::Special(':') => tag.add_attr("type", self.expect(Syntax::Word)?.literal()),
+                Syntax::Special('#') => tag.set_id(self.expr()?),
+                Syntax::Special('.') => tag.add_class(self.expr()?),
+                Syntax::Special('@') => tag.add_attr("name", self.expr()?),
+                Syntax::Special(':') => tag.add_attr("type", self.expr()?),
                 Syntax::Word => {
                     let name = next.to_string();
                     self.expect(Syntax::Special('='))?;
                     match self.peek_kind() {
                         Syntax::Number | Syntax::String(..) | Syntax::Word => {
-                            tag.add_attr(name, self.next().to_string())
+                            tag.add_attr(name, self.atom()?)
                         }
                         Syntax::JS => tag.add_attr(
                             name,
-                            format!(
+                            Expr::String(format!(
                                 "(function(e){{ {} }})(event);return false;",
                                 self.next().to_string()
-                            ),
+                            )),
                         ),
 
                         _ => return pos_error!(pos, "Expected Word, Number, or String"),
@@ -600,16 +600,4 @@ fn default_operators() -> HashMap<String, String> {
     map.insert("<=".into(), "lte".into());
     map.insert(".".into(), "index".into());
     map
-}
-
-// Is the first expression a `<head>`? Used for auto-inserting
-// `<html>` and the doctype.
-#[inline]
-fn first_is_head(block: &[Expr]) -> bool {
-    if !block.is_empty() {
-        if let Expr::Tag(tag) = &block[0] {
-            return tag.tag == "head";
-        }
-    }
-    false
 }

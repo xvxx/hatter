@@ -181,6 +181,14 @@ impl<'s, 't> Parser<'s, 't> {
             let mut parts = vec![];
             let mut idx = 0;
             while let Some(i) = lit[idx..].find('{') {
+                // check for escaped \{}
+                if i > 0 && lit[idx..].bytes().nth(i - 1).unwrap_or(b'0') == b'\\' {
+                    parts.push(Expr::String(lit[idx..i + idx - 1].into()));
+                    parts.push(Expr::String(lit[idx + i..i + idx + 1].into()));
+                    idx += i + 1;
+                    continue;
+                }
+
                 parts.push(Expr::String(lit[idx..i + idx].into()));
                 idx += i + 1;
                 let mut end = idx;

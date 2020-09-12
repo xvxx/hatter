@@ -15,6 +15,7 @@ pub enum Expr {
     For(Option<String>, String, Box<Expr>, Vec<Expr>), // key, val, iter, body
     Assign(String, Box<Expr>, bool),                   // var, val, reassign?
     Tag(Tag),
+    Fn(Vec<String>, Vec<Expr>), // args, body
 }
 
 impl Expr {
@@ -45,6 +46,7 @@ impl Expr {
             }
             Expr::If(..) => format!("{}", "IF: Coming Soon™"),
             Expr::For(..) => format!("{}", "FOR: Coming Soon™"),
+            Expr::Fn(args, body) => format!("fn({:?}) {:?}", args, body),
             Expr::Call(name, args) => format!(
                 "{}({})",
                 name,

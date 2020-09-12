@@ -155,7 +155,7 @@ impl Compiler {
                 "continue" => vec![Code::Continue],
                 _ => vec![Code::PrintVar(word.clone())],
             },
-            Call(..) | List(..) | Map(..) => {
+            Call(..) | List(..) | Map(..) | Fn(..) => {
                 let mut inst = self.compile_expr(expr)?;
                 inst.push(Code::PrintPop);
                 inst
@@ -308,6 +308,7 @@ impl Compiler {
                 inst.push(Code::Call(name.to_string(), args.len()));
                 inst
             }
+            Fn(_args, _body) => vec![],
             _ => panic!("don't know how to compile {:?}", expr),
         })
     }

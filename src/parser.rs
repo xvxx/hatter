@@ -233,6 +233,22 @@ impl<'s, 't> Parser<'s, 't> {
         })
     }
 
+    /// Parse a function literal.
+    fn func(&mut self) -> Result<Expr> {
+        self.expect(Syntax::Bracket('('))?;
+        let mut args = vec![];
+        while !self.peek_is(Syntax::Bracket(')')) {
+            args.push(self.expect(Syntax::Word)?.to_string());
+            if self.peek_is(Syntax::Special(',')) {
+                self.next();
+            } else {
+                break;
+            }
+        }
+        self.expect(Syntax::Bracket(')'))?;
+        Ok(Expr::Fn(args, self.block()?))
+    }
+
     /// Parse a code expression.
     fn expr(&mut self) -> Result<Expr> {
         if let Some(p) = self.peek2() {
@@ -259,6 +275,7 @@ impl<'s, 't> Parser<'s, 't> {
         }
 
         let left = self.atom()?;
+
         if let Some(next) = self.peek() {
             if next.kind == Syntax::Word {
                 let lit = next.to_string();
@@ -279,6 +296,7 @@ impl<'s, 't> Parser<'s, 't> {
                 }
             }
         }
+
         Ok(left)
     }
 
@@ -342,6 +360,14 @@ impl<'s, 't> Parser<'s, 't> {
             }
             Syntax::Word => {
                 let word = self.word()?;
+
+                // check for "fn()" literal
+                if let Expr::Word(w) = &word {
+                    if w == "fn" {
+                        return self.func();
+                    }
+                }
+
                 if !self.peek_is(Syntax::Bracket('(')) {
                     return Ok(word);
                 } else {
@@ -357,7 +383,6 @@ impl<'s, 't> Parser<'s, 't> {
                             Syntax::Special(',') => self.skip(),
                             Syntax::String(..) | Syntax::Number | Syntax::Bool | Syntax::Word => {
                                 args.push(self.expr()?);
-                                println!("{} - {:?}", name, args);
                             }
                             _ => return self.error(")"),
                         }

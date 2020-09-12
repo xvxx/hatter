@@ -213,7 +213,7 @@ impl VM {
                     for (i, (_, k)) in keys.iter().enumerate() {
                         let (_, v) = &values[i];
                         if !matches!(v, Value::Bool(false) | Value::None) {
-                            out.push(format!("{}={} ", k, v));
+                            out.push(format!("{}='{}' ", k, v));
                         }
                     }
                     if closed {

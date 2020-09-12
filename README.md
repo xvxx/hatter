@@ -125,6 +125,7 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
   - [ ] rust api
     - [ ] helpers
     - [ ] functions
+  - [ ] pratt parser
 - [ ] small
   - [ ] hash/array/string index
   - [ ] do syntax

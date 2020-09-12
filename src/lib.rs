@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 #![deny(unused_must_use)]
 #![deny(unreachable_patterns)]
 

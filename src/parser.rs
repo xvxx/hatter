@@ -571,9 +571,31 @@ impl<'s, 't> Parser<'s, 't> {
                         tag.set_id(id);
                     }
                 }
-                Syntax::Special('.') => tag.add_class(self.attr()?),
-                Syntax::Special('@') => tag.add_attr(Expr::String("name".into()), self.attr()?),
-                Syntax::Special(':') => tag.add_attr(Expr::String("type".into()), self.attr()?),
+                Syntax::Special('.') => {
+                    let class = self.attr()?;
+                    if self.peek_is(Syntax::Special('=')) {
+                        self.next();
+                        let cond = self.expr()?;
+                        tag.add_class(Expr::Call("when".into(), vec![cond, class]));
+                    } else {
+                        tag.add_class(class);
+                    }
+                }
+                Syntax::Special('@') | Syntax::Special(':') => {
+                    let attr_name = if let Syntax::Special('@') = &next.kind {
+                        Expr::String("name".into())
+                    } else {
+                        Expr::String("type".into())
+                    };
+                    let expr = self.attr()?;
+                    if self.peek_is(Syntax::Special('=')) {
+                        self.next();
+                        let cond = self.expr()?;
+                        tag.add_attr(attr_name, Expr::Call("when".into(), vec![cond, expr]));
+                    } else {
+                        tag.add_attr(attr_name.into(), expr);
+                    }
+                }
                 Syntax::String(true) => {
                     self.back();
                     let name = self.attr()?;

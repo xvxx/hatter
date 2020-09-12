@@ -561,7 +561,16 @@ impl<'s, 't> Parser<'s, 't> {
                     tag.close();
                     self.tags -= 1;
                 }
-                Syntax::Special('#') => tag.set_id(self.attr()?),
+                Syntax::Special('#') => {
+                    let id = self.attr()?;
+                    if self.peek_is(Syntax::Special('=')) {
+                        self.next();
+                        let cond = self.expr()?;
+                        tag.set_id(Expr::Call("when".into(), vec![cond, id]));
+                    } else {
+                        tag.set_id(id);
+                    }
+                }
                 Syntax::Special('.') => tag.add_class(self.attr()?),
                 Syntax::Special('@') => tag.add_attr(Expr::String("name".into()), self.attr()?),
                 Syntax::Special(':') => tag.add_attr(Expr::String("type".into()), self.attr()?),

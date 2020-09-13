@@ -498,7 +498,7 @@ impl<'s, 't> Parser<'s, 't> {
         let body = self.block()?;
 
         self.expect(Syntax::Dedent)?;
-        Ok(Expr::For(key, val, Box::new(iter), body))
+        Ok(Expr::For(key, val, bx!(iter), body))
     }
 
     /// Parse an if statement.

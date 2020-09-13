@@ -8,7 +8,6 @@ pub type Scope = HashMap<String, Value>;
 pub struct VM {
     strict: bool,       // strict mode?
     stack: Vec<Value>,  // value stack
-    calls: Vec<usize>,  // call stack
     scopes: Vec<Scope>, // stack of scopes
     tags: Vec<String>,  // track tags to auto-close
     ip: usize,          // instruction pointer
@@ -27,15 +26,10 @@ impl VM {
             strict,
             ip: 0,
             stack: vec![],
-            calls: vec![],
             tags: vec![],
             scopes: vec![Scope::new()],
             builtins: builtins(),
         }
-    }
-
-    fn pop_call(&mut self) -> usize {
-        self.calls.pop().unwrap_or(0)
     }
 
     fn pop_stack(&mut self) -> Value {
@@ -248,7 +242,9 @@ impl VM {
                     self.ip += 1;
                     println!("</{}>", self.pop_tag());
                 }
-                Code::Return => self.ip = self.pop_call(),
+                Code::Return => {
+                    return Ok(()); // TODO
+                }
                 Code::Call(name, arity) => {
                     self.ip += 1;
                     let mut args = vec![];

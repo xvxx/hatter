@@ -75,12 +75,12 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
   - `<input:text>`
 - Basic types:
   - `bool`, `int,` `float`, `string`, `list`, `map`, `fn()`
-- for loops over `list` and `map`:
+- Loop over `list` and `map`:
   - `<ul> for page in pages do <li id=page-{page.id}> page.name`
   - `for k, v in some-map do <td> k </> <td> v`
 - if/else statements
   - `if logged_in? then <h2> Welcome back!`
-- Error-checked assignmnent with `:=` and `=`:
+- Error-checked assignment with `:=` and `=`:
   - `name := 'Bob'`  will error if name **is** already set.
   - `name = 'Bob'`  will error if name **isn't** already set.
 - Dynamic values for regular attributes:
@@ -89,7 +89,7 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
   - `<div .logged-in=logged-in?>`
   - `<div data-map=is-map?>`
 - String interpolation:
-  - `<span.greeting> "Hey there {name}."`
+  - `<span.greeting> "Hey there {name}. 2 + 2 is {2 + 2}"`
 - Shorthand interpolation:
   - `<span #page-{page.id} .is-{page.type}> page.title`
 - Implicit divs:
@@ -98,19 +98,21 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
   - `<i>delicious</>` becomes `<i>delicious</i>`
 - Call functions defined in Rust:
   - `<div.name> to-uppercase(name)`
-- Easy inline JavaScript:
-  - `<li> <a onclick=(alert("Oink!"))> 🐷`
+- Write functions in Hatter:
+  - `greet := fn(name) do print("Hey there, {name}!")`
+  - `greet("Lydia")`
 - Add your own operators:
   - `op! ++ append`
+- Easy inline JavaScript:
+  - `<li> <a onclick=(alert("Oink!"))> 🐷`
 - Hatter will add a `<!DOCTYPE>` and wrap everything in `<html>` if
   the first tag in your template is `<head>`.
 
 ## Future Features
 
-- Define your own functions with `def name(x Type, b Type)`.
 - Define your own tags with `def <tag arg=Type>`.
-- Arity checking for builtin functions.
-- Type checking for functions.
+- Arity checking for functions.
+- Optional type checking for functions.
 
 ## TODO
 

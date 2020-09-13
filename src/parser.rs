@@ -293,8 +293,17 @@ impl<'s, 't> Parser<'s, 't> {
                 } else if let Some(f) = self.operators.get(&lit) {
                     let op = f.clone();
                     self.skip();
-                    let right = self.expr()?;
-                    return Ok(Expr::Call(op, vec![left, right]));
+                    // check for += -= etc
+                    if self.peek().filter(|p| p.literal() == "=").is_some() {
+                        self.skip();
+                        return Ok(Expr::Assign(
+                            left.to_string(),
+                            bx!(Expr::Call(op, vec![left, self.expr()?])),
+                            true, // reassignment
+                        ));
+                    } else {
+                        return Ok(Expr::Call(op, vec![left, self.expr()?]));
+                    }
                 }
             }
         }

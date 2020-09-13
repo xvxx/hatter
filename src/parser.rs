@@ -251,25 +251,27 @@ impl<'s, 't> Parser<'s, 't> {
 
     /// Parse a code expression.
     fn expr(&mut self) -> Result<Expr> {
-        if let Some(p) = self.peek2() {
-            if p.kind == Syntax::Word {
-                let lit = p.to_string();
-                if matches!(p.literal(), ":=" | "=") {
-                    let reassign = p.literal() == "=";
-                    let name = self.expect(Syntax::Word)?.to_string();
-                    self.skip(); // skip op
-                    return Ok(Expr::Assign(name, Box::new(self.expr()?), reassign));
-                } else if !self.operators.contains_key(&lit) {
-                    // if we have two or more words in a row, convert
-                    // to a string, ex: <b> Hey Friends -> <b> "Hey Friends"
-                    let mut parts = vec![];
-                    while let Some(p) = self.peek() {
-                        match p.kind {
-                            Syntax::Bracket('<') | Syntax::Special(';') => break,
-                            _ => parts.push(self.next().to_string()),
+        if !matches!(self.peek_kind(), Syntax::Bracket(_)) {
+            if let Some(p) = self.peek2() {
+                if p.kind == Syntax::Word {
+                    let lit = p.to_string();
+                    if matches!(p.literal(), ":=" | "=") {
+                        let reassign = p.literal() == "=";
+                        let name = self.expect(Syntax::Word)?.to_string();
+                        self.skip(); // skip op
+                        return Ok(Expr::Assign(name, bx!(self.expr()?), reassign));
+                    } else if !self.operators.contains_key(&lit) {
+                        // if we have two or more words in a row, convert
+                        // to a string, ex: <b> Hey Friends -> <b> "Hey Friends"
+                        let mut parts = vec![];
+                        while let Some(p) = self.peek() {
+                            match p.kind {
+                                Syntax::Bracket('<') | Syntax::Special(';') => break,
+                                _ => parts.push(self.next().to_string()),
+                            }
                         }
+                        return Ok(Expr::String(parts.join(" ")));
                     }
-                    return Ok(Expr::String(parts.join(" ")));
                 }
             }
         }

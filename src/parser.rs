@@ -449,6 +449,7 @@ impl<'s, 't> Parser<'s, 't> {
                             "if" => block.push(self.if_expr()?),
                             "for" => block.push(self.for_expr()?),
                             "return" => {
+                                self.skip();
                                 block.push(if self.peek_is(Syntax::Special(';')) {
                                     Expr::Return(bx!(Expr::None))
                                 } else {

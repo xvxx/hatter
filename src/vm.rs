@@ -68,6 +68,15 @@ impl VM {
         &mut self.scopes[len - 1]
     }
 
+    fn find_scope(&mut self, key: &str) -> Option<&mut Scope> {
+        for (i, scope) in self.scopes.iter().enumerate() {
+            if scope.contains_key(key) {
+                return Some(&mut self.scopes[i]);
+            }
+        }
+        None
+    }
+
     fn set<S: AsRef<str>, V: Into<Value>>(&mut self, key: S, val: V) {
         self.scope().insert(key.as_ref().to_string(), val.into());
     }
@@ -169,9 +178,9 @@ impl VM {
                     }
                 }
                 Code::SetIfSet(name) => {
-                    if self.lookup(name).is_some() {
-                        let val = self.pop_stack();
-                        self.set(name, val);
+                    let val = self.pop_stack();
+                    if let Some(scope) = self.find_scope(name) {
+                        scope.insert(name.to_string(), val);
                         self.ip += 1;
                     } else {
                         return error!("var doesn't exist: {}", name);

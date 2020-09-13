@@ -133,7 +133,12 @@ impl<'s> Lexer<'s> {
             let start = self.pos;
             let kind = match c {
                 '\n' => self.scan_newline()?,
-                ';' | ',' | '#' => Syntax::Special(c),
+                '#' if self.in_tag() => Syntax::Special(c),
+                '#' => {
+                    self.eat(|c| c != '\n');
+                    Syntax::None
+                }
+                ';' | ',' => Syntax::Special(c),
                 '.' | '@' | '/' => {
                     if self.in_tag() {
                         Syntax::Special(c)

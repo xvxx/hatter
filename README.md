@@ -74,12 +74,12 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
   - `<input@form-field-name>`
   - `<input:text>`
 - Basic types:
-  - `bool`, `float`, `string`, `list`, `map`, `fn()`
+  - `bool`, `int,` `float`, `string`, `list`, `map`, `fn()`
 - for loops over `list` and `map`:
   - `<ul> for page in pages do <li id=page-{page.id}> page.name`
   - `for k, v in some-map do <td> k </> <td> v`
 - if/else statements
-  - `if logged_in? do <h2> Welcome back!`
+  - `if logged_in? then <h2> Welcome back!`
 - Error-checked assignmnent with `:=` and `=`:
   - `name := 'Bob'`  will error if name **is** already set.
   - `name = 'Bob'`  will error if name **isn't** already set.
@@ -130,14 +130,14 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
 - [ ] small
   - [x] hash/array/string index
   - [ ] do syntax
+    - [ ] for / do
+    - [ ] if / then
+  - [ ] int vs float
 
 ----
 
 - [ ] HTMLized error page
 - [ ] `do` syntax
-- [ ] Basic types
-  - [ ] fn()
-    - [ ] literal syntax -> bytecode
 
 - [ ] def <tag attr=Type>
 - [ ] def fn(arg Type, arg Type) Type

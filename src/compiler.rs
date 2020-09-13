@@ -308,16 +308,10 @@ impl Compiler {
                 inst.push(Code::Call(name.to_string(), args.len()));
                 inst
             }
-            Fn(params, body) => {
-                let mut inst = vec![];
-                for expr in body {
-                    inst.append(&mut self.compile_expr(expr)?);
-                }
-                vec![Code::Push(Value::Fn {
-                    params: params.clone(),
-                    body: inst,
-                })]
-            }
+            Fn(params, body) => vec![Code::Push(Value::Fn {
+                params: params.clone(),
+                body: self.compile_stmts(body)?,
+            })],
             _ => panic!("don't know how to compile {:?}", expr),
         })
     }

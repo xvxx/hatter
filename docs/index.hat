@@ -1,6 +1,6 @@
 <head>
-    <link href="new.css" rel="stylesheet" />
-    <link href="prism.css" rel="stylesheet" />
+    <link href="lib/new.css" rel="stylesheet" />
+    <link href="lib/prism.css" rel="stylesheet" />
     <title> Hatter
     <style> ```
         :root {
@@ -104,7 +104,7 @@
     ```
 
 <body>
-    <script src="prism.js"></script>
+    <script src="lib/prism.js"></script>
     <main>
         <#rectangle>
         <#header>

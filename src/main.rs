@@ -32,13 +32,6 @@ fn main() -> Result<(), io::Error> {
         ));
     }
 
-    if !path::Path::new(path).exists() {
-        return Err(io::Error::new(
-            io::ErrorKind::NotFound,
-            format!("file not found: {}", path),
-        ));
-    }
-
     match path.as_ref() {
         "-h" | "-help" | "--help" | "help" => {
             return print_usage();
@@ -47,6 +40,13 @@ fn main() -> Result<(), io::Error> {
             return print_version();
         }
         _ => {}
+    }
+
+    if !path::Path::new(path).exists() {
+        return Err(io::Error::new(
+            io::ErrorKind::NotFound,
+            format!("file not found: {}", path),
+        ));
     }
 
     let source = std::fs::read_to_string(path)?;

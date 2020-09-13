@@ -120,6 +120,7 @@ impl Compiler {
             let mut ex = self.compile_stmt(expr)?;
             codes.append(&mut ex);
         }
+        codes.push(Code::Exit); // fin
         self.reconcile_labels(codes)
     }
 
@@ -155,6 +156,15 @@ impl Compiler {
                 "continue" => vec![Code::Continue],
                 _ => vec![Code::PrintVar(word.clone())],
             },
+            Return(ex) => {
+                if let Expr::None = **ex {
+                    vec![Code::Return]
+                } else {
+                    let mut inst = self.compile_expr(ex)?;
+                    inst.push(Code::Return);
+                    inst
+                }
+            }
             Call(..) | List(..) | Map(..) | Fn(..) => {
                 let mut inst = self.compile_expr(expr)?;
                 inst.push(Code::PrintPop);

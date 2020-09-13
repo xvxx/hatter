@@ -312,7 +312,7 @@ impl Compiler {
                 params: params.clone(),
                 body: self.compile_stmts(body)?,
             })],
-            _ => panic!("don't know how to compile {:?}", expr),
+            _ => panic!("Not an expression: {:?}", expr),
         })
     }
 

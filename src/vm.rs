@@ -246,12 +246,24 @@ impl VM {
                     for _ in 0..*arity {
                         args.push(self.pop_stack());
                     }
-                    let args = args.into_iter().rev().collect::<Vec<_>>();
-                    if let Some(Value::Fn(f)) = self.lookup(name) {
-                        let retval = f(self, &args);
-                        self.push(retval);
+                    let mut args = args.into_iter().rev();
+                    if let Some(Value::Fn { params, body }) = self.lookup(name) {
+                        let mut scope = Scope::new();
+                        for param in params {
+                            if let Some(arg) = args.next() {
+                                scope.insert(param.clone(), arg);
+                            } else {
+                                break;
+                            }
+                        }
+                        let body = body.clone();
+                        let ip = self.ip;
+                        self.scopes.push(scope);
+                        self.run(body)?;
+                        self.scopes.pop();
+                        self.ip = ip;
                     } else if let Some(f) = self.builtins.get(name) {
-                        let retval = f(self, &args);
+                        let retval = f(self, &args.collect::<Vec<_>>());
                         self.push(retval);
                     } else {
                         return error!("can't find fn named {}", name);

@@ -1,5 +1,5 @@
 use {
-    crate::VM,
+    crate::{Code, VM},
     std::{collections::BTreeMap, fmt},
 };
 
@@ -11,9 +11,12 @@ pub enum Value {
     Bool(bool),
     Number(f64),
     String(String),
-    Fn(Builtin),
     List(Vec<Value>),
     Map(BTreeMap<String, Value>),
+    Fn {
+        params: Vec<String>,
+        body: Vec<Code>,
+    },
 }
 
 impl fmt::Display for Value {
@@ -30,7 +33,7 @@ impl fmt::Debug for Value {
             Bool(b) => f.debug_struct(if *b { "True" } else { "False" }).finish(),
             Number(num) => f.debug_struct("Number").field("val", &num).finish(),
             String(s) => f.debug_struct("String").field("val", &s).finish(),
-            Fn(..) => f.debug_struct("Function").field("val", &"?").finish(),
+            Fn { .. } => f.debug_struct("Function").field("val", &"?").finish(),
             List(list) => f
                 .debug_struct("List")
                 .field(
@@ -63,7 +66,7 @@ impl Value {
             Bool(b) => b.to_string(),
             Number(num) => format!("{}", num),
             String(s) => s.clone(),
-            Fn(..) => "{function}".to_string(),
+            Fn { .. } => "{function}".to_string(),
             List(..) => "(list)".to_string(),
             Map(..) => "(map)".to_string(),
         }
@@ -76,7 +79,7 @@ impl Value {
             Bool(..) => "Bool",
             Number(..) => "Number",
             String(..) => "String",
-            Fn(..) => "Fn",
+            Fn { .. } => "Fn",
             List(..) => "List",
             Map(..) => "Map",
         }

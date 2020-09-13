@@ -160,7 +160,7 @@ impl VM {
                     self.ip += 1;
                 }
                 Code::Set(name) => {
-                    if !self.lookup(name).is_some() {
+                    if self.scope().get(name).is_none() {
                         let val = self.pop_stack();
                         self.set(name, val);
                         self.ip += 1;

@@ -3,7 +3,7 @@ use {
     std::collections::HashMap,
 };
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Code {
     /// No-op. Just here to help debugging.
     Debug(String),
@@ -308,7 +308,16 @@ impl Compiler {
                 inst.push(Code::Call(name.to_string(), args.len()));
                 inst
             }
-            Fn(_args, _body) => vec![],
+            Fn(params, body) => {
+                let mut inst = vec![];
+                for expr in body {
+                    inst.append(&mut self.compile_expr(expr)?);
+                }
+                vec![Code::Push(Value::Fn {
+                    params: params.clone(),
+                    body: inst,
+                })]
+            }
             _ => panic!("don't know how to compile {:?}", expr),
         })
     }

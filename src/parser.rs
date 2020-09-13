@@ -455,6 +455,7 @@ impl<'s, 't> Parser<'s, 't> {
                                 } else {
                                     Expr::Return(bx!(self.expr()?))
                                 });
+                                self.expect(Syntax::Special(';'))?;
                             }
                             "op!" => {
                                 self.skip();

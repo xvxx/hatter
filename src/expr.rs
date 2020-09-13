@@ -11,6 +11,7 @@ pub enum Expr {
     List(Vec<Expr>),
     Map(Vec<(String, Expr)>),
     Call(String, Vec<Expr>),
+    Return(Box<Expr>),
     If(Vec<(Expr, Vec<Expr>)>),
     For(Option<String>, String, Box<Expr>, Vec<Expr>), // key, val, iter, body
     Assign(String, Box<Expr>, bool),                   // var, val, reassign?
@@ -27,6 +28,7 @@ impl Expr {
             Expr::String(s) => format!(r#""{}""#, s),
             Expr::Word(s) => s.clone(),
             Expr::Tag(tag) => format!("{:?}", tag),
+            Expr::Return(ex) => format!("return {:?}", ex),
             Expr::List(list) => format!(
                 "[{}]",
                 list.iter()

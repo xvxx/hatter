@@ -448,6 +448,13 @@ impl<'s, 't> Parser<'s, 't> {
                         match word.literal() {
                             "if" => block.push(self.if_expr()?),
                             "for" => block.push(self.for_expr()?),
+                            "return" => {
+                                block.push(if self.peek_is(Syntax::Special(';')) {
+                                    Expr::Return(bx!(Expr::None))
+                                } else {
+                                    Expr::Return(bx!(self.expr()?))
+                                });
+                            }
                             "op!" => {
                                 self.skip();
                                 let op = self.expect(Syntax::Word)?.to_string();

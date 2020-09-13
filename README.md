@@ -67,42 +67,42 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
 
 ## Features
 
-- [x] Auto-closing HTML tags and code blocks based on indentation.
-- [x] Shorthand for `id`, `class`, `type`, and `name` attributes:
+- Auto-closing HTML tags and code blocks based on indentation.
+- Shorthand for `id`, `class`, `type`, and `name` attributes:
   - `<div#id>`
   - `<div.class1.class2>`
   - `<input@form-field-name>`
   - `<input:text>`
-- [x] Basic types:
+- Basic types:
   - `bool`, `float`, `string`, `list`, `map`, `fn()`
-- [x] for loops over `list` and `map`:
+- for loops over `list` and `map`:
   - `<ul> for page in pages do <li id=page-{page.id}> page.name`
   - `for k, v in some-map do <td> k </> <td> v`
-- [x] if/else statements
+- if/else statements
   - `if logged_in? do <h2> Welcome back!`
-- [x] Error-checked assignmnent with `:=` and `=`:
+- Error-checked assignmnent with `:=` and `=`:
   - `name := 'Bob'`  will error if name **is** already set.
   - `name = 'Bob'`  will error if name **isn't** already set.
-- [x] Dynamic values for regular attributes:
+- Dynamic values for regular attributes:
   - `<div page-num=page.id>`
-- [x] Conditionally set attributes or enable shorthand:
+- Conditionally set attributes or enable shorthand:
   - `<div .logged-in=logged-in?>`
   - `<div data-map=is-map?>`
-- [x] String interpolation:
+- String interpolation:
   - `<span.greeting> "Hey there {name}."`
-- [x] Shorthand interpolation:
+- Shorthand interpolation:
   - `<span #page-{page.id} .is-{page.type}> page.title`
-- [x] Implicit divs:
+- Implicit divs:
   - `<#main>` becomes `<div id='main'>`
-- [x] Implicit closing tags:
+- Implicit closing tags:
   - `<i>delicious</>` becomes `<i>delicious</i>`
-- [x] Call functions defined in Rust:
+- Call functions defined in Rust:
   - `<div.name> to-uppercase(name)`
-- [x] Easy inline JavaScript:
+- Easy inline JavaScript:
   - `<li> <a onclick=(alert("Oink!"))> 🐷`
-- [x] Add your own operators:
+- Add your own operators:
   - `op! ++ append`
-- [x] Hatter will add a `<!DOCTYPE>` and wrap everything in `<html>` if
+- Hatter will add a `<!DOCTYPE>` and wrap everything in `<html>` if
   the first tag in your template is `<head>`.
 
 ## Future Features

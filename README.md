@@ -73,7 +73,7 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
   - `<div.class1.class2>`
   - `<input@form-field-name>`
   - `<input:text>`
-- [ ] Basic types:
+- [x] Basic types:
   - `bool`, `float`, `string`, `list`, `map`, `fn()`
 - [x] for loops over `list` and `map`:
   - `<ul> for page in pages do <li id=page-{page.id}> page.name`

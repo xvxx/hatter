@@ -264,7 +264,12 @@ impl VM {
                                     continue;
                                 }
                             }
-                            out.push(format!("{}='{}'", k, v));
+                            // if just true, only print the attr name
+                            if let Value::Bool(true) = v {
+                                out.push(format!("{}", k));
+                            } else {
+                                out.push(format!("{}='{}'", k, v));
+                            }
                         }
                     }
                     if !classes.is_empty() {

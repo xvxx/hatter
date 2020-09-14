@@ -613,7 +613,7 @@ impl<'s, 't> Parser<'s, 't> {
             self.skip();
             return Ok(());
         }
-        self.expect(Syntax::Word)?;
+        self.expect(Syntax::String(true))?;
         self.expect(Syntax::Bracket('>'))?;
         Ok(())
     }
@@ -676,6 +676,11 @@ impl<'s, 't> Parser<'s, 't> {
                 Syntax::String(true) => {
                     self.back();
                     let name = self.attr()?;
+                    // single word attributes, like `defer`
+                    if !self.peek_is(Syntax::Special('=')) {
+                        tag.add_attr(name, Expr::Bool(true));
+                        continue;
+                    }
                     self.expect(Syntax::Special('='))?;
                     match self.peek_kind() {
                         Syntax::Number | Syntax::String(..) | Syntax::Word => {

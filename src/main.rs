@@ -1,5 +1,5 @@
 use {
-    hatter::{compile, parse, scan, vm, Code, Syntax, Token, AST},
+    hatter::{compile, parse, scan, vm, Code, Expr, Syntax, Token},
     std::{env, io, path},
 };
 
@@ -63,7 +63,7 @@ fn main() -> Result<(), io::Error> {
         .map_err(|e| print_error(&path, &source, e))
         .unwrap();
     if command == "parse" {
-        print_ast(ast);
+        print_ast(&ast);
         return Ok(());
     }
 
@@ -71,7 +71,7 @@ fn main() -> Result<(), io::Error> {
         unimplemented!();
     }
 
-    let compiled = compile(ast)
+    let compiled = compile(&ast)
         .map_err(|e| print_error(&path, &source, e))
         .unwrap();
     if command == "compile" {
@@ -123,8 +123,8 @@ fn print_tokens(mut tokens: Vec<Token>) {
     }
 }
 
-fn print_ast(ast: AST) {
-    for expr in ast.exprs {
+fn print_ast(ast: &[Expr]) {
+    for expr in ast {
         println!("{:#?}", expr);
     }
 }

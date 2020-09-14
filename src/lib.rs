@@ -9,7 +9,6 @@ macro_rules! bx {
 
 #[macro_use]
 mod error;
-mod ast;
 mod builtins;
 mod compiler;
 mod expr;
@@ -25,7 +24,6 @@ pub mod vm;
 pub mod repl;
 
 pub use {
-    ast::AST,
     builtins::builtins,
     compiler::{compile, Code},
     error::{print_error, Error},
@@ -44,6 +42,6 @@ pub type Result<T> = std::result::Result<T, Error>;
 pub fn to_html(s: &str) -> Result<String> {
     scan(s)
         .and_then(|t| parse(&t))
-        .and_then(|a| compile(a))
+        .and_then(|a| compile(&a))
         .and_then(|c| vm::run(&c))
 }

@@ -31,7 +31,7 @@ impl Template {
             self.compiled = Some(
                 scan(&self.source)
                     .and_then(|t| parse(&t))
-                    .and_then(|ast| compile(ast))?,
+                    .and_then(|ast| compile(&ast))?,
             );
         }
         Ok(())

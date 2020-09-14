@@ -1,5 +1,5 @@
 use {
-    crate::{scan, Error, Expr, Result, Syntax, Tag, Token, AST},
+    crate::{scan, Error, Expr, Result, Syntax, Tag, Token},
     std::collections::HashMap,
 };
 
@@ -8,8 +8,8 @@ const STACK_SIZE: usize = 1000; // infinite loop protection
 
 #[derive(Debug)]
 pub struct Parser<'s, 't> {
-    ast: AST,                           // what we're building
     tokens: &'t [Token<'s>],            // code
+    ast: Vec<Expr>,                     // what we're building
     pos: usize,                         // position in tokens vec
     tags: usize,                        // open tags
     operators: HashMap<String, String>, // operators like + - * /
@@ -18,7 +18,7 @@ pub struct Parser<'s, 't> {
     peeked: usize, // infinite loop protection hack
 }
 
-pub fn parse<'t>(tokens: &'t [Token]) -> Result<AST> {
+pub fn parse<'t>(tokens: &'t [Token]) -> Result<Vec<Expr>> {
     let mut parser = Parser::from(tokens);
     parser.parse()?;
     Ok(parser.ast)
@@ -29,7 +29,7 @@ impl<'s, 't> Parser<'s, 't> {
     pub fn from(tokens: &'t [Token<'s>]) -> Parser<'s, 't> {
         Parser {
             tokens,
-            ast: AST::new(),
+            ast: vec![],
             tags: 0,
             pos: 0,
             operators: default_operators(),
@@ -40,18 +40,14 @@ impl<'s, 't> Parser<'s, 't> {
 
     /// Parse `TokenStream` into `AST`.
     pub fn parse(&mut self) -> Result<()> {
-        let mut ast = AST::new();
-
         while !self.peek_eof() {
             let mut block = self.block()?;
-            ast.exprs.append(&mut block);
+            self.ast.append(&mut block);
             match self.peek_kind() {
                 Syntax::Dedent | Syntax::Special(';') => self.skip(),
                 _ => {}
             }
         }
-
-        self.ast = ast;
         Ok(())
     }
 
@@ -202,13 +198,13 @@ impl<'s, 't> Parser<'s, 't> {
                     }
                 }
                 // What! Rust 'lifetime magic.
-                let mut ast = scan(&lit[idx..end])
+                let mut exprs = scan(&lit[idx..end])
                     .and_then(|t| parse(&t))
                     .map_err(|mut e| {
                         e.pos += tok.pos + idx - 1; // probably not right yet...
                         e
                     })?;
-                parts.append(&mut ast.exprs);
+                parts.append(&mut exprs);
                 idx = end + 1;
             }
             if idx < lit.len() {

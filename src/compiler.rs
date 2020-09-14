@@ -1,5 +1,5 @@
 use {
-    crate::{Expr, Result, Tag, Value, AST},
+    crate::{Expr, Result, Tag, Value},
     std::collections::HashMap,
 };
 
@@ -94,7 +94,7 @@ pub enum Code {
     EndLoop,
 }
 
-pub fn compile(ast: AST) -> Result<Vec<Code>> {
+pub fn compile(ast: &[Expr]) -> Result<Vec<Code>> {
     let mut compiler = Compiler::new();
     compiler.compile(ast.into())
 }
@@ -114,9 +114,9 @@ impl Compiler {
         format!("{}_{}", s, label)
     }
 
-    fn compile(&mut self, ast: AST) -> Result<Vec<Code>> {
+    fn compile(&mut self, ast: &[Expr]) -> Result<Vec<Code>> {
         let mut codes = vec![];
-        for expr in &ast.exprs {
+        for expr in ast {
             let mut ex = self.compile_stmt(expr)?;
             codes.append(&mut ex);
         }

@@ -279,7 +279,9 @@ impl VM {
                         out.push("/".into());
                     }
                     out!("{}>", out.join(" "));
-                    self.indent += 2;
+                    if !closed {
+                        self.indent += 2;
+                    }
                 }
                 Code::CloseTag => {
                     self.ip += 1;

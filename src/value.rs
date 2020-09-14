@@ -1,6 +1,9 @@
 use {
     crate::{Code, VM},
-    std::{collections::BTreeMap, fmt},
+    std::{
+        collections::{BTreeMap, HashMap},
+        fmt,
+    },
 };
 
 pub type Builtin = fn(&mut VM, &[Value]) -> Value;
@@ -247,6 +250,52 @@ impl From<BTreeMap<&str, i32>> for Value {
 
 impl From<BTreeMap<&str, bool>> for Value {
     fn from(map: BTreeMap<&str, bool>) -> Self {
+        let mut new = BTreeMap::new();
+        for (k, v) in map {
+            new.insert(k.into(), val(v));
+        }
+        Value::Map(new)
+    }
+}
+
+impl From<HashMap<String, Value>> for Value {
+    fn from(map: HashMap<String, Value>) -> Self {
+        map.into()
+    }
+}
+
+impl From<HashMap<String, &str>> for Value {
+    fn from(map: HashMap<String, &str>) -> Self {
+        let mut new = BTreeMap::new();
+        for (k, v) in map {
+            new.insert(k, val(v));
+        }
+        Value::Map(new)
+    }
+}
+
+impl From<HashMap<&str, &str>> for Value {
+    fn from(map: HashMap<&str, &str>) -> Self {
+        let mut new = BTreeMap::new();
+        for (k, v) in map {
+            new.insert(k.to_string(), val(v));
+        }
+        Value::Map(new)
+    }
+}
+
+impl From<HashMap<&str, i32>> for Value {
+    fn from(map: HashMap<&str, i32>) -> Self {
+        let mut new = BTreeMap::new();
+        for (k, v) in map {
+            new.insert(k.into(), val(v));
+        }
+        Value::Map(new)
+    }
+}
+
+impl From<HashMap<&str, bool>> for Value {
+    fn from(map: HashMap<&str, bool>) -> Self {
         let mut new = BTreeMap::new();
         for (k, v) in map {
             new.insert(k.into(), val(v));

@@ -181,6 +181,22 @@ pub fn builtins() -> HashMap<String, Builtin> {
             Value::String("Expected String".to_string())
         }
     }
+    fn len(_: &mut VM, args: &[Value]) -> Value {
+        match args.get(0) {
+            Some(Value::List(list)) => list.len().into(),
+            Some(Value::Map(map)) => map.len().into(),
+            Some(Value::String(s)) => s.len().into(),
+            _ => 0.into(),
+        }
+    }
+    fn empty_(vm: &mut VM, args: &[Value]) -> Value {
+        if let Value::Number(n) = len(vm, args) {
+            n == 0.0
+        } else {
+            false
+        }
+        .into()
+    }
 
     macro_rules! builtin {
         ($name:expr => $fn:expr) => {
@@ -205,6 +221,8 @@ pub fn builtins() -> HashMap<String, Builtin> {
     builtin!("print" => print);
     builtin!("to-uppercase" => to_uppercase);
     builtin!("to-lowercase" => to_lowercase);
+    builtin!("len" => len);
+    builtin!("empty?" => empty_);
 
     map
 }

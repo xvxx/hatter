@@ -1,3 +1,6 @@
 - syntax.md
 - shorthand.md
 - attributes.md
+- forms.md
+- javascript.md
+- head.md

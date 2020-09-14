@@ -5,3 +5,4 @@
 - flow.md
 - loops.md
 - errors.md
+- modules.md

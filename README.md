@@ -119,22 +119,16 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
 ### next
 
 - [ ] big
-  - [x] redo tags
-  - [x] dynamic tag attributes
-  - [x] dynamically set shothands
-  - [x] string interpolation
-  - [x] strict mode for variables
   - [ ] test suite
   - [ ] rust api
     - [ ] helpers
     - [ ] functions
   - [ ] pratt parser
+  - [ ] int vs float
 - [ ] small
-  - [x] hash/array/string index
   - [ ] do syntax
     - [ ] for / do
     - [ ] if / then
-  - [ ] int vs float
 
 ----
 
@@ -155,9 +149,7 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
 - [ ] design
 - [ ] layout
 - [ ] generator
-- [ ] outline
 - [ ] content
-- [ ] docs for stdlib
 
 ### project
 

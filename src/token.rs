@@ -30,7 +30,11 @@ impl<'s> Token<'s> {
 
     /// Create a string of the literal value.
     pub fn to_string(&self) -> String {
-        self.literal().to_string()
+        match self.kind {
+            Syntax::Dedent | Syntax::Indent => "".to_string(),
+            Syntax::Special(c) | Syntax::Bracket(c) => c.to_string(),
+            _ => self.lit.to_string(),
+        }
     }
 
     /// Convert into native number or error. No weak typing.

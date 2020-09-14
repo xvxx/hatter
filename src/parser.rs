@@ -253,7 +253,10 @@ impl<'s, 't> Parser<'s, 't> {
     fn expr(&mut self) -> Result<Expr> {
         if !matches!(self.peek_kind(), Syntax::Bracket(_)) {
             if let Some(p) = self.peek2() {
-                if p.kind == Syntax::Word {
+                if matches!(
+                    p.kind,
+                    Syntax::Word | Syntax::Special(',') | Syntax::Special('.')
+                ) {
                     let lit = p.to_string();
                     if matches!(p.literal(), ":=" | "=") {
                         let reassign = p.literal() == "=";
@@ -267,10 +270,17 @@ impl<'s, 't> Parser<'s, 't> {
                         while let Some(p) = self.peek() {
                             match p.kind {
                                 Syntax::Bracket('<') | Syntax::Special(';') => break,
-                                _ => parts.push(self.next().to_string()),
+                                Syntax::Special(_) => parts.push(self.next().to_string()),
+                                _ => {
+                                    if parts.is_empty() {
+                                        parts.push(self.next().to_string());
+                                    } else {
+                                        parts.push(format!(" {}", self.next().literal()));
+                                    }
+                                }
                             }
                         }
-                        return Ok(Expr::String(parts.join(" ")));
+                        return Ok(Expr::String(parts.join("")));
                     }
                 }
             }

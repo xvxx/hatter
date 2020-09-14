@@ -264,7 +264,7 @@ impl<'s, 't> Parser<'s, 't> {
                         let name = self.expect(Syntax::Word)?.to_string();
                         self.skip(); // skip op
                         return Ok(Expr::Assign(name, bx!(self.expr()?), reassign));
-                    } else if !self.operators.contains_key(&lit) {
+                    } else if matches!(p.kind, Syntax::Word) && !self.operators.contains_key(&lit) {
                         // if we have two or more words in a row, convert
                         // to a string, ex: <b> Hey Friends -> <b> "Hey Friends"
                         let mut parts = vec![];

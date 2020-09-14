@@ -116,6 +116,12 @@ impl From<&String> for Value {
     }
 }
 
+impl From<&&String> for Value {
+    fn from(item: &&String) -> Self {
+        Value::String((*item).clone())
+    }
+}
+
 impl From<usize> for Value {
     fn from(item: usize) -> Self {
         Value::from(item as i32)
@@ -206,6 +212,12 @@ impl From<Vec<String>> for Value {
     }
 }
 
+impl From<Vec<&String>> for Value {
+    fn from(item: Vec<&String>) -> Self {
+        Value::List(item.iter().map(val).collect())
+    }
+}
+
 impl From<Vec<i32>> for Value {
     fn from(item: Vec<i32>) -> Self {
         Value::List(item.iter().map(val).collect())
@@ -215,6 +227,16 @@ impl From<Vec<i32>> for Value {
 impl From<BTreeMap<String, Value>> for Value {
     fn from(map: BTreeMap<String, Value>) -> Self {
         Value::Map(map)
+    }
+}
+
+impl From<BTreeMap<String, String>> for Value {
+    fn from(map: BTreeMap<String, String>) -> Self {
+        let mut new = BTreeMap::new();
+        for (k, v) in map {
+            new.insert(k, val(v));
+        }
+        Value::Map(new)
     }
 }
 
@@ -261,6 +283,16 @@ impl From<BTreeMap<&str, bool>> for Value {
 impl From<HashMap<String, Value>> for Value {
     fn from(map: HashMap<String, Value>) -> Self {
         map.into()
+    }
+}
+
+impl From<HashMap<String, String>> for Value {
+    fn from(map: HashMap<String, String>) -> Self {
+        let mut new = BTreeMap::new();
+        for (k, v) in map {
+            new.insert(k, val(v));
+        }
+        Value::Map(new)
     }
 }
 

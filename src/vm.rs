@@ -47,6 +47,11 @@ impl VM {
         self.scope().insert(key.as_ref().to_string(), val.into());
     }
 
+    /// Add a Rust function as a helper that can be invoked in templates.
+    pub fn helper<S: AsRef<str>>(&mut self, key: S, f: Builtin) {
+        self.builtins.insert(key.as_ref().to_string(), f);
+    }
+
     /// Render a template into a String.
     pub fn render<T: Into<Template>>(&mut self, tpl: T) -> Result<String> {
         let mut tpl = tpl.into();

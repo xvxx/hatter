@@ -1,3 +1,11 @@
+webview? := true
+logged-in? := false
+nav-links := [
+  { href: "/home", text: "home" }
+  { href: "/news", text: "news" }
+  { href: "/help", text: "help" }
+]
+
 <nav .webview-app=webview?>
   <a href="/signin"> sign in
   <a href="/signup"> sign up

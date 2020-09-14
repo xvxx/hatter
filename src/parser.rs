@@ -405,7 +405,11 @@ impl<'s, 't> Parser<'s, 't> {
                                 break;
                             }
                             Syntax::Special(',') => self.skip(),
-                            Syntax::String(..) | Syntax::Number | Syntax::Bool | Syntax::Word => {
+                            Syntax::Bracket(..)
+                            | Syntax::String(..)
+                            | Syntax::Number
+                            | Syntax::Bool
+                            | Syntax::Word => {
                                 args.push(self.expr()?);
                             }
                             _ => return self.error(")"),

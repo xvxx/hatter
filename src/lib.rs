@@ -38,3 +38,10 @@ pub use {
 };
 
 pub type Result<T> = std::result::Result<T, Error>;
+
+pub fn to_html(s: &str) -> Result<String> {
+    scan(s)
+        .and_then(|t| parse(&t))
+        .and_then(|a| compile(a))
+        .and_then(|c| vm::run(c))
+}

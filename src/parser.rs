@@ -251,7 +251,8 @@ impl<'s, 't> Parser<'s, 't> {
 
     /// Parse a code expression.
     fn expr(&mut self) -> Result<Expr> {
-        if !matches!(self.peek_kind(), Syntax::Bracket(_)) {
+        if !matches!(self.peek_kind(), Syntax::Bracket(_) | Syntax::Special(';') | Syntax::Special(','))
+        {
             if let Some(p) = self.peek2() {
                 if matches!(
                     p.kind,

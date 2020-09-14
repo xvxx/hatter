@@ -20,6 +20,7 @@ enum Mode {
     None,      // Regular
     Container, // [List] or {Map}
     Tag,       // <Tag>
+    Args,      // Parsing (args) inside a <tag>
 }
 
 #[derive(Debug, PartialEq)]
@@ -125,6 +126,11 @@ impl<'s> Lexer<'s> {
     /// Are we lexing a container?
     fn in_container(&self) -> bool {
         matches!(self.mode, Mode::Container)
+    }
+
+    /// Are we parsing (args) in a <tag>?
+    fn in_tag_args(&self) -> bool {
+        matches!(self.mode, Mode::Args)
     }
 
     /// Turn `source` into vector of `Token`, or error.
@@ -238,7 +244,12 @@ impl<'s> Lexer<'s> {
                     self.pop_mode();
                     Syntax::Bracket(c)
                 }
-                ')' => Syntax::Bracket(c),
+                ')' => {
+                    if self.in_tag_args() {
+                        self.pop_mode();
+                    }
+                    Syntax::Bracket(c)
+                }
                 '(' => {
                     if self.in_tag() && self.prev_is(Syntax::Special('=')) {
                         let mut open = 0;
@@ -266,7 +277,11 @@ impl<'s> Lexer<'s> {
                 _ => {
                     if self.in_tag() {
                         if self.prev_is(Syntax::Special('=')) {
-                            self.scan_word()?
+                            let word = self.scan_word()?;
+                            if self.peek_is('(') {
+                                self.set_mode(Mode::Args);
+                            }
+                            word
                         } else {
                             self.scan_attr()?
                         }

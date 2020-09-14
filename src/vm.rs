@@ -1,5 +1,5 @@
 use {
-    crate::{builtins, Builtin, Code, Result, Value},
+    crate::{builtins, Builtin, Code, Result, Template, Value},
     std::collections::{BTreeMap, HashMap},
 };
 
@@ -16,13 +16,14 @@ pub struct VM {
     builtins: HashMap<String, Builtin>,
 }
 
-pub fn run(inst: Vec<Code>) -> Result<String> {
+pub fn run(inst: &[Code]) -> Result<String> {
     let mut vm = VM::new(false);
     vm.run(inst)?;
     Ok(vm.out)
 }
 
 impl VM {
+    /// Create a new VM.
     pub fn new(strict: bool) -> VM {
         VM {
             strict,
@@ -39,6 +40,18 @@ impl VM {
     /// Return `out` and clear it.
     pub fn out(&mut self) -> String {
         std::mem::replace(&mut self.out, String::new())
+    }
+
+    /// Set a variable in the current scope.
+    pub fn set<S: AsRef<str>, V: Into<Value>>(&mut self, key: S, val: V) {
+        self.scope().insert(key.as_ref().to_string(), val.into());
+    }
+
+    /// Render a template into a String.
+    pub fn render<T: Into<Template>>(&mut self, tpl: T) -> Result<String> {
+        let mut tpl = tpl.into();
+        self.run(tpl.codes()?)?;
+        Ok(self.out())
     }
 
     fn pop_stack(&mut self) -> Value {
@@ -80,11 +93,8 @@ impl VM {
         None
     }
 
-    fn set<S: AsRef<str>, V: Into<Value>>(&mut self, key: S, val: V) {
-        self.scope().insert(key.as_ref().to_string(), val.into());
-    }
-
-    pub fn run(&mut self, inst: Vec<Code>) -> Result<()> {
+    /// Execute `inst` with this VM, adding any output to `self.out.`
+    pub fn run(&mut self, inst: &[Code]) -> Result<()> {
         self.ip = 0;
         macro_rules! out {
             ($msg:expr) => {{
@@ -286,7 +296,7 @@ impl VM {
                         let body = body.clone();
                         let ip = self.ip;
                         self.scopes.push(scope);
-                        self.run(body)?;
+                        self.run(&body)?;
                         self.scopes.pop();
                         self.ip = ip;
                     } else if let Some(f) = self.builtins.get(name) {

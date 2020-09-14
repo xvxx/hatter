@@ -16,6 +16,7 @@ mod expr;
 mod lexer;
 mod parser;
 mod syntax;
+mod template;
 mod token;
 mod value;
 pub mod vm;
@@ -32,6 +33,7 @@ pub use {
     lexer::scan,
     parser::parse,
     syntax::Syntax,
+    template::Template,
     token::Token,
     value::{Builtin, Value},
     vm::{Scope, VM},
@@ -43,5 +45,5 @@ pub fn to_html(s: &str) -> Result<String> {
     scan(s)
         .and_then(|t| parse(&t))
         .and_then(|a| compile(a))
-        .and_then(|c| vm::run(c))
+        .and_then(|c| vm::run(&c))
 }

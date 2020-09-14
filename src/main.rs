@@ -81,7 +81,7 @@ fn main() -> Result<(), io::Error> {
 
     print!(
         "{}",
-        vm::run(compiled)
+        vm::run(&compiled)
             .map_err(|e| print_error(&path, &source, e))
             .unwrap()
     );

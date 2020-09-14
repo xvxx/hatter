@@ -89,9 +89,7 @@ impl VM {
         macro_rules! out {
             ($msg:expr) => {{
                 let s = $msg;
-                for _ in 0..self.indent {
-                    self.out.push(' ');
-                }
+                self.out.push_str(&" ".repeat(self.indent));
                 self.out.push_str(&s);
                 self.out.push('\n');
             }};
@@ -233,8 +231,9 @@ impl VM {
                     let closed = matches!(self.pop_stack(), Value::Bool(true));
                     let name = self.pop_stack().to_string();
                     if name == "head" && self.tags.is_empty() {
-                        out.push("<!DOCTYPE html>\n<html>\n".into());
+                        out!("<!DOCTYPE html>\n<html>");
                         self.tags.push("html".into());
+                        self.indent += 2;
                     }
                     out.push(format!("<{}", name));
                     if !closed {
@@ -302,6 +301,9 @@ impl VM {
 
         if !self.tags.is_empty() {
             for tag in self.tags.drain(..) {
+                if self.indent > 0 {
+                    self.indent -= 2;
+                }
                 out!("</{}>", tag);
             }
         }

@@ -124,11 +124,9 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
 
 - [ ] big
   - [ ] test suite
-  - [ ] rust api
-    - [ ] helpers
-    - [ ] functions
   - [ ] pratt parser
   - [ ] int vs float
+  - [ ] HTMLized error page
 - [ ] small
   - [ ] <tags> as expressions, not stmts
   - [ ] do syntax
@@ -136,12 +134,7 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
     - [ ] if / then
 
 ----
-
-- [ ] HTMLized error page
-- [ ] `do` syntax
-
 - [ ] def <tag attr=Type>
-- [ ] def fn(arg Type, arg Type) Type
 - [ ] convert lexer to bytes ala https://github.com/nathanwhit/minimal-yaml
 - [ ] show error location when compiling
 - [ ] repl: help

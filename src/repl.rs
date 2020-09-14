@@ -18,11 +18,14 @@ pub fn run() -> Result<(), io::Error> {
         match readline {
             Ok(line) => {
                 rl.add_history_entry(line.as_str());
-                let _ = scan(&line)
+                match scan(&line)
                     .and_then(|t| parse(&t))
                     .and_then(|ast| compile(ast))
                     .and_then(|codes| vm.run(codes))
-                    .map_err(|e| eprintln!("{}", e));
+                {
+                    Ok(..) => println!("{}", vm.out()),
+                    Err(e) => eprintln!("{}", e),
+                }
             }
             Err(ReadlineError::Interrupted) | Err(ReadlineError::Eof) => {
                 println!("Bye!");

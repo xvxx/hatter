@@ -79,9 +79,12 @@ fn main() -> Result<(), io::Error> {
         return Ok(());
     }
 
-    vm::run(compiled)
-        .map_err(|e| print_error(&path, &source, e))
-        .unwrap();
+    println!(
+        "{}",
+        vm::run(compiled)
+            .map_err(|e| print_error(&path, &source, e))
+            .unwrap()
+    );
     Ok(())
 }
 

@@ -11,13 +11,14 @@ pub struct VM {
     scopes: Vec<Scope>, // stack of scopes
     tags: Vec<String>,  // track tags to auto-close
     ip: usize,          // instruction pointer
+    out: String,        // output
     builtins: HashMap<String, Builtin>,
 }
 
-pub fn run(inst: Vec<Code>) -> Result<()> {
+pub fn run(inst: Vec<Code>) -> Result<String> {
     let mut vm = VM::new(false);
     vm.run(inst)?;
-    Ok(())
+    Ok(vm.out)
 }
 
 impl VM {
@@ -28,8 +29,14 @@ impl VM {
             stack: vec![],
             tags: vec![],
             scopes: vec![Scope::new()],
+            out: String::new(),
             builtins: builtins(),
         }
+    }
+
+    /// Return `out` and clear it.
+    pub fn out(&mut self) -> String {
+        std::mem::replace(&mut self.out, String::new())
     }
 
     fn pop_stack(&mut self) -> Value {
@@ -77,6 +84,14 @@ impl VM {
 
     pub fn run(&mut self, inst: Vec<Code>) -> Result<()> {
         self.ip = 0;
+        macro_rules! out {
+            ($msg:expr, $($args:expr),*) => {{
+                let s = &format!($msg, $($args),*);
+                self.out.push_str(&s);
+                self.out.push('\n');
+            }};
+        }
+
         while let Some(inst) = inst.get(self.ip) {
             // println!("\n>> VM: {:?}\nSTACK: {:?}\n", inst, self.stack);
             match inst {
@@ -104,11 +119,11 @@ impl VM {
                 }
                 Code::Exit => return Ok(()),
                 Code::Print(v) => {
-                    println!("{}", v.to_string());
+                    out!("{}", v.to_string());
                     self.ip += 1;
                 }
                 Code::PrintPop => {
-                    println!("{}", self.pop_stack().to_string());
+                    out!("{}", self.pop_stack().to_string());
                     self.ip += 1;
                 }
                 Code::Push(v) => {
@@ -145,11 +160,11 @@ impl VM {
                 Code::Loop(key, val) => self.do_loop(key, val)?,
                 Code::PrintVar(name) => {
                     if let Some(v) = self.lookup(name) {
-                        println!("{}", v);
+                        out!("{}", v);
                     } else if self.strict {
                         return error!("can't find {}", name);
                     } else {
-                        println!("{}", name);
+                        out!("{}", name);
                     }
                     self.ip += 1;
                 }
@@ -236,11 +251,11 @@ impl VM {
                     if closed {
                         out.push("/".into());
                     }
-                    println!("{}>", out.join(" "));
+                    out!("{}>", out.join(" "));
                 }
                 Code::CloseTag => {
                     self.ip += 1;
-                    println!("</{}>", self.pop_tag());
+                    out!("</{}>", self.pop_tag());
                 }
                 Code::Return => {
                     return Ok(()); // TODO
@@ -278,7 +293,7 @@ impl VM {
         }
         if !self.tags.is_empty() {
             for tag in self.tags.drain(..) {
-                println!("</{}>", tag);
+                out!("</{}>", tag);
             }
         }
         Ok(())

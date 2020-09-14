@@ -130,6 +130,7 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
   - [ ] pratt parser
   - [ ] int vs float
 - [ ] small
+  - [ ] <tags> as expressions, not stmts
   - [ ] do syntax
     - [ ] for / do
     - [ ] if / then

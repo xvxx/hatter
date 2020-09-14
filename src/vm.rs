@@ -12,6 +12,7 @@ pub struct VM {
     tags: Vec<String>,  // track tags to auto-close
     ip: usize,          // instruction pointer
     out: String,        // output
+    indent: usize,      // for pretty-printing
     builtins: HashMap<String, Builtin>,
 }
 
@@ -30,6 +31,7 @@ impl VM {
             tags: vec![],
             scopes: vec![Scope::new()],
             out: String::new(),
+            indent: 0,
             builtins: builtins(),
         }
     }
@@ -85,11 +87,17 @@ impl VM {
     pub fn run(&mut self, inst: Vec<Code>) -> Result<()> {
         self.ip = 0;
         macro_rules! out {
-            ($msg:expr, $($args:expr),*) => {{
-                let s = &format!($msg, $($args),*);
+            ($msg:expr) => {{
+                let s = $msg;
+                for _ in 0..self.indent {
+                    self.out.push(' ');
+                }
                 self.out.push_str(&s);
                 self.out.push('\n');
             }};
+            ($msg:expr, $($args:expr),+) => {
+                out!(format!($msg, $($args),+))
+            }
         }
 
         while let Some(inst) = inst.get(self.ip) {
@@ -117,7 +125,7 @@ impl VM {
                         self.ip += 1;
                     }
                 }
-                Code::Exit => return Ok(()),
+                Code::Exit => break,
                 Code::Print(v) => {
                     out!("{}", v.to_string());
                     self.ip += 1;
@@ -225,7 +233,7 @@ impl VM {
                     let closed = matches!(self.pop_stack(), Value::Bool(true));
                     let name = self.pop_stack().to_string();
                     if name == "head" && self.tags.is_empty() {
-                        out.push("<!DOCTYPE html>\n<html>".into());
+                        out.push("<!DOCTYPE html>\n<html>\n".into());
                         self.tags.push("html".into());
                     }
                     out.push(format!("<{}", name));
@@ -252,14 +260,14 @@ impl VM {
                         out.push("/".into());
                     }
                     out!("{}>", out.join(" "));
+                    self.indent += 2;
                 }
                 Code::CloseTag => {
                     self.ip += 1;
+                    self.indent -= 2;
                     out!("</{}>", self.pop_tag());
                 }
-                Code::Return => {
-                    return Ok(()); // TODO
-                }
+                Code::Return => break,
                 Code::Call(name, arity) => {
                     self.ip += 1;
                     let mut args = vec![];
@@ -291,11 +299,13 @@ impl VM {
                 }
             }
         }
+
         if !self.tags.is_empty() {
             for tag in self.tags.drain(..) {
                 out!("</{}>", tag);
             }
         }
+
         Ok(())
     }
 

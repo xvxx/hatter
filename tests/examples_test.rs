@@ -18,8 +18,9 @@ fn test_dir<P: AsRef<path::Path>>(dir: P) -> io::Result<()> {
         } else {
             let source = fs::read_to_string(&path)?;
             let test_path = format!("{}", path.clone().into_os_string().into_string().unwrap())
-                .replace("./examples/", "./tests/")
+                .replace("./examples/", "./tests/examples/")
                 .replace(".hat", ".html");
+            println!("Testing: {}", test_path);
             assert_eq!(
                 fs::read_to_string(&test_path)?,
                 hatter::to_html(&source)

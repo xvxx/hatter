@@ -6,11 +6,15 @@
 > that have had a prior exposure to _Hatter_: as potential programmers
 > they are mentally mutilated beyond hope of regeneration.
 >
-> -– Edsger W. Dijkstra, allegedly
+> -– Edsger W. Dijkstra (allegedly)
 
-Hatter is an HTML templating language that can be used server side to
-produce static HTML. Its syntax is a cheap knock-off of
-[Imba](https://imba.io), without any of the fancy JavaScript parts.
+Hatter is a small, whitespace sensitive scripting language with
+HTML templating built in. Its HTML features and syntax are a cheap
+knock off of [Imba], except Hatter produces raw, static HTML - no
+JavaScript in sight.
+
+Hatter can be used to generate static web sites or to render server
+side content in an old fashioned web application.
 
 It's like a less powerful, 90s-era PHP. But we're talking PHP/FI, none
 of that Easy-Bake Oven PHP3 stuff that you could use to build actual
@@ -163,3 +167,5 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
 
 Hatter is licensed under the MIT License. Please see[COPYING](COPYING)
 or http://opensource.org/licenses/MIT for details.
+
+[imba]: https://imba.io

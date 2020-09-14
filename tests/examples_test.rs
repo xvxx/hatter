@@ -20,9 +20,12 @@ fn test_dir<P: AsRef<path::Path>>(dir: P) -> io::Result<()> {
             let test_path = format!("{}", path.clone().into_os_string().into_string().unwrap())
                 .replace("./examples/", "./tests/examples/")
                 .replace(".hat", ".html");
-            println!("Testing: {}", test_path);
+
+            println!("{}", test_path);
             assert_eq!(
-                fs::read_to_string(&test_path)?,
+                fs::read_to_string(&test_path).map_err(|e| {
+                    io::Error::new(io::ErrorKind::NotFound, format!("{}: {}", e, test_path))
+                })?,
                 hatter::to_html(&source)
                     .map_err(|err| {
                         hatter::print_error(path, source, err);
@@ -30,7 +33,6 @@ fn test_dir<P: AsRef<path::Path>>(dir: P) -> io::Result<()> {
                     })
                     .unwrap()
             );
-            println!(">> {}", test_path);
         }
     }
     Ok(())

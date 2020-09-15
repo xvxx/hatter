@@ -7,6 +7,12 @@ macro_rules! bx {
     };
 }
 
+macro_rules! rc {
+    ($ex:expr) => {
+        Rc::new($ex)
+    };
+}
+
 #[macro_use]
 mod error;
 mod builtins;

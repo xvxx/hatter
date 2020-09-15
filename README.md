@@ -128,7 +128,6 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
   - [ ] int vs float
   - [ ] HTMLized error page
 - [ ] small
-  - [ ] <tags> as expressions, not stmts
   - [ ] do syntax
     - [ ] for / do
     - [ ] if / then

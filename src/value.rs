@@ -66,6 +66,19 @@ impl fmt::Debug for Value {
 }
 
 impl Value {
+    pub fn len(&self) -> usize {
+        match self {
+            Value::List(list) => list.len(),
+            Value::Map(map) => map.len(),
+            Value::String(s) => s.len(),
+            _ => 0,
+        }
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
     pub fn to_bool(&self) -> bool {
         match self {
             Value::None => false,

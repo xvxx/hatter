@@ -123,7 +123,6 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
 ### next
 
 - [ ] big
-  - [ ] test suite
   - [ ] pratt parser
   - [ ] int vs float
   - [ ] HTMLized error page
@@ -136,9 +135,6 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
 - [ ] def <tag attr=Type>
 - [ ] convert lexer to bytes ala https://github.com/nathanwhit/minimal-yaml
 - [ ] show error location when compiling
-- [ ] repl: help
-- [ ] repl: show variables
-- [ ] repl: show functions
 - [ ] repl: tab completion
 
 ### docs

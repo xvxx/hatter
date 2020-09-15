@@ -90,7 +90,7 @@ impl Value {
     pub fn to_str(&self) -> &str {
         use Value::*;
         match self {
-            None => "None",
+            None => "",
             String(s) => &s,
             Number(..) => "(number)",
             Fn { .. } => "{function}",

@@ -11,7 +11,7 @@ nav-links := [
   <a href="/signup"> sign up
   <ul>
     for link in nav-links
-      <li.small-link> <a href=link.href> link.text
+      <li.small-link> <a href={link.href}> link.text
 
 <div#main.markdown-body>
   if logged-in?

@@ -33,7 +33,7 @@ pub use {
     syntax::Syntax,
     template::Template,
     token::Token,
-    value::{Builtin, Value},
+    value::{Builtin, Object, Value},
     vm::{Scope, VM},
 };
 

@@ -71,7 +71,7 @@ pub fn builtins() -> HashMap<String, Builtin> {
         let verb = &args[1];
 
         match subject {
-            Value::Map(map) => map.get(&verb.to_string()).unwrap_or(&Value::None).clone(),
+            Value::Map(map) => map.get(verb.to_str()).unwrap_or(&Value::None).clone(),
             Value::List(list) => {
                 if let Value::Number(n) = verb {
                     list.get(*n as usize).unwrap_or(&Value::None).clone()
@@ -79,6 +79,7 @@ pub fn builtins() -> HashMap<String, Builtin> {
                     Value::None
                 }
             }
+            Value::Object(o) => o.get(verb.to_str()).unwrap_or(Value::None),
             _ => Value::None,
         }
     }

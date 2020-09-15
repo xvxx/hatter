@@ -3,6 +3,7 @@ use {
     std::{
         collections::{BTreeMap, HashMap},
         fmt,
+        rc::Rc,
     },
 };
 
@@ -20,6 +21,16 @@ pub enum Value {
         params: Vec<String>,
         body: Vec<Code>,
     },
+    Object(Rc<dyn Object>),
+}
+
+#[allow(unused_variables)]
+pub trait Object {
+    fn get(&self, key: &str) -> Option<Value> {
+        Some(Value::None)
+    }
+
+    fn set(&self, key: &str, val: Value) {}
 }
 
 impl fmt::Display for Value {
@@ -49,6 +60,7 @@ impl fmt::Debug for Value {
                 )
                 .finish(),
             Map(..) => f.debug_struct("Map").field("val", &"?").finish(),
+            Object(..) => f.debug_struct("Object").field("val", &"?").finish(),
         }
     }
 }
@@ -62,16 +74,31 @@ impl Value {
         }
     }
 
-    pub fn to_string(&self) -> String {
+    pub fn to_str(&self) -> &str {
         use Value::*;
         match self {
-            None => "".to_string(),
-            Bool(b) => b.to_string(),
-            Number(num) => format!("{}", num),
-            String(s) => s.clone(),
-            Fn { .. } => "{function}".to_string(),
-            List(..) => "(list)".to_string(),
-            Map(..) => "(map)".to_string(),
+            None => "None",
+            String(s) => &s,
+            Number(..) => "(number)",
+            Fn { .. } => "{function}",
+            List(..) => "(list)",
+            Map(..) => "(map)",
+            Object(..) => "(object)",
+            Bool(b) => {
+                if *b {
+                    "true"
+                } else {
+                    "false"
+                }
+            }
+        }
+    }
+
+    pub fn to_string(&self) -> String {
+        if let Value::Number(num) = self {
+            format!("{}", num)
+        } else {
+            self.to_str().to_string()
         }
     }
 
@@ -85,6 +112,7 @@ impl Value {
             Fn { .. } => "Fn",
             List(..) => "List",
             Map(..) => "Map",
+            Object(..) => "Object",
         }
     }
 }

@@ -141,7 +141,6 @@ impl Compiler {
             Bool(b) => vec![Code::Print(b.into())],
             Number(n) => vec![Code::Print(n.into())],
             String(s) => vec![Code::Print(s.into())],
-            Tag(tag) => self.compile_tag(tag)?,
             Assign(var, expr, reassign) => {
                 let mut inst = self.compile_expr(expr)?;
                 if *reassign {
@@ -165,7 +164,7 @@ impl Compiler {
                     inst
                 }
             }
-            Call(..) | List(..) | Map(..) | Fn(..) => {
+            Call(..) | List(..) | Map(..) | Fn(..) | Tag(..) => {
                 let mut inst = self.compile_expr(expr)?;
                 inst.push(Code::PrintPop);
                 inst
@@ -297,6 +296,7 @@ impl Compiler {
             Number(n) => vec![Code::Push(n.into())],
             String(s) => vec![Code::Push(s.into())],
             Word(word) => vec![Code::Lookup(word.to_string())],
+            Tag(tag) => self.compile_tag(tag)?,
             List(list) => {
                 let mut inst = vec![];
                 for expr in list {

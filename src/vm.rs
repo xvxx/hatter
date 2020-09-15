@@ -50,6 +50,11 @@ impl VM {
         self.scope().insert(key.as_ref().to_string(), val.into());
     }
 
+    /// Get a variable from the current or parent scope.
+    pub fn get<S: AsRef<str>>(&self, key: S) -> Option<&Value> {
+        self.lookup(key.as_ref())
+    }
+
     /// Add a Rust function as a helper that can be invoked in templates.
     pub fn helper<S, F>(&mut self, key: S, f: F)
     where

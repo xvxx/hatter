@@ -198,6 +198,12 @@ pub fn builtins() -> HashMap<String, Rc<Builtin>> {
         }
         .into()
     }
+    fn r#type(_: &mut VM, args: &[Value]) -> Value {
+        if args.is_empty() {
+            return Value::None;
+        }
+        args[0].typename().into()
+    }
 
     macro_rules! builtin {
         ($name:expr => $fn:expr) => {
@@ -205,6 +211,7 @@ pub fn builtins() -> HashMap<String, Rc<Builtin>> {
         };
     }
 
+    builtin!("type" => r#type);
     builtin!("when" => when);
     builtin!("eq" => eq);
     builtin!("neq" => neq);

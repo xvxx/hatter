@@ -114,6 +114,16 @@ impl VM {
         None
     }
 
+    #[allow(unused)]
+    pub(crate) fn scopes(&self) -> &[Scope] {
+        &self.scopes
+    }
+
+    #[allow(unused)]
+    pub(crate) fn builtins(&self) -> &HashMap<String, Rc<Builtin>> {
+        &self.builtins
+    }
+
     fn scope(&mut self) -> &mut Scope {
         let len = self.scopes.len();
         &mut self.scopes[len - 1]

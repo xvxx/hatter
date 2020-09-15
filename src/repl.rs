@@ -1,5 +1,5 @@
 use {
-    crate::{compile, parse, scan, VM},
+    crate::{compile, parse, scan, Value, VM},
     rustyline::{error::ReadlineError, Editor},
     std::io,
 };
@@ -8,6 +8,9 @@ use {
 pub fn run() -> Result<(), io::Error> {
     banner();
     let mut vm = VM::new(true);
+    vm.helper("help", help);
+    vm.helper("vars", vars);
+    vm.helper("builtins", builtins);
     let history_file = ".hatter_history";
 
     // `()` can be used when no completer is required
@@ -18,12 +21,21 @@ pub fn run() -> Result<(), io::Error> {
         match readline {
             Ok(line) => {
                 rl.add_history_entry(line.as_str());
+                if line == "help" {
+                    help(&mut vm, &[]);
+                    continue;
+                }
                 match scan(&line)
                     .and_then(|t| parse(&t))
                     .and_then(|ast| compile(&ast))
                     .and_then(|codes| vm.run(&codes))
                 {
-                    Ok(..) => println!("{}", vm.out()),
+                    Ok(..) => {
+                        let out = vm.out();
+                        if !out.trim().is_empty() {
+                            println!("{}", out);
+                        }
+                    }
                     Err(e) => eprintln!("{}", e),
                 }
             }
@@ -84,4 +96,28 @@ fn banner() {
         white = white,
         clear = clear
     );
+}
+
+fn help(_: &mut VM, _: &[Value]) -> Value {
+    println!("REPL commands:\n");
+    println!("  - help()");
+    println!("  - vars()");
+    print!("  - builtins()");
+    Value::None
+}
+
+fn vars(vm: &mut VM, _: &[Value]) -> Value {
+    for scope in vm.scopes() {
+        for (k, v) in scope {
+            println!("{}: {:?}", k, v);
+        }
+    }
+    Value::None
+}
+
+fn builtins(vm: &mut VM, _: &[Value]) -> Value {
+    for (name, _) in vm.builtins() {
+        println!("{}", name);
+    }
+    Value::None
 }

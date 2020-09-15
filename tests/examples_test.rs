@@ -38,6 +38,7 @@ fn test_dir<P: AsRef<path::Path>>(dir: P) -> io::Result<()> {
             write!(file, "{}", hatter::to_html(&source)?)?;
             let (expected, actual) = (pretty(&test_path)?, pretty(tmp_path)?);
             if expected != actual {
+                println!("!!! FAILED: {}", path.display());
                 println!("=== EXPECTED ==========\n{}", expected);
                 println!("=== ACTUAL ==========\n{}", actual);
                 assert!(false);

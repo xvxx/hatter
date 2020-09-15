@@ -254,10 +254,17 @@ impl Compiler {
         }
 
         // ATTRS
+        let mut attr_len = 0;
         for (name, val) in &tag.attrs {
+            attr_len += 1;
             if is_form {
                 if let Expr::String(s) = name {
                     if s == "GET" || s == "POST" {
+                        attr_len += 1;
+                        inst.push(Code::Push("method".into()));
+                        inst.push(Code::Push(s.into()));
+                        inst.push(Code::Push("target".into()));
+                        inst.append(&mut self.compile_expr(val)?);
                         continue;
                     }
                 }
@@ -268,7 +275,7 @@ impl Compiler {
         }
 
         inst.push(Code::Tag(
-            tag.attrs.len() + tag.classes.len() + if let Expr::None = &*tag.id { 0 } else { 1 },
+            attr_len + tag.classes.len() + if let Expr::None = &*tag.id { 0 } else { 1 },
         ));
 
         if !tag.closed {

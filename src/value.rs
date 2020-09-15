@@ -93,244 +93,103 @@ fn val<T: Into<Value>>(i: T) -> Value {
     i.into()
 }
 
-impl From<&str> for Value {
-    fn from(item: &str) -> Self {
-        Value::String(item.into())
+macro_rules! into_bool {
+    ($type:ty) => {
+        impl From<$type> for Value {
+            fn from(item: $type) -> Self {
+                Value::Bool(item.clone())
+            }
+        }
+    };
+}
+
+macro_rules! into_string {
+    ($type:ty) => {
+        impl From<$type> for Value {
+            fn from(item: $type) -> Self {
+                Value::String(item.to_string())
+            }
+        }
+    };
+}
+
+macro_rules! into_number {
+    ($type:ty) => {
+        impl From<$type> for Value {
+            fn from(item: $type) -> Self {
+                Value::Number(item.clone().into())
+            }
+        }
+    };
+}
+
+macro_rules! into_number_as {
+    ($type:ty, $conv:ty) => {
+        impl From<$type> for Value {
+            fn from(item: $type) -> Self {
+                Value::Number((item.clone() as $conv).into())
+            }
+        }
+    };
+}
+
+into_string!(&str);
+into_string!(&&str);
+into_string!(String);
+into_string!(&String);
+into_string!(&&String);
+
+into_number!(i32);
+into_number!(&i32);
+into_number!(f64);
+into_number!(&f64);
+into_number_as!(usize, i32);
+into_number_as!(&usize, i32);
+
+into_bool!(bool);
+into_bool!(&bool);
+
+impl<T: Into<Value>> From<Vec<T>> for Value {
+    fn from(vec: Vec<T>) -> Self {
+        Value::List(vec.into_iter().map(val).collect())
     }
 }
 
-impl From<&&str> for Value {
-    fn from(item: &&str) -> Self {
-        Value::String(item.to_string())
+impl<T: Copy + Into<Value>> From<&Vec<T>> for Value {
+    fn from(vec: &Vec<T>) -> Self {
+        Value::List(vec.iter().map(|v| (*v).into()).collect())
     }
 }
 
-impl From<String> for Value {
-    fn from(item: String) -> Self {
-        Value::String(item)
-    }
-}
-impl From<&String> for Value {
-    fn from(item: &String) -> Self {
-        Value::String(item.clone())
+impl<T: Copy + Into<Value>> From<&[T]> for Value {
+    fn from(vec: &[T]) -> Self {
+        Value::List(vec.iter().map(|v| (*v).into()).collect())
     }
 }
 
-impl From<&&String> for Value {
-    fn from(item: &&String) -> Self {
-        Value::String((*item).clone())
-    }
-}
-
-impl From<usize> for Value {
-    fn from(item: usize) -> Self {
-        Value::from(item as i32)
-    }
-}
-
-impl From<&usize> for Value {
-    fn from(item: &usize) -> Self {
-        Value::from(*item as i32)
-    }
-}
-
-impl From<i32> for Value {
-    fn from(item: i32) -> Self {
-        Value::Number(item.into())
-    }
-}
-
-impl From<&i32> for Value {
-    fn from(item: &i32) -> Self {
-        Value::from(*item)
-    }
-}
-
-impl From<f64> for Value {
-    fn from(item: f64) -> Self {
-        Value::Number(item.into())
-    }
-}
-
-impl From<&f64> for Value {
-    fn from(item: &f64) -> Self {
-        Value::from(*item)
-    }
-}
-
-impl From<bool> for Value {
-    fn from(item: bool) -> Self {
-        Value::Bool(item)
-    }
-}
-
-impl From<&bool> for Value {
-    fn from(item: &bool) -> Self {
-        Value::Bool(*item)
-    }
-}
-
-impl From<Vec<Value>> for Value {
-    fn from(vec: Vec<Value>) -> Self {
-        Value::List(vec)
-    }
-}
-
-impl From<&Vec<bool>> for Value {
-    fn from(item: &Vec<bool>) -> Self {
-        Value::List(item.iter().map(val).collect())
-    }
-}
-
-impl From<Vec<bool>> for Value {
-    fn from(item: Vec<bool>) -> Self {
-        Value::List(item.iter().map(val).collect())
-    }
-}
-
-impl From<&[&str]> for Value {
-    fn from(item: &[&str]) -> Self {
-        Value::List(item.iter().map(val).collect())
-    }
-}
-
-impl From<Vec<&str>> for Value {
-    fn from(item: Vec<&str>) -> Self {
-        Value::List(item.iter().map(val).collect())
-    }
-}
-
-impl From<&[String]> for Value {
-    fn from(item: &[String]) -> Self {
-        Value::List(item.iter().map(val).collect())
-    }
-}
-
-impl From<Vec<String>> for Value {
-    fn from(item: Vec<String>) -> Self {
-        Value::List(item.iter().map(val).collect())
-    }
-}
-
-impl From<Vec<&String>> for Value {
-    fn from(item: Vec<&String>) -> Self {
-        Value::List(item.iter().map(val).collect())
-    }
-}
-
-impl From<Vec<i32>> for Value {
-    fn from(item: Vec<i32>) -> Self {
-        Value::List(item.iter().map(val).collect())
-    }
-}
-
-impl From<BTreeMap<String, Value>> for Value {
-    fn from(map: BTreeMap<String, Value>) -> Self {
-        Value::Map(map)
-    }
-}
-
-impl From<BTreeMap<String, String>> for Value {
-    fn from(map: BTreeMap<String, String>) -> Self {
+impl<S, V> From<BTreeMap<S, V>> for Value
+where
+    S: AsRef<str>,
+    V: Into<Value>,
+{
+    fn from(map: BTreeMap<S, V>) -> Self {
         let mut new = BTreeMap::new();
         for (k, v) in map {
-            new.insert(k, val(v));
+            new.insert(k.as_ref().to_string(), v.into());
         }
         Value::Map(new)
     }
 }
 
-impl From<BTreeMap<String, &str>> for Value {
-    fn from(map: BTreeMap<String, &str>) -> Self {
+impl<S, V> From<HashMap<S, V>> for Value
+where
+    S: AsRef<str>,
+    V: Into<Value>,
+{
+    fn from(map: HashMap<S, V>) -> Self {
         let mut new = BTreeMap::new();
         for (k, v) in map {
-            new.insert(k, val(v));
-        }
-        Value::Map(new)
-    }
-}
-
-impl From<BTreeMap<&str, &str>> for Value {
-    fn from(map: BTreeMap<&str, &str>) -> Self {
-        let mut new = BTreeMap::new();
-        for (k, v) in map {
-            new.insert(k.to_string(), val(v));
-        }
-        Value::Map(new)
-    }
-}
-
-impl From<BTreeMap<&str, i32>> for Value {
-    fn from(map: BTreeMap<&str, i32>) -> Self {
-        let mut new = BTreeMap::new();
-        for (k, v) in map {
-            new.insert(k.into(), val(v));
-        }
-        Value::Map(new)
-    }
-}
-
-impl From<BTreeMap<&str, bool>> for Value {
-    fn from(map: BTreeMap<&str, bool>) -> Self {
-        let mut new = BTreeMap::new();
-        for (k, v) in map {
-            new.insert(k.into(), val(v));
-        }
-        Value::Map(new)
-    }
-}
-
-impl From<HashMap<String, Value>> for Value {
-    fn from(map: HashMap<String, Value>) -> Self {
-        map.into()
-    }
-}
-
-impl From<HashMap<String, String>> for Value {
-    fn from(map: HashMap<String, String>) -> Self {
-        let mut new = BTreeMap::new();
-        for (k, v) in map {
-            new.insert(k, val(v));
-        }
-        Value::Map(new)
-    }
-}
-
-impl From<HashMap<String, &str>> for Value {
-    fn from(map: HashMap<String, &str>) -> Self {
-        let mut new = BTreeMap::new();
-        for (k, v) in map {
-            new.insert(k, val(v));
-        }
-        Value::Map(new)
-    }
-}
-
-impl From<HashMap<&str, &str>> for Value {
-    fn from(map: HashMap<&str, &str>) -> Self {
-        let mut new = BTreeMap::new();
-        for (k, v) in map {
-            new.insert(k.to_string(), val(v));
-        }
-        Value::Map(new)
-    }
-}
-
-impl From<HashMap<&str, i32>> for Value {
-    fn from(map: HashMap<&str, i32>) -> Self {
-        let mut new = BTreeMap::new();
-        for (k, v) in map {
-            new.insert(k.into(), val(v));
-        }
-        Value::Map(new)
-    }
-}
-
-impl From<HashMap<&str, bool>> for Value {
-    fn from(map: HashMap<&str, bool>) -> Self {
-        let mut new = BTreeMap::new();
-        for (k, v) in map {
-            new.insert(k.into(), val(v));
+            new.insert(k.as_ref().to_string(), val(v));
         }
         Value::Map(new)
     }

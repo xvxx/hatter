@@ -7,7 +7,7 @@ use {
     },
 };
 
-pub type Builtin = fn(&mut VM, &[Value]) -> Value;
+pub type Builtin = dyn Fn(&mut VM, &[Value]) -> Value;
 
 #[derive(Clone)]
 pub enum Value {

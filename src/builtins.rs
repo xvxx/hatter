@@ -1,10 +1,10 @@
 use {
     crate::{Builtin, Value, VM},
-    std::collections::HashMap,
+    std::{collections::HashMap, rc::Rc},
 };
 
-pub fn builtins() -> HashMap<String, Builtin> {
-    let mut map: HashMap<String, Builtin> = HashMap::new();
+pub fn builtins() -> HashMap<String, Rc<Builtin>> {
+    let mut map: HashMap<String, Rc<Builtin>> = HashMap::new();
 
     fn eq(_: &mut VM, args: &[Value]) -> Value {
         if let Some(val) = args.get(0) {
@@ -201,7 +201,7 @@ pub fn builtins() -> HashMap<String, Builtin> {
 
     macro_rules! builtin {
         ($name:expr => $fn:expr) => {
-            map.insert($name.to_string(), $fn);
+            map.insert($name.to_string(), rc!($fn));
         };
     }
 

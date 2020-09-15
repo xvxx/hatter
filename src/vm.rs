@@ -1,6 +1,9 @@
 use {
     crate::{builtins, Builtin, Code, Result, Template, Value},
-    std::collections::{BTreeMap, HashMap},
+    std::{
+        collections::{BTreeMap, HashMap},
+        rc::Rc,
+    },
 };
 
 pub type Scope = HashMap<String, Value>;
@@ -13,7 +16,7 @@ pub struct VM {
     ip: usize,          // instruction pointer
     out: String,        // output
     indent: usize,      // for pretty-printing
-    builtins: HashMap<String, Builtin>,
+    builtins: HashMap<String, Rc<Builtin>>,
 }
 
 pub fn run(inst: &[Code]) -> Result<String> {
@@ -48,8 +51,12 @@ impl VM {
     }
 
     /// Add a Rust function as a helper that can be invoked in templates.
-    pub fn helper<S: AsRef<str>>(&mut self, key: S, f: Builtin) {
-        self.builtins.insert(key.as_ref().to_string(), f);
+    pub fn helper<S, F>(&mut self, key: S, f: F)
+    where
+        S: AsRef<str>,
+        F: 'static + Fn(&mut VM, &[Value]) -> Value,
+    {
+        self.builtins.insert(key.as_ref().to_string(), rc!(f));
     }
 
     /// Render a template into a String.
@@ -312,6 +319,7 @@ impl VM {
                         self.scopes.pop();
                         self.ip = ip;
                     } else if let Some(f) = self.builtins.get(name) {
+                        let f = f.clone();
                         let retval = f(self, &args.collect::<Vec<_>>());
                         self.push(retval);
                     } else {

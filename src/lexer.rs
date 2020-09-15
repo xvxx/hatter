@@ -351,6 +351,9 @@ impl<'s> Lexer<'s> {
                 self.next();
                 triple = true;
                 start += 2;
+            } else {
+                // empty string
+                return Ok(Syntax::String(false));
             }
         }
 

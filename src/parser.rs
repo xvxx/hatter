@@ -442,9 +442,23 @@ impl<'s, 't> Parser<'s, 't> {
                 Syntax::String(..)
                 | Syntax::Number
                 | Syntax::Bracket('(')
-                | Syntax::Bracket('<')
                 | Syntax::Bracket('[')
                 | Syntax::Bracket('{') => {
+                    block.push(self.expr()?);
+                }
+
+                // Tag
+                Syntax::Bracket('<') => {
+                    // Look for </closing> tag and bail if found.
+                    if !indented
+                        && self
+                            .peek2()
+                            .filter(|p| p.kind == Syntax::Special('/'))
+                            .is_some()
+                    {
+                        break;
+                    }
+                    // Otherwise parse as regular tag expression.
                     block.push(self.expr()?);
                 }
 

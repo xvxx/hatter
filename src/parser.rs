@@ -578,8 +578,16 @@ impl<'s, 't> Parser<'s, 't> {
         tag.set_body(self.block()?);
 
         match self.peek_kind() {
-            Syntax::Special(';') | Syntax::None => self.tags -= 1,
+            Syntax::Special(';') | Syntax::None => {
+                if self.tags == 0 {
+                    self.error("Open Tag")?;
+                }
+                self.tags -= 1;
+            }
             Syntax::Dedent => {
+                if self.tags == 0 {
+                    self.error("Open Tag")?;
+                }
                 self.tags -= 1;
                 self.skip();
             }

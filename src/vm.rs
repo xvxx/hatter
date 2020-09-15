@@ -2,6 +2,7 @@ use {
     crate::{builtins, Builtin, Code, Result, Template, Value},
     std::{
         collections::{BTreeMap, HashMap},
+        mem,
         rc::Rc,
     },
 };
@@ -14,7 +15,8 @@ pub struct VM {
     scopes: Vec<Scope>, // stack of scopes
     tags: Vec<String>,  // track tags to auto-close
     ip: usize,          // instruction pointer
-    out: String,        // output
+    out: String,        // root output
+    outs: Vec<String>,  // output contexts
     indent: usize,      // for pretty-printing
     pre: bool,          // <pre>-like tag?
     builtins: HashMap<String, Rc<Builtin>>,
@@ -36,6 +38,7 @@ impl VM {
             tags: vec![],
             scopes: vec![Scope::new()],
             out: String::new(),
+            outs: vec![],
             indent: 0,
             pre: false,
             builtins: builtins(),
@@ -81,12 +84,25 @@ impl VM {
         self.tags.pop().unwrap_or_else(|| "".into())
     }
 
-    fn push_tag(&mut self, tag: String) {
-        self.tags.push(tag);
+    fn push_tag<S: AsRef<str>>(&mut self, tag: S) {
+        self.tags.push(tag.as_ref().into());
     }
 
     fn push<T: Into<Value>>(&mut self, v: T) {
         self.stack.push(v.into());
+    }
+
+    /// Push output context.
+    fn push_out(&mut self) {
+        self.outs.push(mem::replace(&mut self.out, String::new()));
+    }
+
+    /// Pop output off context stack and push it to the stack.
+    fn pop_out(&mut self) {
+        if let Some(parent) = self.outs.pop() {
+            let old = mem::replace(&mut self.out, parent);
+            self.push(old);
+        }
     }
 
     fn lookup(&self, key: &str) -> Option<&Value> {
@@ -158,11 +174,11 @@ impl VM {
                 }
                 Code::Exit => break,
                 Code::Print(v) => {
-                    out!("{}", v.to_string());
+                    out!("{}", v.to_str());
                     self.ip += 1;
                 }
                 Code::PrintPop => {
-                    out!("{}", self.pop_stack().to_string());
+                    out!("{}", self.pop_stack().to_str());
                     self.ip += 1;
                 }
                 Code::Push(v) => {
@@ -255,6 +271,7 @@ impl VM {
                 }
                 Code::Tag(len) => {
                     self.ip += 1;
+                    self.push_out();
                     let mut out = vec![];
                     let (keys, values): (Vec<_>, Vec<_>) = self
                         .stack
@@ -262,12 +279,13 @@ impl VM {
                         .enumerate()
                         .partition(|(i, _)| i % 2 == 0);
                     let closed = matches!(self.pop_stack(), Value::Bool(true));
-                    let name = self.pop_stack().to_string();
+                    let name = self.pop_stack();
+                    let name = name.to_str();
                     if name == "head" && self.tags.is_empty() {
                         out!("<!DOCTYPE html>\n<html>");
                         self.tags.push("html".into());
                         self.indent += 2;
-                    } else if matches!(name.as_ref(), "textarea" | "pre") {
+                    } else if matches!(name, "textarea" | "pre") {
                         self.pre = true;
                     }
                     out.push(format!("<{}", name));
@@ -280,7 +298,7 @@ impl VM {
                         if !matches!(v, Value::Bool(false) | Value::None) {
                             if let Value::String(s) = k {
                                 if s == "class" {
-                                    classes.push(v.to_string());
+                                    classes.push(v.to_str());
                                     continue;
                                 }
                             }
@@ -304,7 +322,9 @@ impl VM {
                         out.push("/".into());
                     }
                     out!("{}>", out.join(" "));
-                    if !closed {
+                    if closed {
+                        self.pop_out();
+                    } else {
                         self.indent += 2;
                     }
                 }
@@ -313,6 +333,7 @@ impl VM {
                     self.indent -= 2;
                     self.pre = false;
                     out!("</{}>", self.pop_tag());
+                    self.pop_out();
                 }
                 Code::Return => break,
                 Code::Call(name, arity) => {

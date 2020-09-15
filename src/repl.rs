@@ -20,8 +20,8 @@ pub fn run() -> Result<(), io::Error> {
                 rl.add_history_entry(line.as_str());
                 match scan(&line)
                     .and_then(|t| parse(&t))
-                    .and_then(|ast| compile(ast))
-                    .and_then(|codes| vm.run(codes))
+                    .and_then(|ast| compile(&ast))
+                    .and_then(|codes| vm.run(&codes))
                 {
                     Ok(..) => println!("{}", vm.out()),
                     Err(e) => eprintln!("{}", e),

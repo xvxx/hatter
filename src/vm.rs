@@ -287,6 +287,11 @@ impl VM {
                             // if just true, only print the attr name
                             if let Value::Bool(true) = v {
                                 out.push(format!("{}", k));
+                            } else if k.to_str() == "href"
+                                && !v.is_empty()
+                                && v.to_str().chars().next().unwrap_or('0') == '('
+                            {
+                                out.push(format!("{}='javascript:{}'", k, v));
                             } else {
                                 out.push(format!("{}='{}'", k, v));
                             }

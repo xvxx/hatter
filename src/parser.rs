@@ -323,9 +323,13 @@ impl<'s, 't> Parser<'s, 't> {
     /// Parse an indivisible unit, as the Ancient Greeks would say.
     fn atom(&mut self) -> Result<Expr> {
         match self.peek_kind() {
+            // Literal
             Syntax::String(..) => Ok(self.string()?),
             Syntax::Number => Ok(self.number()?),
             Syntax::Bool => Ok(self.boolean()?),
+            // Tag
+            Syntax::Bracket('<') => self.tag(),
+            // Sub-expression
             Syntax::Bracket('(') => {
                 self.skip();
                 let expr = self.expr()?;
@@ -378,6 +382,7 @@ impl<'s, 't> Parser<'s, 't> {
                 self.expect(Syntax::Bracket('}'))?;
                 Ok(Expr::Map(map))
             }
+            // Variables and function calls
             Syntax::Word => {
                 let word = self.word()?;
 
@@ -433,29 +438,17 @@ impl<'s, 't> Parser<'s, 't> {
 
         while !self.peek_eof() {
             match self.peek_kind() {
-                // Tag
-                Syntax::Bracket('<') => {
-                    if !indented
-                        && self
-                            .peek2()
-                            .filter(|p| p.kind == Syntax::Special('/'))
-                            .is_some()
-                    {
-                        break;
-                    }
-                    block.push(self.tag()?);
-                }
-
                 // Literal
                 Syntax::String(..)
                 | Syntax::Number
                 | Syntax::Bracket('(')
+                | Syntax::Bracket('<')
                 | Syntax::Bracket('[')
                 | Syntax::Bracket('{') => {
                     block.push(self.expr()?);
                 }
 
-                // Expression
+                // Keyword or Expression
                 Syntax::Word => {
                     if let Some(word) = self.peek() {
                         match word.literal() {

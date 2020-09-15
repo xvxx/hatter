@@ -685,7 +685,7 @@ impl<'s, 't> Parser<'s, 't> {
                         Syntax::JS => tag.add_attr(
                             name,
                             Expr::String(format!(
-                                "(function(e){{ {} }})(event);return false;",
+                                "(function(e){{ {} }})(event);",
                                 self.next().to_string()
                             )),
                         ),

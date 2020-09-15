@@ -16,6 +16,7 @@ pub struct VM {
     ip: usize,          // instruction pointer
     out: String,        // output
     indent: usize,      // for pretty-printing
+    pre: bool,          // <pre>-like tag?
     builtins: HashMap<String, Rc<Builtin>>,
 }
 
@@ -36,6 +37,7 @@ impl VM {
             scopes: vec![Scope::new()],
             out: String::new(),
             indent: 0,
+            pre: false,
             builtins: builtins(),
         }
     }
@@ -116,9 +118,13 @@ impl VM {
         macro_rules! out {
             ($msg:expr) => {{
                 let s = $msg;
-                self.out.push_str(&" ".repeat(self.indent));
+                if !self.pre {
+                    self.out.push_str(&" ".repeat(self.indent));
+                }
                 self.out.push_str(&s);
-                self.out.push('\n');
+                if !self.pre {
+                    self.out.push('\n');
+                }
             }};
             ($msg:expr, $($args:expr),+) => {
                 out!(format!($msg, $($args),+))
@@ -261,6 +267,8 @@ impl VM {
                         out!("<!DOCTYPE html>\n<html>");
                         self.tags.push("html".into());
                         self.indent += 2;
+                    } else if matches!(name.as_ref(), "textarea" | "pre") {
+                        self.pre = true;
                     }
                     out.push(format!("<{}", name));
                     if !closed {
@@ -298,6 +306,7 @@ impl VM {
                 Code::CloseTag => {
                     self.ip += 1;
                     self.indent -= 2;
+                    self.pre = false;
                     out!("</{}>", self.pop_tag());
                 }
                 Code::Return => break,

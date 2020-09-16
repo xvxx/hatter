@@ -8,10 +8,40 @@
             --pink: #E9648F;
             --black: #272925;
             --blue: #AEE7E8;
+            --cyan: #ABF9E0;
         }
         body {
             background: url(img/memphis.jpg);
             font-size: 1.2rem;
+        }
+        nav {
+            position: absolute;
+            top: 10px;
+            width: 100%;
+            text-align: center;
+            padding: 0;
+            margin: 0;
+        }
+        nav a {
+            background-color: white;
+            margin: 0 10px;
+            padding: 0 10px;
+            color: var(--pink);
+            text-shadow: 3px 3px var(--blue);
+            box-shadow: 3px 3px var(--blue);
+            font-size: 30px;
+            font-family: Impact;
+            text-transform: uppercase;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+        nav a:hover {
+            color: var(--blue);
+            text-shadow: none;
+        }
+        .nav-space {
+            height: 40px;
         }
         #mad-hatter {
             margin-top: -22px;
@@ -22,7 +52,7 @@
             background-image: url(img/light-memphis.png);
             background-repeat: repeat-x;
         }
-        body, p {
+        body, nav, p {
             color: var(--black);
             max-width: 950px;
         }
@@ -104,7 +134,15 @@
     ```
 
 <body>
-    <script src="lib/prism.js">
+    <script src="lib/prism.js"></>
+    <nav>
+        <a href='#'> Language
+        <a href='#'> Tags
+        <a href='#'> Functions
+        <a href='#'> Guide
+        <a href='#'> Examples
+        <a href='#'> Cheat Sheet
+    <.nav-space>
     <main>
         <#rectangle>
         <#header>

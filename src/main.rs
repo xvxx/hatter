@@ -1,9 +1,13 @@
 use {
     hatter::{compile, parse, scan, vm, Code, Expr, Syntax, Token},
-    std::{env, io, path},
+    std::{
+        env,
+        io::{self, Write},
+        path,
+    },
 };
 
-fn main() -> Result<(), io::Error> {
+fn main() -> io::Result<()> {
     let args = env::args().skip(1).collect::<Vec<_>>();
 
     if args.is_empty() {
@@ -79,13 +83,13 @@ fn main() -> Result<(), io::Error> {
         return Ok(());
     }
 
-    print!(
+    write!(
+        io::stdout(),
         "{}",
         vm::run(&compiled)
             .map_err(|e| print_error(&path, &source, e))
             .unwrap()
-    );
-    Ok(())
+    )
 }
 
 fn print_usage() -> Result<(), io::Error> {

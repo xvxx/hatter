@@ -37,8 +37,9 @@
             z-index: 2;
         }
         nav a:hover {
-            color: var(--blue);
+            color: var(--yellow);
             text-shadow: none;
+            box-shadow: 3px 3px var(--blue);
         }
         .nav-space {
             height: 40px;

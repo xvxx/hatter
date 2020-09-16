@@ -13,6 +13,35 @@
             background: url(img/memphis.jpg);
             font-size: 1.2rem;
         }
+        nav {
+            position: absolute;
+            top: 0;
+            text-align: justify;
+        }
+        nav a {
+            background-color: white;
+            display: block;
+            float: left;
+            margin-right: 20px;
+            padding: 0 10px;
+
+            color: var(--pink);
+            text-shadow: 3px 3px var(--blue);
+            box-shadow: 3px 3px var(--blue);
+            font-size: 30px;
+            font-family: Impact;
+            text-transform: uppercase;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+        nav a:hover {
+            color: var(--blue);
+            text-shadow: none;
+        }
+        .nav-space {
+            height: 40px;
+        }
         #mad-hatter {
             margin-top: -22px;
         }
@@ -104,7 +133,15 @@
     ```
 
 <body>
-    <script src="lib/prism.js">
+    <script src="lib/prism.js"></>
+    <nav>
+        <a href='#'> Language
+        <a href='#'> Tags
+        <a href='#'> Functions
+        <a href='#'> Guide
+        <a href='#'> Examples
+        <a href='#'> Cheat Sheet
+    <.nav-space>
     <main>
         <#rectangle>
         <#header>

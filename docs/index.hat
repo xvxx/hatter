@@ -25,7 +25,7 @@
         nav a {
             background-color: white;
             margin: 0 10px;
-            padding: 0 10px;
+            padding: 0 5px 0 10px;
             color: var(--pink);
             text-shadow: 3px 3px var(--blue);
             box-shadow: 3px 3px var(--blue);
@@ -136,12 +136,12 @@
 <body>
     <script src="lib/prism.js"></>
     <nav>
-        <a href='#'> Language
-        <a href='#'> Tags
-        <a href='#'> Functions
-        <a href='#'> Guide
-        <a href='#'> Examples
-        <a href='#'> Cheat Sheet
+        <a href='/'> Overview
+        <a href='/language'> Language
+        <a href='/tags'> Tags
+        <a href='/functions'> Functions
+        <a href='/examples'> Examples
+        <a href='/cheat-sheet'> Cheat Sheet
     <.nav-space>
     <main>
         <#rectangle>

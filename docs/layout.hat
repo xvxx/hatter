@@ -1,0 +1,144 @@
+<head>
+    <link href="lib/new.css" rel="stylesheet" />
+    <link href="lib/prism.css" rel="stylesheet" />
+    <title> Hatter
+    <style> ```
+        :root {
+            --yellow: #F9F251;
+            --pink: #E9648F;
+            --black: #272925;
+            --blue: #AEE7E8;
+            --cyan: #ABF9E0;
+        }
+        body {
+            background: url(img/memphis.jpg);
+            font-size: 1.2rem;
+        }
+        nav {
+            position: absolute;
+            top: 10px;
+            width: 100%;
+            text-align: center;
+            padding: 0;
+            margin: 0;
+        }
+        nav a {
+            background-color: white;
+            margin: 0 10px;
+            padding: 0 5px 0 10px;
+            color: var(--pink);
+            text-shadow: 3px 3px var(--blue);
+            box-shadow: 3px 3px var(--blue);
+            font-size: 30px;
+            font-family: Impact;
+            text-transform: uppercase;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+        nav a:hover {
+            color: var(--yellow);
+            text-shadow: none;
+            box-shadow: 3px 3px var(--blue);
+        }
+        .nav-space {
+            height: 40px;
+        }
+        #mad-hatter {
+            margin-top: -22px;
+        }
+        main {
+            padding: 20px;
+            background-color: var(--yellow);
+            background-image: url(img/light-memphis.png);
+            background-repeat: repeat-x;
+        }
+        body, nav, p {
+            color: var(--black);
+            max-width: 950px;
+        }
+        code {
+            color: var(--pink);
+            border: none;
+            background-color: transparent;
+        }
+        h1, h2, h3 {
+            color: #272925;
+            border-bottom: 1px solid var(--black);
+            font-family: Impact;
+        }
+        h1 {
+            font-size: 5rem;
+        }
+        h2 {
+            font-size: 4rem;
+        }
+        h3 {
+            font-size: 3rem;
+        }
+        a, a:visited {
+            color: var(--pink);
+            text-decoration: none;
+        }
+        a:hover {
+            background-color: var(--pink);
+            color: var(--yellow);
+        }
+        code[class*="language-"], pre[class*="language-"] {
+            background-color: var(--black);
+            color: white;
+            text-shadow: none;
+        }
+        .token.namespace {
+            opacity: 1;
+        }
+        .token.property, .token.tag, .token.boolean, .token.number,
+        .token.constant, .token.symbol, .token.deleted {
+            color: var(--pink);
+        }
+        .token.selector, .token.attr-name, .token.string, .token.char,
+        .token.builtin, .token.inserted {
+            color: var(--blue);
+        }
+        .token.atrule, .token.attr-value, .token.keyword {
+            color: var(--yellow);
+        }
+        #header, #logo {
+            margin-top: 0;
+            padding-top: 0;
+            height: 300px;
+        }
+        #logo {
+            color: var(--pink);
+            text-shadow: 10px 10px var(--blue);
+            font-size: 200px;
+            font-family: Impact;
+            text-transform: uppercase;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+        #rectangle {
+            width: 800px;
+            height: 200px;
+            background: white;
+            clip-path: polygon(25% 0%, 100% 0%, 75% 100%, 0% 100%);
+            position: absolute;
+            z-index: 1;
+            margin-top: 50px;
+            margin-left: 50px;
+        }
+        .code-col {
+            float: left;
+            width: 50%;
+        }
+    ```
+
+<body>
+    <script src="lib/prism.js"></>
+    <nav>
+        for link in ['Overview', 'Language', 'Tags', 'Functions', 'Examples', 'Cheat Sheet']
+            <a href="/{replace(to-lowercase(link), ' ', '-')}"> link
+    <.nav-space>
+    <main>
+        content

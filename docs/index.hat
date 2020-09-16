@@ -8,6 +8,7 @@
             --pink: #E9648F;
             --black: #272925;
             --blue: #AEE7E8;
+            --cyan: #ABF9E0;
         }
         body {
             background: url(img/memphis.jpg);
@@ -15,16 +16,16 @@
         }
         nav {
             position: absolute;
-            top: 0;
-            text-align: justify;
+            top: 10px;
+            width: 100%;
+            text-align: center;
+            padding: 0;
+            margin: 0;
         }
         nav a {
             background-color: white;
-            display: block;
-            float: left;
-            margin-right: 20px;
+            margin: 0 10px;
             padding: 0 10px;
-
             color: var(--pink);
             text-shadow: 3px 3px var(--blue);
             box-shadow: 3px 3px var(--blue);
@@ -51,7 +52,7 @@
             background-image: url(img/light-memphis.png);
             background-repeat: repeat-x;
         }
-        body, p {
+        body, nav, p {
             color: var(--black);
             max-width: 950px;
         }

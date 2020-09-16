@@ -1,3 +1,4 @@
+- intro.md
 - syntax.md
 - types.md
 - variables.md

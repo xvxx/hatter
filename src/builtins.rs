@@ -182,6 +182,15 @@ pub fn builtins() -> HashMap<String, Rc<Builtin>> {
             Value::String("Expected String".to_string())
         }
     }
+    fn replace(_: &mut VM, args: &[Value]) -> Value {
+        if let (Some(Value::String(s)), Some(Value::String(search)), Some(Value::String(replace))) =
+            (args.get(0), args.get(1), args.get(2))
+        {
+            Value::String(s.replace(search, replace))
+        } else {
+            Value::String("Expected String".to_string())
+        }
+    }
     fn len(_: &mut VM, args: &[Value]) -> Value {
         match args.get(0) {
             Some(Value::List(list)) => list.len().into(),
@@ -229,6 +238,7 @@ pub fn builtins() -> HashMap<String, Rc<Builtin>> {
     builtin!("print" => print);
     builtin!("to-uppercase" => to_uppercase);
     builtin!("to-lowercase" => to_lowercase);
+    builtin!("replace" => replace);
     builtin!("len" => len);
     builtin!("empty?" => empty_);
 

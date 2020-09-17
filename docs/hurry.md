@@ -1,6 +1,6 @@
 # Hatter in a Hurry
 
-In a hurry? HereIf you already know how to program, you already know
+In a hurry? If you already know how to program, you already know
 Hatter. And if you already know both Python and HTML, well, you're an
 expert, kid. Maybe you should be teaching me.
 

@@ -15,10 +15,15 @@ for = 'for' (word ',')? word 'in' expr block
 while = 'while' expr block
 def = 'def' word '(' word (',' word)* ')' block
 assign = word (':=' | '=') expr
-expr = call | op-call | atom | ( '(' expr ')' )
+expr = call | op-call | tag | atom | ( '(' expr ')' )
 call = word '(' (expr (',' expr)* )? ')'
 op-call = expr op expr
 op = [\S\W\D]+
+tag = open-tag | close-tag
+open-tag = '<' word? shorthand* attr* '>'
+close-tag = '<' '/' word? '>'
+shorthand = ('#' | '.' | ':' | '@') word
+attr = word ('=' expr)?
 atom = bool | num | string | word
 bool = 'true' | 'false'
 num = '-'? 0..9 ('.' 0..9+)?
@@ -50,8 +55,8 @@ contain a dash (`-`). It also means your variable and function names
 can end in a question mark (`?`), like Ruby.
 
 <#>
-    TODO: Maybe just make the lexer more normal, with the two
-    exceptions of allowing `-` in words and `?` at the end of words.
+TODO: Maybe just make the lexer more normal, with the two
+exceptions of allowing `-` in words and `?` at the end of words.
 </#>
 
 ## Blocks

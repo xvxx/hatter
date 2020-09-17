@@ -4,6 +4,29 @@ In a hurry? If you already know how to program, you already know
 Hatter. And if you already know both Python and HTML, well, you're an
 expert, kid. Maybe you should be teaching me.
 
+## Syntax
+
+Here's Hatter the language (no `<tags>`) in fake BNF:
+
+```
+stmt = if | for | while | def | assign | expr
+if = 'if' expr block ('else' ('if' expr)? block)*
+for = 'for' (word ',')? word 'in' expr block
+while = 'while' expr block
+def = 'def' word '(' word (',' word)* ')' block
+assign = word (':=' | '=') expr
+expr = call | op-call | atom | ( '(' expr ')' )
+call = word '(' (expr (',' expr)* )* ')'
+op-call = atom op expr
+op = [\S\W\D]+
+atom = bool | num | string | word
+bool = 'true' | 'false'
+num = '-'? 0..9_ ('.' 0..9+)?
+string = '"' [^"] '"'
+word = \S+
+block = indent stmt+ dedent
+```
+
 ## Blocks
 
 Like Python, CoffeeScript, Nim, and Imba, Hatter is a

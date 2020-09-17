@@ -6,7 +6,7 @@ expert, kid. Maybe you should be teaching me.
 
 ## Syntax
 
-Here's Hatter the language (no `<tags>`) in fake BNF:
+Here's Hatter the language in fake BNF:
 
 ```
 stmt = if | for | while | def | assign | expr
@@ -16,16 +16,42 @@ while = 'while' expr block
 def = 'def' word '(' word (',' word)* ')' block
 assign = word (':=' | '=') expr
 expr = call | op-call | atom | ( '(' expr ')' )
-call = word '(' (expr (',' expr)* )* ')'
-op-call = atom op expr
+call = word '(' (expr (',' expr)* )? ')'
+op-call = expr op expr
 op = [\S\W\D]+
 atom = bool | num | string | word
 bool = 'true' | 'false'
 num = '-'? 0..9 ('.' 0..9+)?
-string = '"' [^"] '"'
-word = \S+
+string = ('"' [^"]* '"') | ('\'' [^\']* '\'') | ('`' [^`]* '`')
+big-string = ('"""' [^(""")]* '"""') |
+word = [\S]+
 block = indent stmt+ dedent
 ```
+
+## Whitespace
+
+Before we get started, it should be noted that Hatter is more
+sensitive than other languages when it comes to whitespace. You could
+say it has a mild allergy. Like Python, Hatter uses indentation to
+determine blocks, but like Lisp, it is extremely liberal with what it
+considers a "word" (aka ident, symbol, variable or function name...).
+
+In most languages, Math is easy:
+
+    a-b*c # becomes a - b * c
+
+In Hatter, you really need to let things breathe:
+
+    a-b*c      # refers to a variable named "a-b*c"
+    a - b * c  # what you'd expect
+
+The benefit of this is that Hatter variable names, like HTML tags, can
+contain a dash (`-`). It also means your variable and function names
+can end in a question mark (`?`), like Ruby.
+
+## TODO: Maybe just make the lexer more normal, with the two
+
+exceptions of allowing `-` in words and `?` at the end of words.
 
 ## Blocks
 

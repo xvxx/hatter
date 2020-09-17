@@ -49,9 +49,10 @@ The benefit of this is that Hatter variable names, like HTML tags, can
 contain a dash (`-`). It also means your variable and function names
 can end in a question mark (`?`), like Ruby.
 
-## TODO: Maybe just make the lexer more normal, with the two
-
-exceptions of allowing `-` in words and `?` at the end of words.
+<#>
+    TODO: Maybe just make the lexer more normal, with the two
+    exceptions of allowing `-` in words and `?` at the end of words.
+</#>
 
 ## Blocks
 

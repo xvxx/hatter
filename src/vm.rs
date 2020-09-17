@@ -254,6 +254,15 @@ impl VM {
                 Code::SetIfSet(name) => {
                     let val = self.pop_stack();
                     if let Some(scope) = self.find_scope(name) {
+                        if let Some(old) = scope.get(name) {
+                            if old.typename() != val.typename() {
+                                return error!(
+                                    "var types must match: old is {}, new is {}",
+                                    old.typename(),
+                                    val.typename()
+                                );
+                            }
+                        }
                         scope.insert(name.to_string(), val);
                         self.ip += 1;
                     } else {

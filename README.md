@@ -131,7 +131,8 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
     - [ ] for / do
     - [ ] if / then
 
-----
+### future
+
 - [ ] def <tag attr=Type>
 - [ ] convert lexer to bytes ala https://github.com/nathanwhit/minimal-yaml
 - [ ] show error location when compiling

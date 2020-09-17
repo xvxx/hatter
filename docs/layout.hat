@@ -134,10 +134,14 @@
         }
     ```
 
+links := [
+    'Overview', 'Language', 'Tags', 'Functions', 'Examples', 'Cheat Sheet'
+]
+
 <body>
     <script src="lib/prism.js"></>
     <nav>
-        for link in ['Overview', 'Language', 'Tags', 'Functions', 'Examples', 'Cheat Sheet']
+        for link in links
             <a href="/{replace(to-lowercase(link), ' ', '-')}"> link
     <.nav-space>
     <main>

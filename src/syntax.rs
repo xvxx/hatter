@@ -21,13 +21,19 @@ pub enum Syntax {
     GreaterThan,  // >
 }
 
-pub trait WordChar {
+pub trait SyntaxTrait {
     fn is_word_char(&self) -> bool;
+    fn is_tag_opener(&self) -> bool;
 }
 
-impl WordChar for char {
+impl SyntaxTrait for char {
     /// Is this char valid in a `Syntax::Word`?
     fn is_word_char(&self) -> bool {
         self.is_alphanumeric() || *self == '-' || *self == '_'
+    }
+
+    /// Is this valid in the opening section of a <tag>?
+    fn is_tag_opener(&self) -> bool {
+        self.is_alphanumeric() || matches!(self, '#' | '.' | ':' | '@')
     }
 }

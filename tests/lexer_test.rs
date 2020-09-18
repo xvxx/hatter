@@ -138,8 +138,33 @@ scan_test!(double_dot_op, "..", Op);
 scan_test!(question_op, "?", Op);
 scan_test!(bang_op, "!", Op);
 
+////
+// Tags
+
 scan_test!(angle_is_not_op, "<", LessThan);
 scan_test!(angle_followed_by_word, "<div>", LessThan, Word, GreaterThan);
+scan_test!(angle_id, "<#id>", LessThan, Op, Word, GreaterThan);
+scan_test!(angle_class, "<.class>", LessThan, Op, Word, GreaterThan);
+scan_test!(angle_type, "<:type>", LessThan, Colon, Word, GreaterThan);
+scan_test!(angle_name, "<@name>", LessThan, Op, Word, GreaterThan);
+scan_test!(
+    angle_input_type,
+    "<input:type>",
+    LessThan,
+    Word,
+    Colon,
+    Word,
+    GreaterThan
+);
+scan_test!(
+    angle_input_name,
+    "<input@name>",
+    LessThan,
+    Word,
+    Op,
+    Word,
+    GreaterThan
+);
 
 ////
 // Indents

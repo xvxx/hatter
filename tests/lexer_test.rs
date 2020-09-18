@@ -91,9 +91,9 @@ scan_test!(underscore_word2, "_some_other_thing_", Word);
 scan_test!(dash_word, "some-thing", Word);
 scan_test!(dash_word2, "some-thing-", Word);
 scan_test!(numbered_word, "one123", Word);
-scan_test!(word_with_brackets, word-{with brackets}-in-it, Word)
-scan_test!(word_ending_with_brackets, word-ending-{with brackets}, Word)
-scan_test!(word_ending_with_question, word-ending-in?, Word)
+scan_test!(word_with_brackets, "word-{with brackets}-in-it", Word)
+scan_test!(word_ending_with_brackets, "word-ending-{with brackets}", Word)
+scan_test!(word_ending_with_question, "word-ending-in?", Word)
 scan_test!(and_is_a_word, "and", Word);
 
 ////

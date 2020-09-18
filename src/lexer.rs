@@ -152,8 +152,15 @@ impl<'s> Lexer<'s> {
                 '\n' => self.scan_newline()?,
                 ';' => Syntax::Semi,
                 ',' => Syntax::Comma,
-                ':' => Syntax::Colon,
                 '"' | '\'' | '`' => self.scan_string(c)?,
+
+                ':' => {
+                    if self.peek_is('=') {
+                        self.scan_op()?
+                    } else {
+                        Syntax::Colon
+                    }
+                }
 
                 '-' => {
                     if self.peek().filter(|c| c.is_numeric()).is_some() {

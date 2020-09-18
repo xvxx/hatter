@@ -19,22 +19,29 @@ impl<'s> Token<'s> {
         }
     }
 
+    /// Will it produce a `literal()`?
+    pub fn is_literal(&self) -> bool {
+        use Syntax::*;
+        // We want this to fail if new variants are added.
+        match self.kind {
+            None | Number | String(..) | Word | JS | Op | Semi | Colon | Comma | LParen
+            | RParen | LCurly | RCurly | LStaple | RStaple | LessThan | GreaterThan => true,
+            Indent | Dedent => false,
+        }
+    }
+
     /// Get the literal value in source code, if it has one.
     pub fn literal(&self) -> &str {
-        match self.kind {
-            Syntax::Dedent | Syntax::Indent => "",
-            Syntax::Special(..) | Syntax::Bracket(..) => "",
-            _ => self.lit,
+        if self.is_literal() {
+            self.lit
+        } else {
+            ""
         }
     }
 
     /// Create a string of the literal value.
     pub fn to_string(&self) -> String {
-        match self.kind {
-            Syntax::Dedent | Syntax::Indent => "".to_string(),
-            Syntax::Special(c) | Syntax::Bracket(c) => c.to_string(),
-            _ => self.lit.to_string(),
-        }
+        self.literal().to_string()
     }
 
     /// Convert into native number or error. No weak typing.

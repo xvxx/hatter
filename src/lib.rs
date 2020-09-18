@@ -36,7 +36,7 @@ pub use {
     expr::{Expr, Tag},
     lexer::scan,
     parser::parse,
-    syntax::Syntax,
+    syntax::{Syntax, WordChar},
     template::Template,
     token::Token,
     value::{Builtin, Object, Value},

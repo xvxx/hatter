@@ -3,28 +3,31 @@ pub enum Syntax {
     None,
     Indent,
     Dedent,
-    Bracket(char), // < > ( ) [ ] { }
-    Special(char), // ; # . , @ : = /
-    Bool,          // true false
-    Number,        // 123 3.14
-    String(bool),  // "string", bool is `interpolated?` or not
-    Word,          // ident, symbol, etc
-    JS,            // (JavaScript)
+    Number,       // 123 3.14
+    String(bool), // "string", bool is `interpolated?` or not
+    Word,         // ident, symbol, etc
+    JS,           // (JavaScript)
+    Op,           // + - := etc
+    Semi,         // ;
+    Colon,        // :
+    Comma,        // ,
+    LParen,       // (
+    RParen,       // )
+    LCurly,       // {
+    RCurly,       // }
+    LStaple,      // [
+    RStaple,      // ]
+    LessThan,     // <
+    GreaterThan,  // >
 }
 
-pub trait Reserved {
-    fn is_reserved(&self) -> bool;
-    fn is_attr_reserved(&self) -> bool;
+pub trait WordChar {
+    fn is_word_char(&self) -> bool;
 }
 
-impl Reserved for char {
-    #[rustfmt::skip]
-    fn is_attr_reserved(&self) -> bool {
-        matches!(self, '(' | ')' | '[' | ']' | '<' | '>' |
-            ';' | ',' | '.' | '#' | '@' | ':' | '=' | '/' )
-    }
-
-    fn is_reserved(&self) -> bool {
-        self.is_attr_reserved() || matches!(self, '{' | '}')
+impl WordChar for char {
+    /// Is this char valid in a `Syntax::Word`?
+    fn is_word_char(&self) -> bool {
+        self.is_alphanumeric() || *self == '-' || *self == '_'
     }
 }

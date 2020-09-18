@@ -4,35 +4,6 @@ In a hurry? If you already know how to program, you already know
 Hatter. And if you already know both Python and HTML, well, you're an
 expert, kid. Maybe you should be teaching me.
 
-## Syntax
-
-Here's Hatter the language in fake BNF:
-
-```
-stmt = if | for | while | def | assign | expr
-if = 'if' expr block ('else' ('if' expr)? block)*
-for = 'for' (word ',')? word 'in' expr block
-while = 'while' expr block
-def = 'def' word '(' word (',' word)* ')' block
-assign = word (':=' | '=') expr
-expr = call | op-call | tag | atom | ( '(' expr ')' )
-call = word '(' (expr (',' expr)* )? ')'
-op-call = expr op expr
-op = [\S\W\D]+
-tag = open-tag | close-tag
-open-tag = '<' word? shorthand* attr* '>'
-close-tag = '<' '/' word? '>'
-shorthand = ('#' | '.' | ':' | '@') word
-attr = word ('=' expr)?
-atom = bool | num | string | word
-bool = 'true' | 'false'
-num = '-'? 0..9 ('.' 0..9+)?
-string = ('"' [^"]* '"') | ('\'' [^\']* '\'') | ('`' [^`]* '`')
-big-string = ('"""' [^(""")]* '"""') |
-word = [\S]+
-block = indent stmt+ dedent
-```
-
 ## Whitespace
 
 Before we get started, it should be noted that Hatter is more

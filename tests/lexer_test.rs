@@ -10,14 +10,20 @@ macro_rules! scan_test {
     ($name:ident, $code:expr, $($kind:expr,)+) => {
         #[test]
         fn $name() {
-            let mut nodes = scan!($code);
-            let debug = nodes.clone();
+            let nodes = scan!($code);
+            let mut i = 0;
             $(
-                let node = nodes.remove(0);
+                let node = nodes.get(i).unwrap();
                 if node.kind != $kind {
-                    println!("{:#?}", debug);
+                    println!("Computed tokens:");
+                    for (x, token) in nodes.iter().enumerate() {
+                        let (bold, clear) = if x == i  { ("\x1b[1;91m", "\x1b[0m") } else { ("","") };
+                        println!("  {}({:?}, {}){}", bold, token.kind, token.literal(), clear);
+                    }
                 }
+                println!("        left=want, right=got");
                 assert_eq!($kind, node.kind);
+                i += 1;
             )+
         }
     };
@@ -116,3 +122,27 @@ scan_test!(bang_op, "!", Op);
 scan_test!(bracket_is_op, "<", Op);
 scan_test!(bracket_followed_by_word, "<div>", Op, Word, Op);
 
+////
+// Indents
+
+scan_test!(
+    basic_indent,
+    r#"
+if 2 > 1
+    true
+else
+    false
+"#,
+    Word,
+    Number,
+    Op,
+    Number,
+    Semi,
+    Indent,
+    Word,
+    Dedent,
+    Word,
+    Indent,
+    Word,
+    Dedent
+);

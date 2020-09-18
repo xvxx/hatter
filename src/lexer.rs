@@ -316,6 +316,11 @@ impl<'s> Lexer<'s> {
             self.append(Syntax::Dedent)?;
         }
 
+        // Trim leading ;
+        while !self.tokens.is_empty() && self.tokens[0].kind == Syntax::Special(';') {
+            self.tokens.remove(0);
+        }
+
         Ok(())
     }
 

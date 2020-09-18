@@ -441,6 +441,7 @@ impl<'s, 't> Parser<'s, 't> {
                         match word.literal() {
                             "if" => block.push(self.if_expr()?),
                             "for" => block.push(self.for_expr()?),
+                            "def" => block.push(self.def_stmt()?),
                             "return" => {
                                 self.skip();
                                 block.push(if self.peek_is(Syntax::Semi) {
@@ -504,6 +505,31 @@ impl<'s, 't> Parser<'s, 't> {
 
         self.expect(Syntax::Dedent)?;
         Ok(Expr::For(key, val, bx!(iter), body))
+    }
+
+    /// Parse a function definition.
+    fn def_stmt(&mut self) -> Result<Expr> {
+        self.expect(Syntax::Word)?; // def
+        let name = match self.peek_kind() {
+            Syntax::Word | Syntax::Op => self.next(),
+            _ => return self.error("function name"),
+        }
+        .to_string();
+
+        let mut args = vec![];
+        self.expect(Syntax::LParen)?;
+        loop {
+            args.push(self.expect(Syntax::Word)?.to_string());
+            if self.peek_is(Syntax::Comma) {
+                self.next();
+            } else {
+                self.expect(Syntax::RParen)?;
+                break;
+            }
+        }
+
+        let body = self.block()?;
+        Ok(Expr::Assign(name, bx!(Expr::Fn(args, body)), false))
     }
 
     /// Parse an if statement.

@@ -102,8 +102,8 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
   - `<i>delicious</>` becomes `<i>delicious</i>`
 - Call functions defined in Rust:
   - `<div.name> to-uppercase(name)`
-- Write functions in Hatter:
-  - `greet := fn(name) do print("Hey there, {name}!")`
+- Define your own functions:
+  - `def greet(name) do print("Hey there, {name}!")
   - `greet("Lydia")`
 - Easy inline JavaScript:
   - `<li> <a onclick=(alert("Oink!"))> 🐷`
@@ -114,8 +114,6 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
 
 - Define your own tags:
   - `def <item(item)> do <li.item data-id={item.id}> item.text`.
-- Define your own functions:
-  - `def greet(name) do print("Hey there, {name}!")
 - Define your own operators:
   - `def !!(a, b) do return concat(to-uppercase(a), ' ', to-uppercase(b))`
 - Arity checking for functions.

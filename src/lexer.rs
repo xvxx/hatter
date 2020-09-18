@@ -277,6 +277,32 @@ impl<'s> Lexer<'s> {
     fn scan_number(&mut self) -> Result<Syntax> {
         let mut saw_dot = false;
 
+        macro_rules! match_set {
+            ($( $pattern:pat )|+) => {{
+                self.next();
+                while let Some(&c) = self.peek() {
+                    if matches!(c, $( $pattern )|+) {
+                        self.next();
+                    } else {
+                        break;
+                    }
+                }
+                return Ok(Syntax::Number);
+            }};
+        }
+
+        // check for 0xdead and stuff
+        if self.cur == '0' {
+            if let Some(&c) = self.peek() {
+                match c {
+                    'b' => match_set!('0' | '1' | '_'),
+                    'o' => match_set!('0'..='7' | '_'),
+                    'x' => match_set!('a'..='f' | '0'..='9'),
+                    _ => {}
+                }
+            }
+        }
+
         while let Some(&c) = self.peek() {
             if c.is_numeric() || c == '_' {
                 self.next();

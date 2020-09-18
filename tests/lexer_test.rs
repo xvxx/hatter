@@ -148,6 +148,31 @@ scan_test!(angle_class, "<.class>", LessThan, Op, Word, GreaterThan);
 scan_test!(angle_type, "<:type>", LessThan, Colon, Word, GreaterThan);
 scan_test!(angle_name, "<@name>", LessThan, Op, Word, GreaterThan);
 scan_test!(
+    angle_interpolated,
+    "<div class=something-{2 + 2}-classy>",
+    LessThan,
+    Word,
+    Word,
+    Op,
+    Word,
+    GreaterThan
+);
+scan_test!(
+    angle_js,
+    "<span onclick=(alert('He he he!'))>Something</span>",
+    LessThan,
+    Word,
+    Word,
+    Op,
+    JS,
+    GreaterThan,
+    Word,
+    LessThan,
+    Op,
+    Word,
+    GreaterThan,
+);
+scan_test!(
     angle_input_type,
     "<input:type>",
     LessThan,

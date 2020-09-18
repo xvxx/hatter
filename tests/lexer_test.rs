@@ -126,6 +126,7 @@ scan_test!(angle_followed_by_word, "<div>", LessThan, Word, GreaterThan);
 ////
 // Indents
 
+#[rustfmt::skip]
 scan_test!(
     basic_indent,
     r#"
@@ -134,16 +135,33 @@ if 2 > 1
 else
     false
 "#,
-    Word,
-    Number,
-    Op,
-    Number,
-    Semi,
-    Indent,
-    Word,
-    Dedent,
-    Word,
-    Indent,
-    Word,
-    Dedent
+    Word, Number, Op, Number, Indent, Word, Semi, Dedent, Word,
+    Indent, Word, Semi, Dedent
+);
+
+#[rustfmt::skip]
+scan_test!(
+    less_basic_indent,
+    r#"
+def thing()
+    if true
+        other-thing()
+    else if false
+        if true-again?
+            other-other-thing()
+    else
+        for x in loop
+            print(x)
+done()
+"#,
+    Word, Word, LParen, RParen,                             // def thing()
+        Indent, Word, Word,                                 //   if true
+            Indent, Word, LParen, RParen, Semi,             //     other-thing()
+        Dedent, Word, Word, Word,                           //   else if false
+            Indent, Word, Word,                             //     if true-again?
+                Indent, Word, LParen, RParen, Semi,         //       other-other-thing()
+        Dedent, Dedent, Word,                               //   else
+            Indent, Word, Word, Word, Word,                 //     for x in loop
+                Indent, Word, LParen, Word, RParen, Semi,   //       print(x)
+    Dedent, Dedent, Dedent, Word, LParen, RParen, Semi      // done()
 );

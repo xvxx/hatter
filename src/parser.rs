@@ -44,7 +44,7 @@ impl<'s, 't> Parser<'s, 't> {
             let mut block = self.block()?;
             self.ast.append(&mut block);
             match self.peek_kind() {
-                Syntax::Dedent | Syntax::Special(';') => self.skip(),
+                Syntax::Dedent | Syntax::Semi => self.skip(),
                 _ => {}
             }
         }
@@ -78,6 +78,11 @@ impl<'s, 't> Parser<'s, 't> {
     /// Get the next token's kind.
     fn peek_kind(&mut self) -> Syntax {
         self.peek().map(|t| t.kind).unwrap_or(Syntax::None)
+    }
+
+    /// Check the next token's literal value.
+    fn peek_lit(&mut self, lit: &str) -> bool {
+        self.peek().filter(|t| t.literal() == lit).is_some()
     }
 
     /// Check the next token's kind.
@@ -152,9 +157,18 @@ impl<'s, 't> Parser<'s, 't> {
         }
     }
 
-    /// Parse a bool.
-    fn boolean(&mut self) -> Result<Expr> {
-        Ok(Expr::Bool(self.expect(Syntax::Bool)?.literal() == "true"))
+    /// Consumes and returns the next token if it's an Op that matches
+    ///the passed literal value.
+    fn expect_op(&mut self, lit: &str) -> Result<Token> {
+        if self
+            .peek()
+            .filter(|t| t.kind == Syntax::Op && t.literal() == lit)
+            .is_some()
+        {
+            Ok(self.next())
+        } else {
+            self.error(format!("op {}", lit))
+        }
     }
 
     /// Parse a number.
@@ -231,93 +245,62 @@ impl<'s, 't> Parser<'s, 't> {
 
     /// Parse a function literal.
     fn func(&mut self) -> Result<Expr> {
-        self.expect(Syntax::Bracket('('))?;
+        self.expect(Syntax::LParen)?;
         let mut args = vec![];
-        while !self.peek_is(Syntax::Bracket(')')) {
+        while !self.peek_is(Syntax::RParen) {
             args.push(self.expect(Syntax::Word)?.to_string());
-            if self.peek_is(Syntax::Special(',')) {
+            if self.peek_is(Syntax::Comma) {
                 self.next();
             } else {
                 break;
             }
         }
-        self.expect(Syntax::Bracket(')'))?;
+        self.expect(Syntax::RParen)?;
         Ok(Expr::Fn(args, self.block()?))
     }
 
     /// Parse a code expression.
     fn expr(&mut self) -> Result<Expr> {
-        if !matches!(self.peek_kind(), Syntax::Bracket(_) | Syntax::Special(';') | Syntax::Special(','))
-        {
-            if let Some(p) = self.peek2() {
-                if matches!(
-                    p.kind,
-                    Syntax::Word | Syntax::Special(',') | Syntax::Special('.')
-                ) {
-                    let lit = p.to_string();
-                    if matches!(p.literal(), ":=" | "=") {
-                        let reassign = p.literal() == "=";
-                        let name = self.expect(Syntax::Word)?.to_string();
-                        self.skip(); // skip op
-                        return Ok(Expr::Assign(name, bx!(self.expr()?), reassign));
-                    } else if matches!(self.peek_kind(), Syntax::Word | Syntax::Special(_))
-                        && !self.operators.contains_key(&lit)
-                    {
-                        // if we have two or more words in a row, convert
-                        // to a string, ex: <b> Hey Friends -> <b> "Hey Friends"
-                        let mut parts = vec![];
-                        while let Some(p) = self.peek() {
-                            match p.kind {
-                                Syntax::Bracket('<') | Syntax::Special(';') => break,
-                                Syntax::Special(_) => parts.push(self.next().to_string()),
-                                _ => {
-                                    if parts.is_empty() {
-                                        parts.push(self.next().to_string());
-                                    } else {
-                                        parts.push(format!(" {}", self.next().literal()));
-                                    }
-                                }
-                            }
-                        }
-                        return Ok(Expr::String(parts.join("")));
-                    }
-                }
-            }
-        }
-
         let left = self.atom()?;
 
-        if let Some(next) = self.peek() {
-            if next.kind == Syntax::Word {
-                let lit = next.to_string();
-                if lit == "." {
-                    // convert word to str, ex: map.key => index(map, "key")
+        if self.peek_kind() != Syntax::Op {
+            return Ok(left);
+        }
+
+        let next = self.peek().unwrap();
+        let lit = next.literal();
+        match lit {
+            ":=" | "=" => {
+                let reassign = lit == "=";
+                self.skip(); // skip op
+                let name = self.expect(Syntax::Word)?.to_string();
+                Ok(Expr::Assign(name, bx!(self.expr()?), reassign))
+            }
+            "." => {
+                // convert word to str, ex: map.key => index(map, "key")
+                self.skip();
+                let right = self.expr()?;
+                if let Expr::Word(word) = right {
+                    Ok(Expr::Call("index".into(), vec![left, Expr::String(word)]))
+                } else {
+                    Ok(Expr::Call("index".into(), vec![left, right]))
+                }
+            }
+            _ => {
+                // check for += and friends
+                if lit.bytes().last().filter(|b| *b == b'=').is_some() {
+                    let op = left.to_string();
                     self.skip();
-                    let right = self.expr()?;
-                    if let Expr::Word(word) = right {
-                        return Ok(Expr::Call("index".into(), vec![left, Expr::String(word)]));
-                    } else {
-                        return Ok(Expr::Call("index".into(), vec![left, right]));
-                    }
-                } else if let Some(f) = self.operators.get(&lit) {
-                    let op = f.clone();
-                    self.skip();
-                    // check for += -= etc
-                    if self.peek().filter(|p| p.literal() == "=").is_some() {
-                        self.skip();
-                        return Ok(Expr::Assign(
-                            left.to_string(),
-                            bx!(Expr::Call(op, vec![left, self.expr()?])),
-                            true, // reassignment
-                        ));
-                    } else {
-                        return Ok(Expr::Call(op, vec![left, self.expr()?]));
-                    }
+                    Ok(Expr::Assign(
+                        op.clone(),
+                        bx!(Expr::Call(op, vec![left, self.expr()?])),
+                        true, // reassignment
+                    ))
+                } else {
+                    Ok(Expr::Call(next.to_string(), vec![left, self.expr()?]))
                 }
             }
         }
-
-        Ok(left)
     }
 
     /// Parse an indivisible unit, as the Ancient Greeks would say.
@@ -326,60 +309,59 @@ impl<'s, 't> Parser<'s, 't> {
             // Literal
             Syntax::String(..) => Ok(self.string()?),
             Syntax::Number => Ok(self.number()?),
-            Syntax::Bool => Ok(self.boolean()?),
             // Tag
-            Syntax::Bracket('<') => self.tag(),
+            Syntax::LessThan => self.tag(),
             // Sub-expression
-            Syntax::Bracket('(') => {
+            Syntax::LParen => {
                 self.skip();
                 let expr = self.expr()?;
-                self.expect(Syntax::Bracket(')'))?;
+                self.expect(Syntax::RParen)?;
                 Ok(expr)
             }
             // List
-            Syntax::Bracket('[') => {
+            Syntax::LStaple => {
                 self.skip();
-                self.eat(Syntax::Special(';'));
+                self.eat(Syntax::Semi);
                 let mut list = vec![];
-                while !self.peek_eof() && !self.peek_is(Syntax::Bracket(']')) {
+                while !self.peek_eof() && !self.peek_is(Syntax::RStaple) {
                     list.push(self.expr()?);
-                    if self.peek_is(Syntax::Special(';')) {
+                    if self.peek_is(Syntax::Semi) {
                         self.skip();
-                    } else if self.peek_is(Syntax::Bracket(']')) {
+                    } else if self.peek_is(Syntax::RStaple) {
                         break;
                     } else {
-                        self.expect(Syntax::Special(','))?;
+                        self.expect(Syntax::Comma)?;
                     }
                 }
-                self.eat(Syntax::Special(';'));
-                self.expect(Syntax::Bracket(']'))?;
+                self.eat(Syntax::Semi);
+                self.expect(Syntax::RStaple)?;
                 Ok(Expr::List(list))
             }
             // Map
-            Syntax::Bracket('{') => {
+            Syntax::LCurly => {
                 self.skip();
-                self.eat(Syntax::Special(';'));
+                self.eat(Syntax::Semi);
                 let mut map = vec![];
-                while !self.peek_eof() && !self.peek_is(Syntax::Bracket('}')) {
+                while !self.peek_eof() && !self.peek_is(Syntax::RCurly) {
                     let key = match self.peek_kind() {
                         Syntax::Word | Syntax::String(..) | Syntax::Number => {
                             self.next().to_string()
                         }
                         _ => return self.error("String key name"),
                     };
-                    self.expect(Syntax::Special(':'))?;
+                    self.expect(Syntax::Colon)?;
                     let val = self.expr()?;
                     map.push((key, val));
-                    if self.peek_is(Syntax::Special(';')) {
+                    if self.peek_is(Syntax::Semi) {
                         self.skip();
-                    } else if self.peek_is(Syntax::Bracket('}')) {
+                    } else if self.peek_is(Syntax::RCurly) {
                         break;
                     } else {
-                        self.expect(Syntax::Special(','))?;
+                        self.expect(Syntax::Comma)?;
                     }
                 }
-                self.eat(Syntax::Special(';'));
-                self.expect(Syntax::Bracket('}'))?;
+                self.eat(Syntax::Semi);
+                self.expect(Syntax::RCurly)?;
                 Ok(Expr::Map(map))
             }
             // Variables and function calls
@@ -393,23 +375,24 @@ impl<'s, 't> Parser<'s, 't> {
                     }
                 }
 
-                if !self.peek_is(Syntax::Bracket('(')) {
+                if !self.peek_is(Syntax::LParen) {
                     return Ok(word);
                 } else {
-                    self.expect(Syntax::Bracket('('))?;
+                    self.expect(Syntax::LParen)?;
                     let name = word.to_string();
                     let mut args = vec![];
                     while let Some(tok) = self.peek() {
                         match tok.kind {
-                            Syntax::Bracket(')') => {
+                            Syntax::RParen => {
                                 self.skip();
                                 break;
                             }
-                            Syntax::Special(',') => self.skip(),
-                            Syntax::Bracket(..)
+                            Syntax::Comma => self.skip(),
+                            Syntax::LParen
+                            | Syntax::LCurly
+                            | Syntax::LStaple
                             | Syntax::String(..)
                             | Syntax::Number
-                            | Syntax::Bool
                             | Syntax::Word => {
                                 args.push(self.expr()?);
                             }
@@ -441,21 +424,16 @@ impl<'s, 't> Parser<'s, 't> {
                 // Literal
                 Syntax::String(..)
                 | Syntax::Number
-                | Syntax::Bracket('(')
-                | Syntax::Bracket('[')
-                | Syntax::Bracket('{') => {
+                | Syntax::LParen
+                | Syntax::LStaple
+                | Syntax::LCurly => {
                     block.push(self.expr()?);
                 }
 
                 // Tag
-                Syntax::Bracket('<') => {
+                Syntax::LessThan => {
                     // Look for </closing> tag and bail if found.
-                    if !indented
-                        && self
-                            .peek2()
-                            .filter(|p| p.kind == Syntax::Special('/'))
-                            .is_some()
-                    {
+                    if !indented && self.peek2().filter(|p| p.literal() == "/").is_some() {
                         break;
                     }
                     // Otherwise parse as regular tag expression.
@@ -470,12 +448,12 @@ impl<'s, 't> Parser<'s, 't> {
                             "for" => block.push(self.for_expr()?),
                             "return" => {
                                 self.skip();
-                                block.push(if self.peek_is(Syntax::Special(';')) {
+                                block.push(if self.peek_is(Syntax::Semi) {
                                     Expr::Return(bx!(Expr::None))
                                 } else {
                                     Expr::Return(bx!(self.expr()?))
                                 });
-                                self.expect(Syntax::Special(';'))?;
+                                self.expect(Syntax::Semi)?;
                             }
                             "op!" => {
                                 self.skip();
@@ -489,17 +467,17 @@ impl<'s, 't> Parser<'s, 't> {
                 }
 
                 // keep going if we're indented
-                Syntax::Special(';') if indented => {
+                Syntax::Semi if indented => {
                     self.skip();
                 }
 
                 // pass these up the food chain
-                Syntax::Dedent | Syntax::Special(';') => break,
+                Syntax::Dedent | Syntax::Semi => break,
 
                 // probably implicit text...
-                Syntax::Special(c) => {
+                Syntax::Op => {
                     self.skip();
-                    block.push(Expr::Word(c.to_string()));
+                    block.push(Expr::Word(self.next().to_string()));
                 }
 
                 // Unexpected
@@ -519,7 +497,7 @@ impl<'s, 't> Parser<'s, 't> {
         let val;
 
         let word = self.expect(Syntax::Word)?.to_string();
-        if self.peek_is(Syntax::Special(',')) {
+        if self.peek_is(Syntax::Comma) {
             self.skip();
             key = Some(word);
             val = self.next().to_string();
@@ -575,11 +553,7 @@ impl<'s, 't> Parser<'s, 't> {
 
     /// Parse a <tag> and its contents or a </tag>.
     fn tag(&mut self) -> Result<Expr> {
-        if self
-            .peek2()
-            .filter(|p| p.kind == Syntax::Special('/'))
-            .is_some()
-        {
+        if self.peek2().filter(|p| p.literal() == "/").is_some() {
             self.close_tag()?;
             return Ok(Expr::None);
         }
@@ -592,7 +566,7 @@ impl<'s, 't> Parser<'s, 't> {
         tag.set_body(self.block()?);
 
         match self.peek_kind() {
-            Syntax::Special(';') | Syntax::None => {
+            Syntax::Semi | Syntax::None => {
                 if self.tags == 0 {
                     self.error("Open Tag")?;
                 }
@@ -617,15 +591,15 @@ impl<'s, 't> Parser<'s, 't> {
             return self.error("open tags");
         }
         self.tags -= 1;
-        self.expect(Syntax::Bracket('<'))?;
-        self.expect(Syntax::Special('/'))?;
+        self.expect(Syntax::LessThan)?;
+        self.expect_op("/")?;
         // </>
-        if self.peek_is(Syntax::Bracket('>')) {
+        if self.peek_is(Syntax::GreaterThan) {
             self.skip();
             return Ok(());
         }
         self.expect(Syntax::String(true))?;
-        self.expect(Syntax::Bracket('>'))?;
+        self.expect(Syntax::GreaterThan)?;
         Ok(())
     }
 
@@ -633,9 +607,9 @@ impl<'s, 't> Parser<'s, 't> {
     /// starting after the <
     fn open_tag(&mut self) -> Result<Tag> {
         self.tags += 1;
-        self.expect(Syntax::Bracket('<'))?;
+        self.expect(Syntax::LessThan)?;
         let mut tag = Tag::new(match self.peek_kind() {
-            Syntax::Special(_) => Expr::String("div".into()),
+            Syntax::Op => Expr::String("div".into()),
             _ => self.attr()?,
         });
 
@@ -643,56 +617,59 @@ impl<'s, 't> Parser<'s, 't> {
             let next = self.next();
             let pos = next.pos;
             match next.kind {
-                Syntax::Special(';') => {}
-                Syntax::Bracket('>') => break,
-                Syntax::Special('/') => {
-                    tag.close();
-                    self.tags -= 1;
-                }
-                Syntax::Special('#') => {
-                    let id = self.attr()?;
-                    if self.peek_is(Syntax::Special('=')) {
-                        self.next();
-                        let cond = self.expr()?;
-                        tag.set_id(Expr::Call("when".into(), vec![cond, id]));
-                    } else {
-                        tag.set_id(id);
+                Syntax::Semi => {}
+                Syntax::GreaterThan => break,
+                Syntax::Op => match next.literal() {
+                    "/" => {
+                        tag.close();
+                        self.tags -= 1;
                     }
-                }
-                Syntax::Special('.') => {
-                    let class = self.attr()?;
-                    if self.peek_is(Syntax::Special('=')) {
-                        self.next();
-                        let cond = self.expr()?;
-                        tag.add_class(Expr::Call("when".into(), vec![cond, class]));
-                    } else {
-                        tag.add_class(class);
+                    "#" => {
+                        let id = self.attr()?;
+                        if self.peek_lit("=") {
+                            self.next();
+                            let cond = self.expr()?;
+                            tag.set_id(Expr::Call("when".into(), vec![cond, id]));
+                        } else {
+                            tag.set_id(id);
+                        }
                     }
-                }
-                Syntax::Special('@') | Syntax::Special(':') => {
-                    let attr_name = if let Syntax::Special('@') = &next.kind {
-                        Expr::String("name".into())
-                    } else {
-                        Expr::String("type".into())
-                    };
-                    let expr = self.attr()?;
-                    if self.peek_is(Syntax::Special('=')) {
-                        self.next();
-                        let cond = self.expr()?;
-                        tag.add_attr(attr_name, Expr::Call("when".into(), vec![cond, expr]));
-                    } else {
-                        tag.add_attr(attr_name.into(), expr);
+                    "." => {
+                        let class = self.attr()?;
+                        if self.peek_lit("=") {
+                            self.next();
+                            let cond = self.expr()?;
+                            tag.add_class(Expr::Call("when".into(), vec![cond, class]));
+                        } else {
+                            tag.add_class(class);
+                        }
                     }
-                }
+                    "@" | ":" => {
+                        let attr_name = if next.literal() == "@" {
+                            Expr::String("name".into())
+                        } else {
+                            Expr::String("type".into())
+                        };
+                        let expr = self.attr()?;
+                        if self.peek_lit("=") {
+                            self.next();
+                            let cond = self.expr()?;
+                            tag.add_attr(attr_name, Expr::Call("when".into(), vec![cond, expr]));
+                        } else {
+                            tag.add_attr(attr_name.into(), expr);
+                        }
+                    }
+                    _ => return self.error("# . @ or :"),
+                },
                 Syntax::String(true) => {
                     self.back();
                     let name = self.attr()?;
                     // single word attributes, like `defer`
-                    if !self.peek_is(Syntax::Special('=')) {
+                    if !self.peek_lit("=") {
                         tag.add_attr(name, Expr::Bool(true));
                         continue;
                     }
-                    self.expect(Syntax::Special('='))?;
+                    self.expect_op("=")?;
                     match self.peek_kind() {
                         Syntax::Number | Syntax::String(..) | Syntax::Word => {
                             tag.add_attr(name, self.atom()?)

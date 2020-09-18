@@ -120,8 +120,8 @@ scan_test!(double_dot_op, "..", Op);
 scan_test!(question_op, "?", Op);
 scan_test!(bang_op, "!", Op);
 
-scan_test!(bracket_is_op, "<", Op);
-scan_test!(bracket_followed_by_word, "<div>", Op, Word, Op);
+scan_test!(angle_is_not_op, "<", LessThan);
+scan_test!(angle_followed_by_word, "<div>", LessThan, Word, GreaterThan);
 
 ////
 // Indents
@@ -134,7 +134,6 @@ if 2 > 1
 else
     false
 "#,
-    Special(';'),
     Word,
     Number,
     Op,

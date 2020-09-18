@@ -105,8 +105,6 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
 - Write functions in Hatter:
   - `greet := fn(name) do print("Hey there, {name}!")`
   - `greet("Lydia")`
-- Add your own operators:
-  - `op! ++ append`
 - Easy inline JavaScript:
   - `<li> <a onclick=(alert("Oink!"))> 🐷`
 - Hatter will add a `<!DOCTYPE>` and wrap everything in `<html>` if

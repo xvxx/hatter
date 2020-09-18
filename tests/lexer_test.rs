@@ -76,7 +76,6 @@ scan_test!(
     Semi,
     Semi,
     Number,
-    Semi,
 );
 
 ////
@@ -182,7 +181,7 @@ done()
         Dedent, Dedent, Word,                               //   else
             Indent, Word, Word, Word, Word,                 //     for x in loop
                 Indent, Word, LParen, Word, RParen, Semi,   //       print(x)
-    Dedent, Dedent, Dedent, Word, LParen, RParen, Semi      // done()
+    Dedent, Dedent, Dedent, Word, LParen, RParen            // done()
 );
 
 #[rustfmt::skip]

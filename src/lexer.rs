@@ -461,25 +461,7 @@ impl<'s> Lexer<'s> {
             self.eat(|c| c == '\n');
 
             // tabs vs spaces error checking
-            let style = if self.peek_is(' ') {
-                Style::Spaces
-            } else if self.peek_is('\t') {
-                Style::Tabs
-            } else {
-                Style::None
-            };
-
-            if self.style == Style::None {
-                self.style = style;
-            } else if style != Style::None && self.style != style {
-                return scan_error!(
-                    start + 1,
-                    self.pos - start + 1,
-                    "Can't mix tabs and spaces. Expected {:?}, found {:?}",
-                    self.style,
-                    style
-                );
-            }
+            self.check_indent_style()?;
 
             // count indent
             while self.peek_is(' ') || self.peek_is('\t') {
@@ -497,7 +479,7 @@ impl<'s> Lexer<'s> {
         }
 
         // what indent level are we at?
-        let last = if self.indents.len() > 0 {
+        let last = if !self.indents.is_empty() {
             self.indents[self.indents.len() - 1]
         } else {
             0
@@ -514,7 +496,7 @@ impl<'s> Lexer<'s> {
         // lesser indent than current depth: Dedent
         if indent < last {
             self.append(Syntax::Semi)?;
-            while self.indents.len() > 0 {
+            while !self.indents.is_empty() {
                 if indent < self.indents[self.indents.len() - 1] {
                     self.indents.pop();
                     self.append(Syntax::Dedent)?;
@@ -527,5 +509,30 @@ impl<'s> Lexer<'s> {
 
         // current depth == current indent
         Ok(Syntax::Semi)
+    }
+
+    /// Make sure tabs vs spaces use is consistent.
+    fn check_indent_style(&mut self) -> Result<()> {
+        let style = if self.peek_is(' ') {
+            Style::Spaces
+        } else if self.peek_is('\t') {
+            Style::Tabs
+        } else {
+            Style::None
+        };
+
+        if self.style == Style::None {
+            self.style = style;
+        } else if style != Style::None && self.style != style {
+            return scan_error!(
+                self.pos,
+                1,
+                "Can't mix tabs and spaces. Expected {:?}, found {:?}",
+                self.style,
+                style
+            );
+        }
+
+        Ok(())
     }
 }

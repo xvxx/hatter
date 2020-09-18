@@ -112,9 +112,14 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
 
 ## Future Features
 
-- Define your own tags with `def <tag arg=Type>`.
+- Define your own tags:
+  - `def <item(item)> do <li.item data-id={item.id}> item.text`.
+- Define your own functions:
+  - `def greet(name) do print("Hey there, {name}!")
+- Define your own operators:
+  - `def !!(a, b) do return concat(to-uppercase(a), ' ', to-uppercase(b))`
 - Arity checking for functions.
-- Optional type checking for functions.
+- Optional type checking for functions(?)
 
 ## TODO
 

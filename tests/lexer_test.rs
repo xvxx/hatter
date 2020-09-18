@@ -1,9 +1,22 @@
-use hatter::{scan, Syntax::*};
+use hatter::{scan, Syntax::*, Token};
 
 macro_rules! scan {
     ($code:expr) => {
         scan($code).unwrap()
     };
+}
+
+fn print_nodes(i: usize, nodes: &[Token]) {
+    println!("Computed tokens:");
+    for (x, token) in nodes.iter().enumerate() {
+        let (bold, clear) = if x == i {
+            ("\x1b[1;91m", "\x1b[0m")
+        } else {
+            ("", "")
+        };
+        println!("  {}({:?}, {}){}", bold, token.kind, token.literal(), clear);
+    }
+    println!("        left=want, right=got");
 }
 
 macro_rules! scan_test {
@@ -15,17 +28,23 @@ macro_rules! scan_test {
             $(
                 let node = nodes.get(i).unwrap();
                 if node.kind != $kind {
-                    println!("Computed tokens:");
-                    for (x, token) in nodes.iter().enumerate() {
-                        let (bold, clear) = if x == i  { ("\x1b[1;91m", "\x1b[0m") } else { ("","") };
-                        println!("  {}({:?}, {}){}", bold, token.kind, token.literal(), clear);
-                    }
+                    print_nodes(i, &nodes);
                 }
-                println!("        left=want, right=got");
                 assert_eq!($kind, node.kind);
-                #[allow(unused_assignments)]
                 { i += 1; }
             )+
+            let mut nodes = nodes;
+            while let Some(tok) = nodes.iter().last() {
+                if tok.kind == Semi {
+                    nodes.pop();
+                } else {
+                    break;
+                }
+            }
+            if i != nodes.len() {
+                print_nodes(i, &nodes);
+            }
+            assert_eq!(i, nodes.len());
         }
     };
     ($name:ident, $code:expr, $($kind:expr),+) => {

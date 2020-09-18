@@ -1,10 +1,10 @@
 use {
-    crate::{syntax::Reserved, Result, Syntax, Token},
+    crate::{Result, Syntax, Token, WordChar},
     std::{iter::Peekable, mem, str::CharIndices},
 };
 
 struct Lexer<'s> {
-    tokens: Vec<Token<'s>>,           // list we're building
+    tokens: Vec<Token<'s>>,           // what we're building
     source: &'s str,                  // template source code
     pos: usize,                       // current position in `source`
     indents: Vec<usize>,              // current depth
@@ -78,6 +78,17 @@ impl<'s> Lexer<'s> {
             .is_some()
     }
 
+    /// Did we just see =?
+    fn prev_is_equal_sign(&self) -> bool {
+        if self.tokens.is_empty() {
+            return false;
+        }
+        self.tokens
+            .get(self.tokens.len() - 1)
+            .filter(|t| t.literal() == "=")
+            .is_some()
+    }
+
     /// Advance position in `source` and return next `char`.
     fn next(&mut self) -> Option<char> {
         if let Some((pos, c)) = self.chars.next() {
@@ -139,156 +150,71 @@ impl<'s> Lexer<'s> {
             let start = self.pos;
             let kind = match c {
                 '\n' => self.scan_newline()?,
-                '#' if self.in_tag() => Syntax::Special(c),
-                '#' => {
-                    self.eat(|c| c != '\n');
-                    Syntax::None
-                }
-                ';' | ',' => Syntax::Special(c),
-                '.' | '@' | '/' => {
-                    if self.in_tag() {
-                        Syntax::Special(c)
-                    } else {
-                        Syntax::Word
-                    }
-                }
+                ';' => Syntax::Semi,
+                ',' => Syntax::Comma,
+                ':' => Syntax::Colon,
                 '"' | '\'' | '`' => self.scan_string(c)?,
-                ':' => {
-                    if self.peek_is('=') {
-                        self.next();
-                        self.scan_word()?
-                    } else {
-                        Syntax::Special(c)
-                    }
-                }
-                '=' => {
-                    if self.in_tag() {
-                        Syntax::Special(c)
-                    } else if self.peek_is('=') {
-                        self.next();
-                        self.scan_word()?
-                    } else {
-                        self.scan_word()?
-                    }
-                }
+
                 '-' => {
                     if self.peek().filter(|c| c.is_numeric()).is_some() {
                         self.scan_number()?
                     } else {
-                        self.scan_word()?
+                        self.scan_op()?
                     }
                 }
-                '<' => {
-                    if self.peek_is('!') {
-                        while let Some(&c) = self.peek() {
-                            self.next();
-                            if c == '>' {
-                                break;
-                            }
-                        }
-                        Syntax::String(true)
-                    } else if self.peek_is('=') || self.peek_is(c) {
-                        self.next(); // skip =
-                        self.scan_word()?
-                    } else if self.in_tag() || self.peek_is(' ') {
+
+                '#' => {
+                    if self.peek().filter(|c| c.is_alphabetic()).is_some() {
                         self.scan_word()?
                     } else {
-                        self.mode = Mode::Tag;
-                        Syntax::Bracket('<')
+                        self.scan_comment()?
                     }
                 }
-                '>' => {
-                    if self.peek_is('=') || self.peek_is(c) {
-                        self.next(); // skip =
-                        self.scan_word()?
-                    } else if self.in_tag() {
-                        self.mode = Mode::None;
-                        Syntax::Bracket('>')
-                    } else {
-                        self.scan_word()?
-                    }
-                }
-                '{' => {
-                    if self.in_tag() {
-                        if self.prev_is(Syntax::Special('=')) {
-                            let mut curlies = 0;
-                            while let Some(c) = self.peek() {
-                                match c {
-                                    '{' => curlies += 1,
-                                    '}' => {
-                                        if curlies == 0 {
-                                            break;
-                                        } else {
-                                            curlies -= 1;
-                                        }
-                                    }
-                                    _ => {}
-                                }
-                                self.next();
-                            }
-                            self.next();
-                            Syntax::String(true)
-                        } else {
-                            self.scan_attr()?
-                        }
-                    } else {
-                        self.set_mode(Mode::Container);
-                        Syntax::Bracket(c)
-                    }
-                }
+
                 '[' => {
                     self.set_mode(Mode::Container);
-                    Syntax::Bracket(c)
+                    Syntax::LStaple
                 }
-                ']' | '}' => {
+                ']' => {
                     self.pop_mode();
-                    Syntax::Bracket(c)
+                    Syntax::RStaple
+                }
+
+                '(' => {
+                    if self.in_tag() {
+                        self.tag_open_paren()?
+                    } else {
+                        Syntax::LParen
+                    }
                 }
                 ')' => {
                     if self.in_tag_args() {
                         self.pop_mode();
                     }
-                    Syntax::Bracket(c)
+                    Syntax::RParen
                 }
-                '(' => {
-                    if self.in_tag() && self.prev_is(Syntax::Special('=')) {
-                        let mut open = 0;
-                        while let Some(&c) = self.peek() {
-                            if c == ')' && open == 0 {
-                                self.next();
-                                break;
-                            } else if c == '(' {
-                                open += 1;
-                            } else if c == ')' {
-                                open -= 1;
-                            }
-                            self.next();
-                        }
-                        Syntax::JS
+
+                '{' => {
+                    if self.in_tag() {
+                        self.scan_word()?
                     } else {
-                        Syntax::Bracket('(')
+                        self.set_mode(Mode::Container);
+                        Syntax::LCurly
                     }
                 }
-                _ if c.is_numeric() => self.scan_number()?,
+                '}' => {
+                    self.pop_mode();
+                    Syntax::RCurly
+                }
+
                 _ if c.is_whitespace() => {
                     self.eat(|c| c.is_whitespace());
                     continue;
                 }
-                _ => {
-                    if self.in_tag() {
-                        if self.prev_is(Syntax::Special('=')) {
-                            let word = self.scan_word()?;
-                            if self.peek_is('(') {
-                                self.set_mode(Mode::Args);
-                            }
-                            word
-                        } else {
-                            self.scan_attr()?
-                        }
-                    } else {
-                        self.scan_word()?
-                    }
-                }
+
+                _ if c.is_numeric() => self.scan_number()?,
+                _ if c.is_alphabetic() || c == '_' => self.scan_word()?,
+                _ => self.scan_op()?,
             };
 
             // skip empty tokens
@@ -306,8 +232,8 @@ impl<'s> Lexer<'s> {
         }
 
         // Add final semicolon before EOF, if not present.
-        if !self.prev_is(Syntax::Special(';')) && !self.prev_is(Syntax::Dedent) {
-            self.append(Syntax::Special(';'))?;
+        if !self.prev_is(Syntax::Semi) && !self.prev_is(Syntax::Dedent) {
+            self.append(Syntax::Semi)?;
         }
 
         // Close open indents
@@ -317,14 +243,20 @@ impl<'s> Lexer<'s> {
         }
 
         // Trim leading ;
-        while !self.tokens.is_empty() && self.tokens[0].kind == Syntax::Special(';') {
+        while !self.tokens.is_empty() && self.tokens[0].kind == Syntax::Semi {
             self.tokens.remove(0);
         }
 
         Ok(())
     }
 
-    /// Parse until we find a non-number.
+    /// Scan a single line comment.
+    fn scan_comment(&mut self) -> Result<Syntax> {
+        self.eat(|c| c != '\n');
+        Ok(Syntax::None)
+    }
+
+    /// Scan until we find a non-number.
     fn scan_number(&mut self) -> Result<Syntax> {
         let mut saw_dot = false;
 
@@ -399,16 +331,17 @@ impl<'s> Lexer<'s> {
         )
     }
 
-    /// Parse until we encounter a `token::RESERVED` char.
-    fn scan_word(&mut self) -> Result<Syntax> {
-        self.eat(|c| !c.is_reserved() && !c.is_whitespace());
-        Ok(Syntax::Word)
+    /// Scan a word, which may have {interpolation.with(some, whitespace)}.
+    fn scan_op(&mut self) -> Result<Syntax> {
+        self.eat(|c| !c.is_whitespace() && !c.is_alphanumeric());
+        Ok(Syntax::Op)
     }
 
-    /// Parse a word in an attribute, which can have {interpolation}.
-    fn scan_attr(&mut self) -> Result<Syntax> {
+    /// Scan a word, which may have {interpolation.with(some, whitespace)}.
+    fn scan_word(&mut self) -> Result<Syntax> {
         let mut in_code = false;
         let mut curlies = 0;
+
         while let Some(&c) = self.peek() {
             if in_code {
                 if c == '}' {
@@ -423,20 +356,46 @@ impl<'s> Lexer<'s> {
             } else {
                 if c == '{' {
                     in_code = true;
-                } else if c.is_whitespace() || c.is_attr_reserved() {
+                } else if !c.is_word_char() {
                     break;
                 }
             }
-
             self.next();
         }
-        Ok(Syntax::String(true))
+
+        if self.peek_is('?') {
+            self.next();
+        }
+
+        Ok(Syntax::Word)
+    }
+
+    /// Scan an open paren `(` seen in a tag declaration.
+    fn tag_open_paren(&mut self) -> Result<Syntax> {
+        if self.prev_is_equal_sign() {
+            let mut open = 0;
+            while let Some(&c) = self.peek() {
+                if c == ')' && open == 0 {
+                    self.next();
+                    break;
+                } else if c == '(' {
+                    open += 1;
+                } else if c == ')' {
+                    open -= 1;
+                }
+                self.next();
+            }
+            Ok(Syntax::JS)
+        } else {
+            self.set_mode(Mode::Args);
+            Ok(Syntax::LParen)
+        }
     }
 
     /// Figure out indents and dedents.
     fn scan_newline(&mut self) -> Result<Syntax> {
         if self.in_tag() || self.in_container() {
-            return Ok(Syntax::Special(';'));
+            return Ok(Syntax::Semi);
         }
 
         let start = self.pos;
@@ -498,7 +457,7 @@ impl<'s> Lexer<'s> {
 
         // lesser indent than current depth: Dedent
         if indent < last {
-            self.append(Syntax::Special(';'))?;
+            self.append(Syntax::Semi)?;
             while self.indents.len() > 0 {
                 if indent < self.indents[self.indents.len() - 1] {
                     self.indents.pop();
@@ -511,6 +470,6 @@ impl<'s> Lexer<'s> {
         }
 
         // current depth == current indent
-        Ok(Syntax::Special(';'))
+        Ok(Syntax::Semi)
     }
 }

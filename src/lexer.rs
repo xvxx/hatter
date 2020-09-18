@@ -1,5 +1,5 @@
 use {
-    crate::{Result, Syntax, Token, WordChar},
+    crate::{Result, Syntax, SyntaxTrait, Token},
     std::{iter::Peekable, mem, str::CharIndices},
 };
 
@@ -207,6 +207,16 @@ impl<'s> Lexer<'s> {
                     Syntax::RCurly
                 }
 
+                '<' => self.scan_left_arrow()?,
+                '>' => {
+                    if self.in_tag() {
+                        self.mode = Mode::None;
+                        Syntax::GreaterThan
+                    } else {
+                        self.scan_op()?
+                    }
+                }
+
                 _ if c.is_whitespace() => {
                     self.eat(|c| c.is_whitespace());
                     continue;
@@ -368,6 +378,45 @@ impl<'s> Lexer<'s> {
         }
 
         Ok(Syntax::Word)
+    }
+
+    /// Determines if < is opening a tag or just a regular `<` sign
+    fn scan_left_arrow(&mut self) -> Result<Syntax> {
+        let p = *self.peek().unwrap_or(&'0');
+        if !self.in_tag() && p.is_tag_opener() {
+            // <tag>
+            self.mode = Mode::Tag;
+            Ok(Syntax::LessThan)
+        } else if !self.in_tag() && p == '!' {
+            self.next(); // skip !
+
+            let mut comment = false;
+            if self.peek_is('-') {
+                self.next();
+                if self.peek_is('-') {
+                    self.next();
+                    comment = true
+                }
+            }
+
+            while let Some(c) = self.next() {
+                if comment && c == '-' {
+                    if let Some('-') = self.next() {
+                        if let Some('>') = self.next() {
+                            break;
+                        }
+                    }
+                } else if c == '>' {
+                    self.next();
+                    break;
+                }
+            }
+
+            Ok(Syntax::String(true))
+        } else {
+            // <= << <
+            self.scan_op()
+        }
     }
 
     /// Scan an open paren `(` seen in a tag declaration.

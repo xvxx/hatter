@@ -54,10 +54,10 @@ scan_test!(
     another_basic_comment,
     "456\n# Something something.\n789",
     Number,
-    Special(';'),
-    Special(';'),
+    Semi,
+    Semi,
     Number,
-    Special(';'),
+    Semi,
 );
 
 ////

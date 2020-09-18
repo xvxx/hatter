@@ -165,3 +165,22 @@ done()
                 Indent, Word, LParen, Word, RParen, Semi,   //       print(x)
     Dedent, Dedent, Dedent, Word, LParen, RParen, Semi      // done()
 );
+
+#[rustfmt::skip]
+scan_test!(
+    no_indent_for_operators,
+    r#"
+abc()
+    .to-lowercase()
+    .to-uppercase()
+    + 20
+    if true
+        yay
+"#,
+    Word, LParen, RParen,
+    Op, Word, LParen, RParen,
+    Op, Word, LParen, RParen,
+    Op, Number,
+    Indent, Word, Word, Indent, Word, Semi,
+    Dedent, Dedent,
+);

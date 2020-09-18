@@ -24,6 +24,7 @@ pub enum Syntax {
 pub trait SyntaxTrait {
     fn is_word_char(&self) -> bool;
     fn is_tag_opener(&self) -> bool;
+    fn is_op(&self) -> bool;
 }
 
 impl SyntaxTrait for char {
@@ -35,5 +36,10 @@ impl SyntaxTrait for char {
     /// Is this valid in the opening section of a <tag>?
     fn is_tag_opener(&self) -> bool {
         self.is_alphanumeric() || matches!(self, '#' | '.' | ':' | '@')
+    }
+
+    /// Operator?
+    fn is_op(&self) -> bool {
+        !self.is_whitespace() && !self.is_alphanumeric() && *self != '#'
     }
 }

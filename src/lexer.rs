@@ -172,7 +172,7 @@ impl<'s> Lexer<'s> {
 
                 '#' => {
                     if self.peek().filter(|c| c.is_alphabetic()).is_some() {
-                        self.scan_word()?
+                        self.scan_op()?
                     } else {
                         self.scan_comment()?
                     }
@@ -350,7 +350,7 @@ impl<'s> Lexer<'s> {
 
     /// Scan a word, which may have {interpolation.with(some, whitespace)}.
     fn scan_op(&mut self) -> Result<Syntax> {
-        self.eat(|c| !c.is_whitespace() && !c.is_alphanumeric());
+        self.eat(|c| c.is_op());
         Ok(Syntax::Op)
     }
 
@@ -476,6 +476,11 @@ impl<'s> Lexer<'s> {
             }
 
             break;
+        }
+
+        // if the next token is an operator, continue the last line
+        if self.peek().filter(|c| c.is_op()).is_some() {
+            return Ok(Syntax::None);
         }
 
         // what indent level are we at?

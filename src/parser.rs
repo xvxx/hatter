@@ -1,18 +1,14 @@
-use {
-    crate::{scan, Error, Expr, Result, Syntax, Tag, Token},
-    std::collections::HashMap,
-};
+use crate::{scan, Error, Expr, Result, Syntax, Tag, Token};
 
 #[cfg(debug_assertions)]
 const STACK_SIZE: usize = 1000; // infinite loop protection
 
 #[derive(Debug)]
 pub struct Parser<'s, 't> {
-    tokens: &'t [Token<'s>],            // code
-    ast: Vec<Expr>,                     // what we're building
-    pos: usize,                         // position in tokens vec
-    tags: usize,                        // open tags
-    operators: HashMap<String, String>, // operators like + - * /
+    tokens: &'t [Token<'s>], // code
+    ast: Vec<Expr>,          // what we're building
+    pos: usize,              // position in tokens vec
+    tags: usize,             // open tags
 
     #[cfg(debug_assertions)]
     peeked: usize, // infinite loop protection hack
@@ -32,7 +28,6 @@ impl<'s, 't> Parser<'s, 't> {
             ast: vec![],
             tags: 0,
             pos: 0,
-            operators: default_operators(),
             #[cfg(debug_assertions)]
             peeked: 0,
         }
@@ -455,12 +450,6 @@ impl<'s, 't> Parser<'s, 't> {
                                 });
                                 self.expect(Syntax::Semi)?;
                             }
-                            "op!" => {
-                                self.skip();
-                                let op = self.expect(Syntax::Word)?.to_string();
-                                let f = self.expect(Syntax::Word)?.to_string();
-                                self.operators.insert(op, f);
-                            }
                             _ => block.push(self.expr()?),
                         }
                     }
@@ -696,22 +685,4 @@ impl<'s, 't> Parser<'s, 't> {
     fn attr(&mut self) -> Result<Expr> {
         self.string()
     }
-}
-
-/// Probably a better way to do this, but it works for now and lets us
-/// define new operators in Hatter source code using `op!`.
-fn default_operators() -> HashMap<String, String> {
-    let mut map = HashMap::new();
-    map.insert("==".into(), "eq".into());
-    map.insert("!=".into(), "neq".into());
-    map.insert("+".into(), "add".into());
-    map.insert("-".into(), "sub".into());
-    map.insert("*".into(), "mul".into());
-    map.insert("/".into(), "div".into());
-    map.insert(">".into(), "gt".into());
-    map.insert(">=".into(), "gte".into());
-    map.insert("<".into(), "lt".into());
-    map.insert("<=".into(), "lte".into());
-    map.insert(".".into(), "index".into());
-    map
 }

@@ -23,7 +23,8 @@ macro_rules! scan_test {
                 }
                 println!("        left=want, right=got");
                 assert_eq!($kind, node.kind);
-                i += 1;
+                #[allow(unused_assignments)]
+                { i += 1; }
             )+
         }
     };
@@ -133,6 +134,7 @@ if 2 > 1
 else
     false
 "#,
+    Special(';'),
     Word,
     Number,
     Op,

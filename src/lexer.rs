@@ -218,7 +218,7 @@ impl<'s> Lexer<'s> {
                 '>' => {
                     if self.in_tag() {
                         self.mode = Mode::None;
-                        Syntax::GreaterThan
+                        Syntax::RCaret
                     } else {
                         self.scan_op()?
                     }
@@ -419,7 +419,9 @@ impl<'s> Lexer<'s> {
         if !self.in_tag() && p.is_tag_opener() {
             // <tag>
             self.mode = Mode::Tag;
-            Ok(Syntax::LessThan)
+            println!("OPENER {:?}", p);
+            println!("OPENER {:?}", p.is_tag_opener());
+            Ok(Syntax::LCaret)
         } else if !self.in_tag() && p == '!' {
             self.next(); // skip !
 
@@ -505,7 +507,7 @@ impl<'s> Lexer<'s> {
         }
 
         // if the next token is an operator, continue the last line
-        if self.peek().filter(|c| c.is_op()).is_some() {
+        if self.peek().filter(|c| c.is_op() && c != &&'<').is_some() {
             return Ok(Syntax::None);
         }
 

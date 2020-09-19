@@ -305,7 +305,7 @@ impl<'s, 't> Parser<'s, 't> {
             Syntax::String(..) => Ok(self.string()?),
             Syntax::Number => Ok(self.number()?),
             // Tag
-            Syntax::LessThan => self.tag(),
+            Syntax::LCaret => self.tag(),
             // Sub-expression
             Syntax::LParen => {
                 self.skip();
@@ -426,7 +426,7 @@ impl<'s, 't> Parser<'s, 't> {
                 }
 
                 // Tag
-                Syntax::LessThan => {
+                Syntax::LCaret => {
                     // Look for </closing> tag and bail if found.
                     if !indented && self.peek2().filter(|p| p.literal() == "/").is_some() {
                         break;
@@ -606,15 +606,15 @@ impl<'s, 't> Parser<'s, 't> {
             return self.error("open tags");
         }
         self.tags -= 1;
-        self.expect(Syntax::LessThan)?;
+        self.expect(Syntax::LCaret)?;
         self.expect_op("/")?;
         // </>
-        if self.peek_is(Syntax::GreaterThan) {
+        if self.peek_is(Syntax::RCaret) {
             self.skip();
             return Ok(());
         }
         self.expect(Syntax::String(true))?;
-        self.expect(Syntax::GreaterThan)?;
+        self.expect(Syntax::RCaret)?;
         Ok(())
     }
 
@@ -622,7 +622,7 @@ impl<'s, 't> Parser<'s, 't> {
     /// starting after the <
     fn open_tag(&mut self) -> Result<Tag> {
         self.tags += 1;
-        self.expect(Syntax::LessThan)?;
+        self.expect(Syntax::LCaret)?;
         let mut tag = Tag::new(match self.peek_kind() {
             Syntax::Op => Stmt::String("div".into()),
             _ => self.attr()?,
@@ -633,7 +633,7 @@ impl<'s, 't> Parser<'s, 't> {
             let pos = next.pos;
             match next.kind {
                 Syntax::Semi => {}
-                Syntax::GreaterThan => break,
+                Syntax::RCaret => break,
                 Syntax::Op => match next.literal() {
                     "/" => {
                         tag.close();

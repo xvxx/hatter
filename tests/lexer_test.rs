@@ -137,58 +137,68 @@ scan_test!(dot_op, ".", Op);
 scan_test!(double_dot_op, "..", Op);
 scan_test!(question_op, "?", Op);
 scan_test!(bang_op, "!", Op);
+scan_test!(gt_is_op, "4 > 5", Number, Op, Number);
+scan_test!(lt_is_op, "4 < 5", Number, Op, Number);
+scan_test!(lt_with_word_is_caret, "<ding>", LCaret, Word, RCaret);
+scan_test!(lt_with_word_is_caret_2, "<ding >", LCaret, Word, RCaret);
 
 ////
 // Tags
 
-scan_test!(angle_is_not_op, "<", LessThan);
-scan_test!(angle_followed_by_word, "<div>", LessThan, Word, GreaterThan);
-scan_test!(angle_id, "<#id>", LessThan, Op, Word, GreaterThan);
-scan_test!(angle_class, "<.class>", LessThan, Op, Word, GreaterThan);
-scan_test!(angle_type, "<:type>", LessThan, Colon, Word, GreaterThan);
-scan_test!(angle_name, "<@name>", LessThan, Op, Word, GreaterThan);
+scan_test!(angle_is_op, "<", Op);
+scan_test!(
+    angle_followed_by_word_is_not_op,
+    "<div>",
+    LCaret,
+    Word,
+    RCaret
+);
+scan_test!(angle_id, "<#id>", LCaret, Op, Word, RCaret);
+scan_test!(angle_class, "<.class>", LCaret, Op, Word, RCaret);
+scan_test!(angle_type, "<:type>", LCaret, Colon, Word, RCaret);
+scan_test!(angle_name, "<@name>", LCaret, Op, Word, RCaret);
 scan_test!(
     angle_interpolated,
     "<div class=something-{2 + 2}-classy>",
-    LessThan,
+    LCaret,
     Word,
     Word,
     Op,
     Word,
-    GreaterThan
+    RCaret
 );
 scan_test!(
     angle_js,
     "<span onclick=(alert('He he he!'))>Something</span>",
-    LessThan,
+    LCaret,
     Word,
     Word,
     Op,
     JS,
-    GreaterThan,
+    RCaret,
     Word,
-    LessThan,
+    LCaret,
     Op,
     Word,
-    GreaterThan,
+    RCaret,
 );
 scan_test!(
     angle_input_type,
     "<input:type>",
-    LessThan,
+    LCaret,
     Word,
     Colon,
     Word,
-    GreaterThan
+    RCaret
 );
 scan_test!(
     angle_input_name,
     "<input@name>",
-    LessThan,
+    LCaret,
     Word,
     Op,
     Word,
-    GreaterThan
+    RCaret
 );
 
 ////
@@ -251,4 +261,21 @@ abc()
     Op, Number,
     Indent, Word, Word, Indent, Word, Semi,
     Dedent, Dedent,
+);
+
+scan_test!(
+    tag_isnt_an_operator,
+    r#"
+if true
+    <b> Something
+"#,
+    Word,
+    Word,
+    Indent,
+    LCaret,
+    Word,
+    RCaret,
+    Word,
+    Semi,
+    Dedent
 );

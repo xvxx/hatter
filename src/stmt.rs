@@ -5,7 +5,7 @@ pub use tag::Tag;
 pub enum Stmt {
     None,
     Bool(bool),
-    Number(usize),
+    Number(isize),
     String(String),
     Word(String),
     List(Vec<Stmt>),

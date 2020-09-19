@@ -45,9 +45,18 @@ impl<'s> Token<'s> {
     }
 
     /// Convert into native number or error. No weak typing.
-    pub fn to_usize(&self) -> Result<usize> {
+    pub fn to_isize(&self) -> Result<isize> {
+        if self.literal().len() > 2 {
+            match &self.literal()[..2] {
+                "0b" => return self.from_bin(),
+                "0o" => return self.from_oct(),
+                "0x" => return self.from_hex(),
+                _ => {}
+            }
+        }
         self.literal()
-            .parse::<usize>()
+            .replace('_', "")
+            .parse::<isize>()
             .map_err(|e| Error::new(e.to_string(), self.pos, 1))
     }
 
@@ -56,5 +65,32 @@ impl<'s> Token<'s> {
         self.literal()
             .parse::<f64>()
             .map_err(|e| Error::new(e.to_string(), self.pos, 1))
+    }
+
+    /// 0b10101 to isize
+    fn from_bin(&self) -> Result<isize> {
+        if self.literal().starts_with("0b") {
+            Ok(isize::from_str_radix(&self.literal()[2..], 2)?)
+        } else {
+            error!("can't parse binary number: {:?}", self)
+        }
+    }
+
+    /// 0o755 to isize
+    fn from_oct(&self) -> Result<isize> {
+        if self.literal().starts_with("0o") {
+            Ok(isize::from_str_radix(&self.literal()[2..], 8)?)
+        } else {
+            error!("can't parse binary number: {:?}", self)
+        }
+    }
+
+    /// 0xdeadbeef to isize
+    fn from_hex(&self) -> Result<isize> {
+        if self.literal().starts_with("0x") {
+            Ok(isize::from_str_radix(&self.literal()[2..], 16)?)
+        } else {
+            error!("can't parse binary number: {:?}", self)
+        }
     }
 }

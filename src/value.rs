@@ -186,6 +186,8 @@ into_number!(f64);
 into_number!(&f64);
 into_number_as!(usize, i32);
 into_number_as!(&usize, i32);
+into_number_as!(isize, i32);
+into_number_as!(&isize, i32);
 
 into_bool!(bool);
 into_bool!(&bool);

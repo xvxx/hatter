@@ -1,5 +1,5 @@
 #![allow(unused_macros)]
-use std::{error, fmt, io};
+use std::{error, fmt, io, num};
 
 #[derive(Debug, PartialEq)]
 pub struct Error {
@@ -23,6 +23,16 @@ impl error::Error for Error {
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "Error: {}", self.details)
+    }
+}
+
+impl From<num::ParseIntError> for Error {
+    fn from(error: num::ParseIntError) -> Self {
+        Error {
+            details: format!("{}", error),
+            pos: 0,
+            len: 0,
+        }
     }
 }
 

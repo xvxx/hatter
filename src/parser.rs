@@ -168,7 +168,7 @@ impl<'s, 't> Parser<'s, 't> {
 
     /// Parse a number.
     fn number(&mut self) -> Result<Stmt> {
-        Ok(Stmt::Number(self.expect(Syntax::Number)?.to_usize()?))
+        Ok(Stmt::Number(self.expect(Syntax::Number)?.to_isize()?))
     }
 
     /// Parse a string.

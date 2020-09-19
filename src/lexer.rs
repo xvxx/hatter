@@ -20,7 +20,7 @@ enum Mode {
     None,      // Regular
     Container, // [List] or {Map}
     Tag,       // <Tag>
-    Args,      // Parsing (args) inside a <tag>
+    Args,      // Parsing fn-call(args) inside a <tag>
 }
 
 #[derive(Debug, PartialEq)]

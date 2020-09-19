@@ -268,8 +268,11 @@ impl<'s, 't> Parser<'s, 't> {
             ":=" | "=" => {
                 let reassign = lit == "=";
                 self.skip(); // skip op
-                let name = self.expect(Syntax::Word)?.to_string();
-                Ok(Stmt::Assign(name, bx!(self.expr()?), reassign))
+                if let Stmt::Word(name) = left {
+                    Ok(Stmt::Assign(name, bx!(self.expr()?), reassign))
+                } else {
+                    self.error("Word")
+                }
             }
             "." => {
                 // convert word to str, ex: map.key => index(map, "key")

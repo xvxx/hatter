@@ -64,6 +64,56 @@ parse_test!(hex_number, "0xdeadbeef", Stmt::Number(3735928559));
 ////
 // string
 
+parse_test!(
+    basic_string,
+    r#""just a regular string""#,
+    Stmt::String("just a regular string".into())
+);
+parse_test!(
+    interpolated_string,
+    r#""just checking that {2 + 2} = 4""#,
+    Stmt::String("just checking that {2 + 2} = 4".into())
+);
+parse_test!(
+    single_quote_string,
+    "'single quote'",
+    Stmt::String("single quote".into())
+);
+parse_test!(
+    escaped_single_quote_string,
+    "'what\'s up'",
+    Stmt::String("what's up".into())
+);
+parse_test!(
+    grave_string,
+    r#"`one two three`"#,
+    Stmt::String("one two three".into())
+);
+parse_test!(
+    triple_string,
+    r#" """one two three""" "#,
+    Stmt::String("one two three".into())
+);
+parse_test!(
+    triple_single_string,
+    r#"'''one two three'''"#,
+    Stmt::String("one two three".into())
+);
+parse_test!(
+    triple_grave_string,
+    r#"```one two three```"#,
+    Stmt::String("one two three".into())
+);
+parse_test!(
+    triple_string_with_breaks,
+    r#""""
+one
+two
+three
+""""#,
+    Stmt::String("\none\ntwo\nthree\n".into())
+);
+
 ////
 // if
 
@@ -118,6 +168,24 @@ parse_test!(
         ]
     )
 );
+
+// parse_test!(
+//     call_with_whitespace,
+//     "something(a,
+//         b,
+//         true,
+//         123
+//     )",
+//     Stmt::Call(
+//         "something".into(),
+//         vec![
+//             Stmt::Word("a".into()),
+//             Stmt::Word("b".into()),
+//             Stmt::Bool(true),
+//             Stmt::Number(123)
+//         ]
+//     )
+// );
 
 ////
 // op

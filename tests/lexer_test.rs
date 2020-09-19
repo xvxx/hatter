@@ -283,3 +283,27 @@ if true
     Semi,
     Dedent
 );
+
+#[rustfmt::skip]
+scan_test!(
+    indented_comments,
+    r#"
+if true
+    # Something
+    "ok"
+# ok?
+else
+    "something else"
+        # nice..
+
+# all done
+"all done"
+                # yup
+"yup"
+"#,
+    Word, Word,
+        Indent, String(false), Semi,
+    Dedent, Word,
+        Indent, String(false), Semi,
+    Dedent, String(false), Semi, String(false)
+);

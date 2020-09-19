@@ -420,8 +420,6 @@ impl<'s> Lexer<'s> {
         if !self.in_tag() && p.is_tag_opener() {
             // <tag>
             self.mode = Mode::Tag;
-            println!("OPENER {:?}", p);
-            println!("OPENER {:?}", p.is_tag_opener());
             Ok(Syntax::LCaret)
         } else if !self.in_tag() && p == '!' {
             self.next(); // skip !
@@ -498,13 +496,15 @@ impl<'s> Lexer<'s> {
                 self.next();
             }
 
-            // start over if we hit another newline
-            if let Some('\n') = self.peek() {
-                indent = 0;
-                continue;
+            // start over if we hit another newline or a comment
+            match self.peek() {
+                Some('\n') => {}
+                Some('#') => {
+                    self.scan_comment()?;
+                }
+                _ => break,
             }
-
-            break;
+            indent = 0;
         }
 
         // if the next token is an operator, continue the last line

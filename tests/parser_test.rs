@@ -38,14 +38,78 @@ macro_rules! parse_test {
     }
 }
 
+////
+// boolean
+
+////
+// number
+
+////
+// string
+
+////
+// if
+
+////
+// for
+
+////
+// while
+
+////
+// def
+
+////
+// assign
+
 parse_test!(
-    basic_op,
-    "2 + 2",
-    Stmt::Call("+".into(), vec![Stmt::Number(2), Stmt::Number(2)])
+    assign,
+    "a := 123",
+    Stmt::Assign("a".into(), Box::new(Stmt::Number(123)), false)
 );
+
+////
+// reassign
+
+parse_test!(
+    reassign,
+    "a = 123",
+    Stmt::Assign("a".into(), Box::new(Stmt::Number(123)), true)
+);
+
+////
+// call
 
 parse_test!(
     basic_call,
     "word(true)",
     Stmt::Call("word".into(), vec![Stmt::Bool(true)])
 );
+
+parse_test!(empty_call, "add()", Stmt::Call("add".into(), vec![]));
+
+parse_test!(
+    call_with_args,
+    "something(a,b, true ,123)",
+    Stmt::Call(
+        "something".into(),
+        vec![
+            Stmt::Word("a".into()),
+            Stmt::Word("b".into()),
+            Stmt::Bool(true),
+            Stmt::Number(123)
+        ]
+    )
+);
+
+////
+// op
+
+parse_test!(
+    basic_op,
+    "2 + 2",
+    Stmt::Call("+".into(), vec![Stmt::Number(2), Stmt::Number(2)])
+);
+
+////
+// tag

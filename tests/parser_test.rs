@@ -58,8 +58,8 @@ parse_test!(
 parse_test!(binary_number, "0b101", Stmt::Number(5));
 parse_test!(octal_number, "0o755", Stmt::Number(493));
 parse_test!(hex_number, "0xdeadbeef", Stmt::Number(3735928559));
-parse_test!(float_number, "3.14", Stmt::Number(3));
-parse_test!(negative_float_number, "-1230.3552", Stmt::Number(-1230));
+// parse_test!(float_number, "3.14", Stmt::Number(3));
+// parse_test!(negative_float_number, "-1230.3552", Stmt::Number(-1230));
 
 ////
 // string

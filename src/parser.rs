@@ -1,4 +1,4 @@
-use crate::{scan, Error, Expr, Result, Syntax, Tag, Token};
+use crate::{scan, Error, Result, Stmt, Syntax, Tag, Token};
 
 #[cfg(debug_assertions)]
 const STACK_SIZE: usize = 1000; // infinite loop protection
@@ -6,7 +6,7 @@ const STACK_SIZE: usize = 1000; // infinite loop protection
 #[derive(Debug)]
 pub struct Parser<'s, 't> {
     tokens: &'t [Token<'s>], // code
-    ast: Vec<Expr>,          // what we're building
+    ast: Vec<Stmt>,          // what we're building
     pos: usize,              // position in tokens vec
     tags: usize,             // open tags
 
@@ -14,7 +14,7 @@ pub struct Parser<'s, 't> {
     peeked: usize, // infinite loop protection hack
 }
 
-pub fn parse<'t>(tokens: &'t [Token]) -> Result<Vec<Expr>> {
+pub fn parse<'t>(tokens: &'t [Token]) -> Result<Vec<Stmt>> {
     let mut parser = Parser::from(tokens);
     parser.parse()?;
     Ok(parser.ast)
@@ -167,12 +167,12 @@ impl<'s, 't> Parser<'s, 't> {
     }
 
     /// Parse a number.
-    fn number(&mut self) -> Result<Expr> {
-        Ok(Expr::Number(self.expect(Syntax::Number)?.to_usize()?))
+    fn number(&mut self) -> Result<Stmt> {
+        Ok(Stmt::Number(self.expect(Syntax::Number)?.to_usize()?))
     }
 
     /// Parse a string.
-    fn string(&mut self) -> Result<Expr> {
+    fn string(&mut self) -> Result<Stmt> {
         let tok = self.next();
         let is_interpolated = match tok.kind {
             Syntax::String(is) => is,
@@ -186,8 +186,8 @@ impl<'s, 't> Parser<'s, 't> {
             while let Some(i) = lit[idx..].find('{') {
                 // check for escaped \{}
                 if i > 0 && lit[idx..].bytes().nth(i - 1).unwrap_or(b'0') == b'\\' {
-                    parts.push(Expr::String(lit[idx..i + idx - 1].into()));
-                    parts.push(Expr::String(lit[idx + i..i + idx + 1].into()));
+                    parts.push(Stmt::String(lit[idx..i + idx - 1].into()));
+                    parts.push(Stmt::String(lit[idx + i..i + idx + 1].into()));
                     idx += i + 1;
                     continue;
                 }
@@ -195,7 +195,7 @@ impl<'s, 't> Parser<'s, 't> {
                 {
                     let s = &lit[idx..i + idx];
                     if !s.is_empty() {
-                        parts.push(Expr::String(s.into()));
+                        parts.push(Stmt::String(s.into()));
                     }
                 }
                 idx += i + 1;
@@ -217,29 +217,29 @@ impl<'s, 't> Parser<'s, 't> {
                 idx = end + 1;
             }
             if idx < lit.len() {
-                parts.push(Expr::String(lit[idx..].into()));
+                parts.push(Stmt::String(lit[idx..].into()));
             }
             if parts.len() == 1 {
                 Ok(parts.remove(0))
             } else {
-                Ok(Expr::Call("concat".into(), parts))
+                Ok(Stmt::Call("concat".into(), parts))
             }
         } else {
-            Ok(Expr::String(lit))
+            Ok(Stmt::String(lit))
         }
     }
 
     /// Parse a word.
-    fn word(&mut self) -> Result<Expr> {
+    fn word(&mut self) -> Result<Stmt> {
         let word = self.expect(Syntax::Word)?;
         Ok(match word.literal() {
-            "true" | "false" => Expr::Bool(word.literal() == "true"),
-            _ => Expr::Word(word.to_string()),
+            "true" | "false" => Stmt::Bool(word.literal() == "true"),
+            _ => Stmt::Word(word.to_string()),
         })
     }
 
     /// Parse a function literal.
-    fn func(&mut self) -> Result<Expr> {
+    fn func(&mut self) -> Result<Stmt> {
         self.expect(Syntax::LParen)?;
         let mut args = vec![];
         while !self.peek_is(Syntax::RParen) {
@@ -251,11 +251,11 @@ impl<'s, 't> Parser<'s, 't> {
             }
         }
         self.expect(Syntax::RParen)?;
-        Ok(Expr::Fn(args, self.block()?))
+        Ok(Stmt::Fn(args, self.block()?))
     }
 
     /// Parse a code expression.
-    fn expr(&mut self) -> Result<Expr> {
+    fn expr(&mut self) -> Result<Stmt> {
         let left = self.atom()?;
 
         if self.peek_kind() != Syntax::Op {
@@ -269,16 +269,16 @@ impl<'s, 't> Parser<'s, 't> {
                 let reassign = lit == "=";
                 self.skip(); // skip op
                 let name = self.expect(Syntax::Word)?.to_string();
-                Ok(Expr::Assign(name, bx!(self.expr()?), reassign))
+                Ok(Stmt::Assign(name, bx!(self.expr()?), reassign))
             }
             "." => {
                 // convert word to str, ex: map.key => index(map, "key")
                 self.skip();
                 let right = self.expr()?;
-                if let Expr::Word(word) = right {
-                    Ok(Expr::Call("index".into(), vec![left, Expr::String(word)]))
+                if let Stmt::Word(word) = right {
+                    Ok(Stmt::Call("index".into(), vec![left, Stmt::String(word)]))
                 } else {
-                    Ok(Expr::Call("index".into(), vec![left, right]))
+                    Ok(Stmt::Call("index".into(), vec![left, right]))
                 }
             }
             _ => {
@@ -286,20 +286,20 @@ impl<'s, 't> Parser<'s, 't> {
                 if lit.bytes().last().filter(|b| *b == b'=').is_some() {
                     let op = left.to_string();
                     self.skip();
-                    Ok(Expr::Assign(
+                    Ok(Stmt::Assign(
                         op.clone(),
-                        bx!(Expr::Call(op, vec![left, self.expr()?])),
+                        bx!(Stmt::Call(op, vec![left, self.expr()?])),
                         true, // reassignment
                     ))
                 } else {
-                    Ok(Expr::Call(next.to_string(), vec![left, self.expr()?]))
+                    Ok(Stmt::Call(next.to_string(), vec![left, self.expr()?]))
                 }
             }
         }
     }
 
     /// Parse an indivisible unit, as the Ancient Greeks would say.
-    fn atom(&mut self) -> Result<Expr> {
+    fn atom(&mut self) -> Result<Stmt> {
         match self.peek_kind() {
             // Literal
             Syntax::String(..) => Ok(self.string()?),
@@ -330,7 +330,7 @@ impl<'s, 't> Parser<'s, 't> {
                 }
                 self.eat(Syntax::Semi);
                 self.expect(Syntax::RStaple)?;
-                Ok(Expr::List(list))
+                Ok(Stmt::List(list))
             }
             // Map
             Syntax::LCurly => {
@@ -357,14 +357,14 @@ impl<'s, 't> Parser<'s, 't> {
                 }
                 self.eat(Syntax::Semi);
                 self.expect(Syntax::RCurly)?;
-                Ok(Expr::Map(map))
+                Ok(Stmt::Map(map))
             }
             // Variables and function calls
             Syntax::Word => {
                 let word = self.word()?;
 
                 // check for "fn()" literal
-                if let Expr::Word(w) = &word {
+                if let Stmt::Word(w) = &word {
                     if w == "fn" {
                         return self.func();
                     }
@@ -394,7 +394,7 @@ impl<'s, 't> Parser<'s, 't> {
                             _ => return self.error(")"),
                         }
                     }
-                    Ok(Expr::Call(name, args))
+                    Ok(Stmt::Call(name, args))
                 }
             }
             _ => self.error("Atom"),
@@ -405,7 +405,7 @@ impl<'s, 't> Parser<'s, 't> {
     /// - to the next Dedent if the next() char is an Indent
     ///   or
     /// - to the next ; if the next() char isn't an Indent
-    fn block(&mut self) -> Result<Vec<Expr>> {
+    fn block(&mut self) -> Result<Vec<Stmt>> {
         let mut block = vec![];
         let mut indented = false;
 
@@ -435,7 +435,7 @@ impl<'s, 't> Parser<'s, 't> {
                     block.push(self.expr()?);
                 }
 
-                // Keyword or Expression
+                // Keyword or Stmtession
                 Syntax::Word => {
                     if let Some(word) = self.peek() {
                         match word.literal() {
@@ -445,9 +445,9 @@ impl<'s, 't> Parser<'s, 't> {
                             "return" => {
                                 self.skip();
                                 block.push(if self.peek_is(Syntax::Semi) {
-                                    Expr::Return(bx!(Expr::None))
+                                    Stmt::Return(bx!(Stmt::None))
                                 } else {
-                                    Expr::Return(bx!(self.expr()?))
+                                    Stmt::Return(bx!(self.expr()?))
                                 });
                                 self.expect(Syntax::Semi)?;
                             }
@@ -467,7 +467,7 @@ impl<'s, 't> Parser<'s, 't> {
                 // probably implicit text...
                 Syntax::Op => {
                     self.skip();
-                    block.push(Expr::Word(self.next().to_string()));
+                    block.push(Stmt::Word(self.next().to_string()));
                 }
 
                 // Unexpected
@@ -481,7 +481,7 @@ impl<'s, 't> Parser<'s, 't> {
     /// Parse a `for` statement:
     ///     for v in list
     ///     for k, v in map
-    fn for_expr(&mut self) -> Result<Expr> {
+    fn for_expr(&mut self) -> Result<Stmt> {
         self.expect(Syntax::Word)?; // for
         let mut key = None;
         let val;
@@ -504,11 +504,11 @@ impl<'s, 't> Parser<'s, 't> {
         let body = self.block()?;
 
         self.expect(Syntax::Dedent)?;
-        Ok(Expr::For(key, val, bx!(iter), body))
+        Ok(Stmt::For(key, val, bx!(iter), body))
     }
 
     /// Parse a function definition.
-    fn def_stmt(&mut self) -> Result<Expr> {
+    fn def_stmt(&mut self) -> Result<Stmt> {
         self.expect(Syntax::Word)?; // def
         let name = match self.peek_kind() {
             Syntax::Word | Syntax::Op => self.next(),
@@ -529,11 +529,11 @@ impl<'s, 't> Parser<'s, 't> {
         }
 
         let body = self.block()?;
-        Ok(Expr::Assign(name, bx!(Expr::Fn(args, body)), false))
+        Ok(Stmt::Assign(name, bx!(Stmt::Fn(args, body)), false))
     }
 
     /// Parse an if statement.
-    fn if_expr(&mut self) -> Result<Expr> {
+    fn if_expr(&mut self) -> Result<Stmt> {
         self.expect(Syntax::Word)?; // if
         let mut conds = vec![];
         let test = self.expr()?;
@@ -544,7 +544,7 @@ impl<'s, 't> Parser<'s, 't> {
                 if next.literal() == "else" {
                     self.skip(); // skip dedent
                     self.skip(); // skip else
-                    let mut test = Expr::Bool(true);
+                    let mut test = Stmt::Bool(true);
                     if let Some(word) = self.peek() {
                         if word.literal() == "if" {
                             self.skip();
@@ -563,19 +563,19 @@ impl<'s, 't> Parser<'s, 't> {
             break;
         }
         self.expect(Syntax::Dedent)?;
-        Ok(Expr::If(conds))
+        Ok(Stmt::If(conds))
     }
 
     /// Parse a <tag> and its contents or a </tag>.
-    fn tag(&mut self) -> Result<Expr> {
+    fn tag(&mut self) -> Result<Stmt> {
         if self.peek2().filter(|p| p.literal() == "/").is_some() {
             self.close_tag()?;
-            return Ok(Expr::None);
+            return Ok(Stmt::None);
         }
 
         let mut tag = self.open_tag()?;
         if tag.is_closed() {
-            return Ok(Expr::Tag(tag));
+            return Ok(Stmt::Tag(tag));
         }
 
         tag.set_body(self.block()?);
@@ -597,7 +597,7 @@ impl<'s, 't> Parser<'s, 't> {
             _ => self.close_tag()?,
         }
 
-        Ok(Expr::Tag(tag))
+        Ok(Stmt::Tag(tag))
     }
 
     /// Parse just a closing tag, starting after the <
@@ -624,7 +624,7 @@ impl<'s, 't> Parser<'s, 't> {
         self.tags += 1;
         self.expect(Syntax::LessThan)?;
         let mut tag = Tag::new(match self.peek_kind() {
-            Syntax::Op => Expr::String("div".into()),
+            Syntax::Op => Stmt::String("div".into()),
             _ => self.attr()?,
         });
 
@@ -644,7 +644,7 @@ impl<'s, 't> Parser<'s, 't> {
                         if self.peek_lit("=") {
                             self.next();
                             let cond = self.expr()?;
-                            tag.set_id(Expr::Call("when".into(), vec![cond, id]));
+                            tag.set_id(Stmt::Call("when".into(), vec![cond, id]));
                         } else {
                             tag.set_id(id);
                         }
@@ -654,22 +654,22 @@ impl<'s, 't> Parser<'s, 't> {
                         if self.peek_lit("=") {
                             self.next();
                             let cond = self.expr()?;
-                            tag.add_class(Expr::Call("when".into(), vec![cond, class]));
+                            tag.add_class(Stmt::Call("when".into(), vec![cond, class]));
                         } else {
                             tag.add_class(class);
                         }
                     }
                     "@" | ":" => {
                         let attr_name = if next.literal() == "@" {
-                            Expr::String("name".into())
+                            Stmt::String("name".into())
                         } else {
-                            Expr::String("type".into())
+                            Stmt::String("type".into())
                         };
                         let expr = self.attr()?;
                         if self.peek_lit("=") {
                             self.next();
                             let cond = self.expr()?;
-                            tag.add_attr(attr_name, Expr::Call("when".into(), vec![cond, expr]));
+                            tag.add_attr(attr_name, Stmt::Call("when".into(), vec![cond, expr]));
                         } else {
                             tag.add_attr(attr_name.into(), expr);
                         }
@@ -681,7 +681,7 @@ impl<'s, 't> Parser<'s, 't> {
                     let name = self.attr()?;
                     // single word attributes, like `defer`
                     if !self.peek_lit("=") {
-                        tag.add_attr(name, Expr::Bool(true));
+                        tag.add_attr(name, Stmt::Bool(true));
                         continue;
                     }
                     self.expect_op("=")?;
@@ -691,7 +691,7 @@ impl<'s, 't> Parser<'s, 't> {
                         }
                         Syntax::JS => tag.add_attr(
                             name,
-                            Expr::String(format!(
+                            Stmt::String(format!(
                                 "(function(e){{ {} }})(event);",
                                 self.next().to_string()
                             )),
@@ -708,7 +708,7 @@ impl<'s, 't> Parser<'s, 't> {
     }
 
     /// Parse a tag attribute, which may have {interpolation}.
-    fn attr(&mut self) -> Result<Expr> {
+    fn attr(&mut self) -> Result<Stmt> {
         self.string()
     }
 }

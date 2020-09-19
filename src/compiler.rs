@@ -1,5 +1,5 @@
 use {
-    crate::{Expr, Result, Tag, Value},
+    crate::{Result, Stmt, Tag, Value},
     std::collections::HashMap,
 };
 
@@ -94,7 +94,7 @@ pub enum Code {
     EndLoop,
 }
 
-pub fn compile(ast: &[Expr]) -> Result<Vec<Code>> {
+pub fn compile(ast: &[Stmt]) -> Result<Vec<Code>> {
     let mut compiler = Compiler::new();
     compiler.compile(ast.into())
 }
@@ -114,7 +114,7 @@ impl Compiler {
         format!("{}_{}", s, label)
     }
 
-    fn compile(&mut self, ast: &[Expr]) -> Result<Vec<Code>> {
+    fn compile(&mut self, ast: &[Stmt]) -> Result<Vec<Code>> {
         let mut codes = vec![];
         for expr in ast {
             let mut ex = self.compile_stmt(expr)?;
@@ -124,7 +124,7 @@ impl Compiler {
         self.reconcile_labels(codes)
     }
 
-    fn compile_stmts(&mut self, exprs: &[Expr]) -> Result<Vec<Code>> {
+    fn compile_stmts(&mut self, exprs: &[Stmt]) -> Result<Vec<Code>> {
         let mut out = vec![];
         for expr in exprs {
             let mut e = self.compile_stmt(expr)?;
@@ -133,8 +133,8 @@ impl Compiler {
         Ok(out)
     }
 
-    fn compile_stmt(&mut self, expr: &Expr) -> Result<Vec<Code>> {
-        use Expr::*;
+    fn compile_stmt(&mut self, expr: &Stmt) -> Result<Vec<Code>> {
+        use Stmt::*;
 
         Ok(match expr {
             None => vec![],
@@ -156,7 +156,7 @@ impl Compiler {
                 _ => vec![Code::PrintVar(word.clone())],
             },
             Return(ex) => {
-                if let Expr::None = **ex {
+                if let Stmt::None = **ex {
                     vec![Code::Return]
                 } else {
                     let mut inst = self.compile_expr(ex)?;
@@ -190,7 +190,7 @@ impl Compiler {
                 inst
             }
             // key, val, iter, body
-            // Option<String>, String, Box<Expr>, Vec<Expr>
+            // Option<String>, String, Box<Stmt>, Vec<Stmt>
             For(key, val, iter, body) => {
                 let mut inst = vec![];
                 let start_label = self.label("loop_start");
@@ -233,7 +233,7 @@ impl Compiler {
         inst.push(Code::Push(tag.closed.into())); // CLOSED?
 
         // need to know if it's a <form>
-        let is_form = if let Expr::String(s) = &*tag.tag {
+        let is_form = if let Stmt::String(s) = &*tag.tag {
             s == "form"
         } else {
             false
@@ -257,7 +257,7 @@ impl Compiler {
         for (name, val) in &tag.attrs {
             attr_len += 1;
             if is_form {
-                if let Expr::String(s) = name {
+                if let Stmt::String(s) = name {
                     if s == "GET" || s == "POST" {
                         attr_len += 1;
                         inst.push(Code::Push("method".into()));
@@ -274,7 +274,7 @@ impl Compiler {
         }
 
         inst.push(Code::Tag(
-            attr_len + tag.classes.len() + if let Expr::None = &*tag.id { 0 } else { 1 },
+            attr_len + tag.classes.len() + if let Stmt::None = &*tag.id { 0 } else { 1 },
         ));
 
         if !tag.closed {
@@ -287,8 +287,8 @@ impl Compiler {
         Ok(inst)
     }
 
-    fn compile_expr(&mut self, expr: &Expr) -> Result<Vec<Code>> {
-        use Expr::*;
+    fn compile_expr(&mut self, expr: &Stmt) -> Result<Vec<Code>> {
+        use Stmt::*;
 
         Ok(match expr {
             None => vec![],

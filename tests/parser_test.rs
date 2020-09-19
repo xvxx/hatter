@@ -1,40 +1,32 @@
-use hatter::{parse, scan, Expr};
+use hatter::{parse, scan, Stmt};
 
-fn print_nodes(i: usize, nodes: &[Expr]) {
+fn print_nodes(i: usize, nodes: &[Stmt]) {
     println!("Computed nodes:");
-    for (x, token) in nodes.iter().enumerate() {
+    for (x, stmt) in nodes.iter().enumerate() {
         let (bold, clear) = if x == i {
             ("\x1b[1;91m", "\x1b[0m")
         } else {
             ("", "")
         };
-        println!("  {}({:?}, {}){}", bold, token.kind, token.literal(), clear);
+        println!("  {}{:?}{}", bold, stmt, clear);
     }
     println!("        left=want, right=got");
 }
 
 macro_rules! parse_test {
-    ($name:ident, $code:expr, $($kind:expr,)+) => {
+    ($name:ident, $code:expr, $($stmt:expr,)+) => {
         #[test]
         fn $name() {
-            let nodes = scan($code).and_then(|t| parse(t)).unwrap();
+            let nodes = scan($code).and_then(|t| parse(&t)).unwrap();
             let mut i = 0;
             $(
                 let node = nodes.get(i).unwrap();
-                if node.kind != $kind {
+                if node == &$stmt {
                     print_nodes(i, &nodes);
                 }
-                assert_eq!($kind, node.kind);
+                assert_eq!(&$stmt, node);
                 { i += 1; }
             )+
-            let mut nodes = nodes;
-            while let Some(tok) = nodes.iter().last() {
-                if tok.kind == Semi {
-                    nodes.pop();
-                } else {
-                    break;
-                }
-            }
             if i != nodes.len() {
                 print_nodes(i, &nodes);
             }
@@ -45,3 +37,15 @@ macro_rules! parse_test {
         parse_test!($name, $code, $($kind,)+);
     }
 }
+
+parse_test!(
+    basic_op,
+    "2 + 2",
+    Stmt::Call("+".into(), vec![Stmt::Number(2), Stmt::Number(2)])
+);
+
+parse_test!(
+    basic_call,
+    "word(true)",
+    Stmt::Call("word".into(), vec![Stmt::Bool(true)])
+);

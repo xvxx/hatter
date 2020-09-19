@@ -1,5 +1,5 @@
 use {
-    hatter::{compile, parse, scan, vm, Code, Expr, Syntax, Token},
+    hatter::{compile, parse, scan, vm, Code, Stmt, Syntax, Token},
     std::{
         env,
         io::{self, Write},
@@ -127,7 +127,7 @@ fn print_tokens(mut tokens: Vec<Token>) {
     }
 }
 
-fn print_ast(ast: &[Expr]) {
+fn print_ast(ast: &[Stmt]) {
     for expr in ast {
         println!("{:#?}", expr);
     }

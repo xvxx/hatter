@@ -17,7 +17,7 @@ macro_rules! rc {
 mod error;
 mod builtins;
 mod compiler;
-mod expr;
+mod stmt;
 mod lexer;
 mod parser;
 mod syntax;
@@ -33,7 +33,7 @@ pub use {
     builtins::builtins,
     compiler::{compile, Code},
     error::{print_error, Error},
-    expr::{Expr, Tag},
+    stmt::{Stmt, Tag},
     lexer::scan,
     parser::parse,
     syntax::{Syntax, SyntaxTrait},

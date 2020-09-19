@@ -87,11 +87,7 @@ scan_test!(
     String(true)
 );
 scan_test!(single_quote_string, r#"'single quote'"#, String(false));
-scan_test!(
-    escaped_single_quote_string,
-    r#"'what\'s up'"#,
-    String(false)
-);
+scan_test!(escaped_single_quote_string, "'what\\'s up'", String(false));
 scan_test!(grave_string, r#"`one two three`"#, String(false));
 scan_test!(triple_string, r#" """one two three""" "#, String(false));
 scan_test!(

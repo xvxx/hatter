@@ -81,8 +81,8 @@ parse_test!(
 );
 parse_test!(
     escaped_single_quote_string,
-    "'what\'s up'",
-    Stmt::String("what's up".into())
+    r#"'what\'s up'"#,
+    Stmt::String("what\\'s up".into())
 );
 parse_test!(
     grave_string,
@@ -117,14 +117,145 @@ three
 ////
 // if
 
+parse_test!(
+    basic_if,
+    r#"
+if true
+    "something"
+"#,
+    Stmt::None
+);
+
+parse_test!(
+    basic_if_else,
+    r#"
+if true
+    "something"
+else
+    "something else"
+"#,
+    Stmt::None
+);
+
+parse_test!(
+    basic_if_with_elses,
+    r#"
+if i > 0
+    "greater"
+else if i < 0
+    "lesser"
+else
+    "cero"
+"#,
+    Stmt::None
+);
+
 ////
 // for
+
+parse_test!(
+    basic_for,
+    r#"
+for v in abc
+    print(v)
+"#,
+    Stmt::None
+);
+
+parse_test!(
+    basic_for_with_index,
+    r#"
+for i, v in abc
+    print("{i}: {v}")
+"#,
+    Stmt::None
+);
+
+parse_test!(
+    basic_break,
+    r#"
+for i, v in abc
+    print("{i}: {v}")
+    if i > 20
+        break
+"#,
+    Stmt::None
+);
+
+parse_test!(
+    basic_continue,
+    r#"
+for i, v in abc
+    if i < 20
+        continue
+    print("{i}: {v}")
+"#,
+    Stmt::None
+);
+
+
+parse_test!(
+    basic_for_list,
+    r#"
+for x in [1,2,3]
+    print(x * 10)
+"#,
+    Stmt::None
+);
+
+parse_test!(
+    basic_for_map,
+    r#"
+for k, v in { first: 'Bilbo', last: 'Swaggins' }
+    print("{k}: {v}"
+"#,
+    Stmt::None
+);
 
 ////
 // while
 
+parse_test!(
+    basic_while,
+    r#"
+while i > 0
+    do-something()
+    then-do-something-else()
+"#,
+    Stmt::None
+);
+
 ////
 // def
+
+parse_test!(
+    basic_def,
+    r#"
+def greet(name)
+    print("Hi there, {name}!")
+"#,
+    Stmt::None
+);
+
+parse_test!(
+    basic_def_with_args,
+    r#"
+def greet(title, name)
+    print("Hi there, {title}. {name}!")
+"#,
+    Stmt::None
+);
+
+parse_test!(
+    def_op,
+    r#"
+def <<(a, b)
+    if type(a) == 'list'
+        append(a, b)
+    return a
+"#,
+    Stmt::None
+);
 
 ////
 // assign

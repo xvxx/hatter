@@ -193,7 +193,6 @@ for i, v in abc
     Stmt::None
 );
 
-
 parse_test!(
     basic_for_list,
     r#"
@@ -327,5 +326,33 @@ parse_test!(
     Stmt::Call("+".into(), vec![Stmt::Number(2), Stmt::Number(2)])
 );
 
+parse_test!(chained_ops, "2 + 20 * 10 - 5", Stmt::None,);
+
 ////
 // tag
+
+parse_test!(basic_tag, "<some-tag></some-tag>", Stmt::None);
+parse_test!(basic_closed_tag, "<some-tag/>", Stmt::None);
+
+// TODO:
+
+// <div.with.many.classes> My <em.big>my</>!
+
+// <form GET="/search">
+//   <input:text@query/>
+//   <input:submit/>
+
+// <form POST="/info">
+//   <h3> Your Information
+//    <label> <input@name:text placeholder="Name..."/>
+//    <label> <input@age:text placeholder="Age..."/>
+//    <br/>
+//    <input:submit/>
+//    <input:reset/>
+
+// <ul#menu>
+//     <li.item#burger> Burger
+//     <li.item#fries> Fries
+//     <li.item#milkshake> Milkshake
+
+// <#my-id> Just some <.bold>cool</> "content."

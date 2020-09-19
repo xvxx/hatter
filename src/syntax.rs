@@ -41,7 +41,10 @@ impl SyntaxTrait for char {
 
     /// Operator?
     fn is_op(&self) -> bool {
-        !self.is_whitespace() && !self.is_alphanumeric() && !self.is_bracket() && *self != '#'
+        !self.is_whitespace()
+            && !self.is_alphanumeric()
+            && !self.is_bracket()
+            && !matches!(*self, '#' | '"' | '`' | '\'')
     }
 
     /// ( ) [ ] { }

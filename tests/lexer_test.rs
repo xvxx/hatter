@@ -74,14 +74,18 @@ scan_test!(
     "456\n# Something something.\n789",
     Number,
     Semi,
-    Semi,
     Number,
 );
 
 ////
 // Strings
 
-scan_test!(basic_string, r#""just a regular string""#, String(true));
+scan_test!(basic_string, r#""just a regular string""#, String(false));
+scan_test!(
+    interpolated_string,
+    r#""just checking that {2 + 2} = 4""#,
+    String(true)
+);
 scan_test!(single_quote_string, r#"'single quote'"#, String(false));
 scan_test!(
     escaped_single_quote_string,

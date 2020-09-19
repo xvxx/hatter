@@ -341,11 +341,12 @@ impl<'s> Lexer<'s> {
             if c == delimiter && prev != '\\' {
                 if !triple {
                     let len = self.pos - start - 1;
+                    let lit = &self.source[start..=start + len];
                     self.tokens.push(Token::new(
-                        Syntax::String(delimiter == '"'),
+                        Syntax::String(delimiter == '"' && lit.contains('{')),
                         start,
                         len,
-                        &self.source[start..=start + len],
+                        lit,
                     ));
                     return Ok(Syntax::None);
                 } else if self.peek_is(delimiter) {

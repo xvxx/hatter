@@ -41,8 +41,25 @@ macro_rules! parse_test {
 ////
 // boolean
 
+parse_test!(true_bool, "true", Stmt::Bool(true));
+parse_test!(false_bool, "false", Stmt::Bool(false));
+
 ////
 // number
+
+parse_test!(positive_number, "100", Stmt::Number(100));
+parse_test!(negative_number, "-400", Stmt::Number(-400));
+parse_test!(underscore_number, "1_422_200", Stmt::Number(1_422_200));
+parse_test!(
+    negative_underscore_number,
+    "-1_422_200",
+    Stmt::Number(-1_422_200)
+);
+parse_test!(binary_number, "0b101", Stmt::Number(5));
+parse_test!(octal_number, "0o755", Stmt::Number(493));
+parse_test!(hex_number, "0xdeadbeef", Stmt::Number(3735928559));
+parse_test!(float_number, "3.14", Stmt::Number(3));
+parse_test!(negative_float_number, "-1230.3552", Stmt::Number(-1230));
 
 ////
 // string

@@ -444,7 +444,7 @@ def <<(a, b)
                         "==".into(),
                         vec![
                             Stmt::Call("type".into(), vec![Stmt::Word("a".into())]),
-                            Stmt::Word("list".into())
+                            Stmt::String("list".into())
                         ]
                     ),
                     vec![Stmt::Call(

@@ -72,7 +72,14 @@ parse_test!(
 parse_test!(
     interpolated_string,
     r#""just checking that {2 + 2} = 4""#,
-    Stmt::String("just checking that {2 + 2} = 4".into())
+    Stmt::Call(
+        "concat".into(),
+        vec![
+            Stmt::String("just checking that ".into()),
+            Stmt::Call("+".into(), vec![Stmt::Number(2), Stmt::Number(2)]),
+            Stmt::String(" = 4".into()),
+        ]
+    )
 );
 parse_test!(
     single_quote_string,
@@ -165,10 +172,7 @@ else
             Stmt::Call("<".into(), vec![Stmt::Word("i".into()), Stmt::Number(0)]),
             vec![Stmt::String("lesser".into())]
         ),
-        (
-            Stmt::Bool(true),
-            vec![Stmt::String("something else".into())]
-        ),
+        (Stmt::Bool(true), vec![Stmt::String("cero".into())]),
     ])
 );
 
@@ -305,7 +309,7 @@ parse_test!(
     basic_for_map,
     r#"
 for k, v in { first: 'Bilbo', last: 'Swaggins' }
-    print("{k}: {v}"
+    print("{k}: {v}")
 "#,
     Stmt::For(
         Some("k".into()),

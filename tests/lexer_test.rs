@@ -396,7 +396,7 @@ scan_test!(
     Word,
     Word,
     Op,
-    String(true),
+    Word,
     RCaret
 );
 scan_test!(
@@ -594,4 +594,43 @@ if true # this should work
     RParen,
     Semi,
     Dedent,
+);
+
+#[rustfmt::skip]
+scan_test!(basic_indented_tag, r#"
+<ul>
+    <li> Kewl
+    <li> Very!
+"#,
+LCaret, Word, RCaret,
+    Indent, LCaret, Word, RCaret, Word, Semi,
+    LCaret, Word, RCaret, Word, Op, Semi,
+Dedent
+);
+
+#[rustfmt::skip]
+scan_test!(basic_nested_tag, r#"
+<main> <ul>
+    <li> Kewl <b> beans
+    <li> Very!
+"#,
+LCaret, Word, RCaret,
+LCaret, Word, RCaret,
+    Indent, LCaret, Word, RCaret, Word, LCaret, Word, RCaret, Word, Semi,
+    LCaret, Word, RCaret, Word, Op, Semi,
+Dedent
+);
+
+#[rustfmt::skip]
+scan_test!(nested_tag_and_code, r#"
+<main> <ul> for bean in beans
+    <li> Kewl <b> bean
+    <li> Very!
+"#,
+LCaret, Word, RCaret,
+LCaret, Word, RCaret,
+Word, Word, Word, Word,
+    Indent, LCaret, Word, RCaret, Word, LCaret, Word, RCaret, Word, Semi,
+    LCaret, Word, RCaret, Word, Op, Semi,
+Dedent
 );

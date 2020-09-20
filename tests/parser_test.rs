@@ -501,13 +501,29 @@ parse_test!(
     Stmt::Call("+".into(), vec![Stmt::Number(2), Stmt::Number(2)])
 );
 
-parse_test!(chained_ops, "2 + 20 * 10 - 5", Stmt::None,);
+parse_test!(
+    chained_ops,
+    "2 + 20 * 10 - 5",
+    Stmt::Call(
+        "-".into(),
+        vec![
+            Stmt::Call(
+                "+".into(),
+                vec![
+                    Stmt::Number(2),
+                    Stmt::Call("*".into(), vec![Stmt::Number(20), Stmt::Number(10),])
+                ]
+            ),
+            Stmt::Number(5)
+        ]
+    )
+);
 
 ////
 // tag
 
-parse_test!(basic_tag, "<some-tag></some-tag>", Stmt::None);
-parse_test!(basic_closed_tag, "<some-tag/>", Stmt::None);
+// parse_test!(basic_tag, "<some-tag></some-tag>", Stmt::None);
+// parse_test!(basic_closed_tag, "<some-tag/>", Stmt::None);
 
 // TODO:
 

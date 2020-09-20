@@ -260,7 +260,7 @@ for i, v in abc
         vec![
             Stmt::If(vec![(
                 Stmt::Call("<".into(), vec![Stmt::Word("i".into()), Stmt::Number(20)]),
-                vec![Stmt::Word("break".into())]
+                vec![Stmt::Word("continue".into())]
             )]),
             Stmt::Call(
                 "print".into(),

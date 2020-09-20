@@ -295,7 +295,10 @@ impl<'s, 't> Parser<'s, 't> {
                         true, // reassignment
                     ))
                 } else {
-                    Ok(Stmt::Call(next.to_string(), vec![left, self.expr()?]))
+                    Ok(Stmt::Call(
+                        self.next().to_string(),
+                        vec![left, self.expr()?],
+                    ))
                 }
             }
         }

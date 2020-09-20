@@ -209,6 +209,230 @@ scan_test!(
 );
 
 ////
+// Tag
+
+scan_test!(basic_tag, "<b> Hey there", LCaret, Word, RCaret, Word, Word);
+scan_test!(
+    self_closing_tag,
+    "<end/> ok",
+    LCaret,
+    Word,
+    Op,
+    RCaret,
+    Word
+);
+scan_test!(
+    nested_tag,
+    "<b> Hey <i> there",
+    LCaret,
+    Word,
+    RCaret,
+    Word,
+    LCaret,
+    Word,
+    RCaret,
+    Word
+);
+scan_test!(
+    close_shortcut,
+    "<b> Hey <i> there </> fren ",
+    LCaret,
+    Word,
+    RCaret,
+    Word,
+    LCaret,
+    Word,
+    RCaret,
+    Word,
+    LCaret,
+    Op,
+    RCaret,
+    Word
+);
+scan_test!(
+    basic_id_shortcut,
+    "<b#shout> Hey yo",
+    LCaret,
+    Word,
+    Op,
+    Word,
+    RCaret,
+    Word,
+    Word
+);
+scan_test!(
+    basic_class_shortcut,
+    "<span.clear> Welcome ",
+    LCaret,
+    Word,
+    Op,
+    Word,
+    RCaret,
+    Word
+);
+scan_test!(
+    basic_classes,
+    "<div.main.markdown> Yada yada... ",
+    LCaret,
+    Word,
+    Op,
+    Word,
+    Op,
+    Word,
+    RCaret,
+    Word,
+    Word,
+    Op
+);
+scan_test!(
+    basic_name_shortcut,
+    "<input@text/>",
+    LCaret,
+    Word,
+    Op,
+    Word,
+    Op,
+    RCaret
+);
+scan_test!(
+    basic_type_shortcut,
+    "<input:submit/> ",
+    LCaret,
+    Word,
+    Colon,
+    Word,
+    Op,
+    RCaret
+);
+scan_test!(
+    mixed_shortcuts,
+    "<div#main.markdown/> ",
+    LCaret,
+    Word,
+    Op,
+    Word,
+    Op,
+    Word,
+    Op,
+    RCaret
+);
+scan_test!(
+    mixed_input_shortcuts,
+    "<input#focused:text@search  /> ",
+    LCaret,
+    Word,
+    Op,
+    Word,
+    Colon,
+    Word,
+    Op,
+    Word,
+    Op,
+    RCaret
+);
+scan_test!(
+    basic_attribute,
+    r#"<div data-id="45">"#,
+    LCaret,
+    Word,
+    Word,
+    Op,
+    String(false),
+    RCaret
+);
+scan_test!(
+    basic_attributes,
+    r#"<input name="thing" placeholder="Other..."/>"#,
+    LCaret,
+    Word,
+    Word,
+    Op,
+    String(false),
+    Word,
+    Op,
+    String(false),
+    Op,
+    RCaret,
+);
+scan_test!(
+    js_attributes,
+    "<div onclick=(alert('lol'))>Click me",
+    LCaret,
+    Word,
+    Word,
+    Op,
+    JS,
+    RCaret,
+    Word,
+    Word
+);
+scan_test!(
+    simple_code_attributes,
+    "<div data-id=page.id>",
+    LCaret,
+    Word,
+    Word,
+    Op,
+    Word,
+    Op,
+    Word,
+    RCaret
+);
+scan_test!(
+    shorthand_conditionals,
+    "<div#id=has-id>",
+    LCaret,
+    Word,
+    Op,
+    Word,
+    Op,
+    Word,
+    RCaret,
+);
+scan_test!(
+    code_expr_attributes,
+    "<div data-value={2 + 3}>",
+    LCaret,
+    Word,
+    Word,
+    Op,
+    String(true),
+    RCaret
+);
+scan_test!(
+    tag_everything,
+    "<div#id.class1.class-2=is-it? :why-not @sure onclick=(alert(`it's ${2 + 2}`)) data-id=123 data-{value}=compute(value) />",
+    LCaret,
+    Word,
+    Op,
+    Word,
+    Op,
+    Word,
+    Op,
+    Word,
+    Op,
+    Word,
+    Colon,
+    Word,
+    Op,
+    Word,
+    Word,
+    Op,
+    JS,
+    Word,
+    Op,
+    Number,
+    Word,
+    Op,
+    Word,
+    LParen,
+    Word,
+    RParen,
+    Op,
+    RCaret
+);
+
+////
 // Indents
 
 #[rustfmt::skip]

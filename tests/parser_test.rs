@@ -176,6 +176,30 @@ else
     ])
 );
 
+parse_test!(
+    and_exprs,
+    "true and false",
+    Stmt::Call("and".into(), vec![Stmt::Bool(true), Stmt::Bool(false)])
+);
+
+parse_test!(
+    or_exprs,
+    "true or false",
+    Stmt::Call("or".into(), vec![Stmt::Bool(true), Stmt::Bool(false)])
+);
+
+parse_test!(
+    and_or_exprs,
+    "true and false or false",
+    Stmt::Call(
+        "and".into(),
+        vec![
+            Stmt::Bool(true),
+            Stmt::Call("or".into(), vec![Stmt::Bool(false), Stmt::Bool(false)])
+        ]
+    )
+);
+
 ////
 // for
 
@@ -503,6 +527,18 @@ parse_test!(
     basic_op,
     "2 + 2",
     Stmt::Call("+".into(), vec![Stmt::Number(2), Stmt::Number(2)])
+);
+
+parse_test!(
+    eq_op,
+    "2 == 2",
+    Stmt::Call("==".into(), vec![Stmt::Number(2), Stmt::Number(2)])
+);
+
+parse_test!(
+    neq_op,
+    "2 != 2",
+    Stmt::Call("!=".into(), vec![Stmt::Number(2), Stmt::Number(2)])
 );
 
 parse_test!(

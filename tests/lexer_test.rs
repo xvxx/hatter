@@ -137,6 +137,7 @@ scan_test!(simple_op, "+", Op);
 scan_test!(lonley_dash_is_an_op, "-", Op);
 scan_test!(two_char_op, ":=", Op);
 scan_test!(two_char_op2, "==", Op);
+scan_test!(two_char_op3, "!=", Op);
 scan_test!(gt_op, ">", Op);
 scan_test!(random_op, "*@$%^$*", Op);
 scan_test!(dot_op, ".", Op);

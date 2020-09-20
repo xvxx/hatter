@@ -286,7 +286,9 @@ impl<'s, 't> Parser<'s, 't> {
             }
             _ => {
                 // check for += and friends
-                if lit.bytes().last().filter(|b| *b == b'=').is_some() {
+                if !matches!(lit, "==" | "!=")
+                    && lit.bytes().last().filter(|b| *b == b'=').is_some()
+                {
                     let op = left.to_string();
                     self.skip();
                     Ok(Stmt::Assign(

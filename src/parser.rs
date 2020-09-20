@@ -329,9 +329,10 @@ impl<'s, 't> Parser<'s, 't> {
                 while !self.peek_eof() && !self.peek_is(Syntax::RStaple) {
                     self.eat(Syntax::Semi);
                     list.push(self.expr()?);
-                    self.eat(Syntax::Semi);
                     if self.peek_is(Syntax::RStaple) {
                         break;
+                    } else if self.peek_is(Syntax::Semi) {
+                        self.eat(Syntax::Semi);
                     } else {
                         self.expect(Syntax::Comma)?;
                     }

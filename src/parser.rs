@@ -327,10 +327,10 @@ impl<'s, 't> Parser<'s, 't> {
                 self.eat(Syntax::Semi);
                 let mut list = vec![];
                 while !self.peek_eof() && !self.peek_is(Syntax::RStaple) {
+                    self.eat(Syntax::Semi);
                     list.push(self.expr()?);
-                    if self.peek_is(Syntax::Semi) {
-                        self.skip();
-                    } else if self.peek_is(Syntax::RStaple) {
+                    self.eat(Syntax::Semi);
+                    if self.peek_is(Syntax::RStaple) {
                         break;
                     } else {
                         self.expect(Syntax::Comma)?;
@@ -346,6 +346,7 @@ impl<'s, 't> Parser<'s, 't> {
                 self.eat(Syntax::Semi);
                 let mut map = vec![];
                 while !self.peek_eof() && !self.peek_is(Syntax::RCurly) {
+                    self.eat(Syntax::Semi);
                     let key = match self.peek_kind() {
                         Syntax::Word | Syntax::String(..) | Syntax::Number => {
                             self.next().to_string()
@@ -353,10 +354,11 @@ impl<'s, 't> Parser<'s, 't> {
                         _ => return self.error("String key name"),
                     };
                     self.expect(Syntax::Colon)?;
+                    self.eat(Syntax::Semi);
                     let val = self.expr()?;
                     map.push((key, val));
                     if self.peek_is(Syntax::Semi) {
-                        self.skip();
+                        self.eat(Syntax::Semi);
                     } else if self.peek_is(Syntax::RCurly) {
                         break;
                     } else {

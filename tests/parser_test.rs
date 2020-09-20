@@ -122,6 +122,73 @@ three
 );
 
 ////
+// list
+
+parse_test!(
+    basic_list,
+    "[1,2,3]",
+    Stmt::List(vec![Stmt::Number(1), Stmt::Number(2), Stmt::Number(3)])
+);
+
+parse_test!(
+    lists_ignore_whitespace,
+    "[
+        1,
+2,
+        3
+                ]",
+    Stmt::List(vec![Stmt::Number(1), Stmt::Number(2), Stmt::Number(3)])
+);
+
+parse_test!(
+    lists_treat_newlines_as_optional_commas,
+    "
+[
+    1
+    2
+    3
+]",
+    Stmt::List(vec![Stmt::Number(1), Stmt::Number(2), Stmt::Number(3)])
+);
+
+parse_test!(
+    string_list,
+    "[ 'one',
+    'two','three']",
+    Stmt::List(vec![
+        Stmt::String("one".into()),
+        Stmt::String("two".into()),
+        Stmt::String("three".into())
+    ])
+);
+
+////
+// map
+
+parse_test!(
+    basic_map,
+    "{ one: 1, two: 2, three: 3 }",
+    Stmt::Map(vec![
+        ("one".to_string(), Stmt::Number(1)),
+        ("two".to_string(), Stmt::Number(2)),
+        ("three".to_string(), Stmt::Number(3))
+    ])
+);
+
+parse_test!(
+    basic_map_spanning_newlines,
+    "{
+        one: 1
+                two: 2, three:
+        3}",
+    Stmt::Map(vec![
+        ("one".to_string(), Stmt::Number(1)),
+        ("two".to_string(), Stmt::Number(2)),
+        ("three".to_string(), Stmt::Number(3))
+    ])
+);
+
+////
 // if
 
 parse_test!(

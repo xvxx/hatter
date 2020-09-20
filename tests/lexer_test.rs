@@ -310,3 +310,64 @@ else
         Indent, String(false), Semi,
     Dedent, String(false), Semi, String(false)
 );
+
+scan_test!(
+    ignore_whitespace_in_parens,
+    r#"
+add(
+    1,
+    2,    3
+)
+"#,
+    Word,
+    LParen,
+    Semi,
+    Number,
+    Comma,
+    Semi,
+    Number,
+    Comma,
+    Number,
+    Semi,
+    RParen,
+);
+
+scan_test!(
+    newlines_are_commas_in_fn_calls,
+    r#"
+add(
+    1
+    2,    3
+    4
+)
+"#,
+    Word,
+    LParen,
+    Semi,
+    Number,
+    Semi,
+    Number,
+    Comma,
+    Number,
+    Semi,
+    Number,
+    Semi,
+    RParen,
+);
+
+scan_test!(
+    comments_dont_eat_indents,
+    r#"
+if true # this should work
+    print("Told ya")
+"#,
+    Word,
+    Word,
+    Indent,
+    Word,
+    LParen,
+    String(false),
+    RParen,
+    Semi,
+    Dedent,
+);

@@ -393,7 +393,7 @@ impl<'s, 't> Parser<'s, 't> {
                                 self.skip();
                                 break;
                             }
-                            Syntax::Comma => self.skip(),
+                            Syntax::Comma | Syntax::Semi => self.skip(),
                             Syntax::LParen
                             | Syntax::LCurly
                             | Syntax::LStaple

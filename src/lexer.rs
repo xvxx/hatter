@@ -18,9 +18,8 @@ struct Lexer<'s> {
 #[derive(Debug, PartialEq)]
 enum Mode {
     None,      // Regular
-    Container, // [List] or {Map}
+    Container, // [List] or {Map} or (Sub-Expr)
     Tag,       // <Tag>
-    Args,      // Parsing fn-call(args) inside a <tag>
 }
 
 #[derive(Debug, PartialEq)]
@@ -139,11 +138,6 @@ impl<'s> Lexer<'s> {
         matches!(self.mode, Mode::Container)
     }
 
-    /// Are we parsing (args) in a <tag>?
-    fn in_tag_args(&self) -> bool {
-        matches!(self.mode, Mode::Args)
-    }
-
     /// Turn `source` into vector of `Token`, or error.
     fn scan(&mut self) -> Result<()> {
         while let Some(c) = self.next() {
@@ -191,11 +185,12 @@ impl<'s> Lexer<'s> {
                     if self.in_tag() {
                         self.tag_open_paren()?
                     } else {
+                        self.set_mode(Mode::Container);
                         Syntax::LParen
                     }
                 }
                 ')' => {
-                    if self.in_tag_args() {
+                    if !self.in_tag() {
                         self.pop_mode();
                     }
                     Syntax::RParen
@@ -474,7 +469,7 @@ impl<'s> Lexer<'s> {
             }
             Ok(Syntax::JS)
         } else {
-            self.set_mode(Mode::Args);
+            self.set_mode(Mode::Container);
             Ok(Syntax::LParen)
         }
     }

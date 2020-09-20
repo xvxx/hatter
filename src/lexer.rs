@@ -198,7 +198,7 @@ impl<'s> Lexer<'s> {
 
                 '{' => {
                     if self.in_tag() {
-                        self.scan_word()?
+                        self.scan_word(true)?
                     } else {
                         self.set_mode(Mode::Container);
                         Syntax::LCurly
@@ -232,7 +232,7 @@ impl<'s> Lexer<'s> {
                 }
 
                 _ if c.is_numeric() => self.scan_number()?,
-                _ if c.is_alphabetic() || c == '_' => self.scan_word()?,
+                _ if c.is_alphabetic() || c == '_' => self.scan_word(false)?,
                 _ => self.scan_op()?,
             };
 
@@ -384,8 +384,8 @@ impl<'s> Lexer<'s> {
     }
 
     /// Scan a word, which may have {interpolation.with(some, whitespace)}.
-    fn scan_word(&mut self) -> Result<Syntax> {
-        let mut in_code = false;
+    /// Set `in_code` to `true` if the first char of the word is `{`
+    fn scan_word(&mut self, mut in_code: bool) -> Result<Syntax> {
         let mut curlies = 0;
         let start = self.pos;
 

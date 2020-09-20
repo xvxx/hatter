@@ -625,12 +625,15 @@ Dedent
 scan_test!(nested_tag_and_code, r#"
 <main> <ul> for bean in beans
     <li> Kewl <b> bean
-    <li> Very!
+    <li> Very: <b> if 2 > 1
+        <em> Nuty!
 "#,
 LCaret, Word, RCaret,
 LCaret, Word, RCaret,
 Word, Word, Word, Word,
     Indent, LCaret, Word, RCaret, Word, LCaret, Word, RCaret, Word, Semi,
-    LCaret, Word, RCaret, Word, Op, Semi,
+    LCaret, Word, RCaret, Word, Colon, LCaret, Word, RCaret, Word, Number, Op, Number,
+        Indent, LCaret, Word, RCaret, Word, Op, Semi,
+    Dedent,
 Dedent
 );

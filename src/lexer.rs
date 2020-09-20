@@ -218,6 +218,13 @@ impl<'s> Lexer<'s> {
                         self.scan_op()?
                     }
                 }
+                '/' => {
+                    if self.in_tag() {
+                        Syntax::Op
+                    } else {
+                        self.scan_op()?
+                    }
+                }
 
                 _ if c.is_whitespace() => {
                     self.eat(|c| c.is_whitespace());

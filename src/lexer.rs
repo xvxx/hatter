@@ -183,7 +183,7 @@ impl<'s> Lexer<'s> {
 
                 '(' => {
                     if self.in_tag() {
-                        self.tag_open_paren()?
+                        self.scan_open_paren_in_tag()?
                     } else {
                         self.set_mode(Mode::Container);
                         Syntax::LParen
@@ -460,7 +460,7 @@ impl<'s> Lexer<'s> {
     }
 
     /// Scan an open paren `(` seen in a tag declaration.
-    fn tag_open_paren(&mut self) -> Result<Syntax> {
+    fn scan_open_paren_in_tag(&mut self) -> Result<Syntax> {
         if self.prev_is_equal_sign() {
             let mut open = 0;
             while let Some(&c) = self.peek() {

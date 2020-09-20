@@ -588,23 +588,37 @@ parse_test!(
     )
 );
 
-// parse_test!(
-//     call_with_whitespace,
-//     "something(a,
-//         b,
-//         true,
-//         123
-//     )",
-//     Stmt::Call(
-//         "something".into(),
-//         vec![
-//             Stmt::Word("a".into()),
-//             Stmt::Word("b".into()),
-//             Stmt::Bool(true),
-//             Stmt::Number(123)
-//         ]
-//     )
-// );
+parse_test!(
+    call_with_whitespace,
+    "something(a,
+        b,
+        true,
+        123
+    )",
+    Stmt::Call(
+        "something".into(),
+        vec![
+            Stmt::Word("a".into()),
+            Stmt::Word("b".into()),
+            Stmt::Bool(true),
+            Stmt::Number(123)
+        ]
+    )
+);
+
+parse_test!(
+    call_with_named_args,
+    "greet(name: 'Bob', title: 'Dr')",
+    Stmt::Call(
+        "something".into(),
+        vec![
+            Stmt::Word("a".into()),
+            Stmt::Word("b".into()),
+            Stmt::Bool(true),
+            Stmt::Number(123)
+        ]
+    )
+);
 
 ////
 // op

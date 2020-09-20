@@ -526,15 +526,15 @@ impl<'s, 't> Parser<'s, 't> {
 
         let mut args = vec![];
         self.expect(Syntax::LParen)?;
-        loop {
+        while !self.peek_eof() && !self.peek_is(Syntax::RParen) {
             args.push(self.expect(Syntax::Word)?.to_string());
             if self.peek_is(Syntax::Comma) {
                 self.next();
             } else {
-                self.expect(Syntax::RParen)?;
                 break;
             }
         }
+        self.expect(Syntax::RParen)?;
 
         let body = self.block()?;
         Ok(Stmt::Assign(name, bx!(Stmt::Fn(args, body)), false))

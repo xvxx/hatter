@@ -375,6 +375,25 @@ for k, v in { first: 'Bilbo', last: 'Swaggins' }
 parse_test!(
     basic_def,
     r#"
+def greet()
+    print("HEY!!")
+"#,
+    Stmt::Assign(
+        "greet".into(),
+        Box::new(Stmt::Fn(
+            vec![],
+            vec![Stmt::Call(
+                "print".into(),
+                vec![Stmt::String("HEY!!".into())],
+            )]
+        )),
+        false
+    )
+);
+
+parse_test!(
+    basic_def_with_arg,
+    r#"
 def greet(name)
     print("Hi there, {name}!")
 "#,

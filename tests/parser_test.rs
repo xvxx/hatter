@@ -123,7 +123,10 @@ parse_test!(
 if true
     "something"
 "#,
-    Stmt::None
+    Stmt::If(vec![(
+        Stmt::Bool(true),
+        vec![Stmt::String("something".into())]
+    )])
 );
 
 parse_test!(
@@ -134,7 +137,13 @@ if true
 else
     "something else"
 "#,
-    Stmt::None
+    Stmt::If(vec![
+        (Stmt::Bool(true), vec![Stmt::String("something".into())]),
+        (
+            Stmt::Bool(true),
+            vec![Stmt::String("something else".into())]
+        ),
+    ])
 );
 
 parse_test!(
@@ -147,7 +156,20 @@ else if i < 0
 else
     "cero"
 "#,
-    Stmt::None
+    Stmt::If(vec![
+        (
+            Stmt::Call(">".into(), vec![Stmt::Word("i".into()), Stmt::Number(0)]),
+            vec![Stmt::String("greater".into())]
+        ),
+        (
+            Stmt::Call("<".into(), vec![Stmt::Word("i".into()), Stmt::Number(0)]),
+            vec![Stmt::String("lesser".into())]
+        ),
+        (
+            Stmt::Bool(true),
+            vec![Stmt::String("something else".into())]
+        ),
+    ])
 );
 
 ////
@@ -159,7 +181,12 @@ parse_test!(
 for v in abc
     print(v)
 "#,
-    Stmt::None
+    Stmt::For(
+        None,
+        "v".into(),
+        Box::new(Stmt::Word("abc".into())),
+        vec![Stmt::Call("print".into(), vec![Stmt::Word("v".into())])]
+    )
 );
 
 parse_test!(
@@ -168,7 +195,22 @@ parse_test!(
 for i, v in abc
     print("{i}: {v}")
 "#,
-    Stmt::None
+    Stmt::For(
+        Some("i".into()),
+        "v".into(),
+        Box::new(Stmt::Word("abc".into())),
+        vec![Stmt::Call(
+            "print".into(),
+            vec![Stmt::Call(
+                "concat".into(),
+                vec![
+                    Stmt::Word("i".into()),
+                    Stmt::String(": ".into()),
+                    Stmt::Word("v".into())
+                ]
+            )]
+        )]
+    )
 );
 
 parse_test!(
@@ -179,7 +221,28 @@ for i, v in abc
     if i > 20
         break
 "#,
-    Stmt::None
+    Stmt::For(
+        Some("i".into()),
+        "v".into(),
+        Box::new(Stmt::Word("abc".into())),
+        vec![
+            Stmt::Call(
+                "print".into(),
+                vec![Stmt::Call(
+                    "concat".into(),
+                    vec![
+                        Stmt::Word("i".into()),
+                        Stmt::String(": ".into()),
+                        Stmt::Word("v".into())
+                    ]
+                )]
+            ),
+            Stmt::If(vec![(
+                Stmt::Call(">".into(), vec![Stmt::Word("i".into()), Stmt::Number(20)]),
+                vec![Stmt::Word("break".into())]
+            )])
+        ]
+    )
 );
 
 parse_test!(
@@ -190,7 +253,28 @@ for i, v in abc
         continue
     print("{i}: {v}")
 "#,
-    Stmt::None
+    Stmt::For(
+        Some("i".into()),
+        "v".into(),
+        Box::new(Stmt::Word("abc".into())),
+        vec![
+            Stmt::If(vec![(
+                Stmt::Call("<".into(), vec![Stmt::Word("i".into()), Stmt::Number(20)]),
+                vec![Stmt::Word("break".into())]
+            )]),
+            Stmt::Call(
+                "print".into(),
+                vec![Stmt::Call(
+                    "concat".into(),
+                    vec![
+                        Stmt::Word("i".into()),
+                        Stmt::String(": ".into()),
+                        Stmt::Word("v".into())
+                    ]
+                )]
+            )
+        ]
+    )
 );
 
 parse_test!(
@@ -199,7 +283,22 @@ parse_test!(
 for x in [1,2,3]
     print(x * 10)
 "#,
-    Stmt::None
+    Stmt::For(
+        None,
+        "x".into(),
+        Box::new(Stmt::List(vec![
+            Stmt::Number(1),
+            Stmt::Number(2),
+            Stmt::Number(3)
+        ])),
+        vec![Stmt::Call(
+            "print".into(),
+            vec![Stmt::Call(
+                "*".into(),
+                vec![Stmt::Word("x".into()), Stmt::Number(10)]
+            )]
+        )]
+    )
 );
 
 parse_test!(
@@ -208,21 +307,39 @@ parse_test!(
 for k, v in { first: 'Bilbo', last: 'Swaggins' }
     print("{k}: {v}"
 "#,
-    Stmt::None
+    Stmt::For(
+        Some("k".into()),
+        "v".into(),
+        Box::new(Stmt::Map(vec![
+            ("first".to_string(), Stmt::String("Bilbo".into())),
+            ("last".to_string(), Stmt::String("Swaggins".into())),
+        ])),
+        vec![Stmt::Call(
+            "print".into(),
+            vec![Stmt::Call(
+                "concat".into(),
+                vec![
+                    Stmt::Word("k".into()),
+                    Stmt::String(": ".into()),
+                    Stmt::Word("v".into())
+                ]
+            )]
+        )]
+    )
 );
 
 ////
 // while
 
-parse_test!(
-    basic_while,
-    r#"
-while i > 0
-    do-something()
-    then-do-something-else()
-"#,
-    Stmt::None
-);
+// parse_test!(
+//     basic_while,
+//     r#"
+// while i > 0
+//     do-something()
+//     then-do-something-else()
+// "#,
+//     Stmt::None
+// );
 
 ////
 // def
@@ -233,7 +350,24 @@ parse_test!(
 def greet(name)
     print("Hi there, {name}!")
 "#,
-    Stmt::None
+    Stmt::Assign(
+        "greet".into(),
+        Box::new(Stmt::Fn(
+            vec!["name".into()],
+            vec![Stmt::Call(
+                "print".into(),
+                vec![Stmt::Call(
+                    "concat".into(),
+                    vec![
+                        Stmt::String("Hi there, ".into()),
+                        Stmt::Word("name".into()),
+                        Stmt::String("!".into())
+                    ]
+                )]
+            )]
+        )),
+        false
+    )
 );
 
 parse_test!(
@@ -242,7 +376,26 @@ parse_test!(
 def greet(title, name)
     print("Hi there, {title}. {name}!")
 "#,
-    Stmt::None
+    Stmt::Assign(
+        "greet".into(),
+        Box::new(Stmt::Fn(
+            vec!["title".into(), "name".into()],
+            vec![Stmt::Call(
+                "print".into(),
+                vec![Stmt::Call(
+                    "concat".into(),
+                    vec![
+                        Stmt::String("Hi there, ".into()),
+                        Stmt::Word("title".into()),
+                        Stmt::String(". ".into()),
+                        Stmt::Word("name".into()),
+                        Stmt::String("!".into())
+                    ]
+                )]
+            )]
+        )),
+        false
+    )
 );
 
 parse_test!(
@@ -253,7 +406,29 @@ def <<(a, b)
         append(a, b)
     return a
 "#,
-    Stmt::None
+    Stmt::Assign(
+        "<<".into(),
+        Box::new(Stmt::Fn(
+            vec!["a".into(), "b".into()],
+            vec![
+                Stmt::If(vec![(
+                    Stmt::Call(
+                        "==".into(),
+                        vec![
+                            Stmt::Call("type".into(), vec![Stmt::Word("a".into())]),
+                            Stmt::Word("list".into())
+                        ]
+                    ),
+                    vec![Stmt::Call(
+                        "append".into(),
+                        vec![Stmt::Word("a".into()), Stmt::Word("b".into())]
+                    )]
+                )]),
+                Stmt::Return(Box::new(Stmt::Word("a".into())))
+            ]
+        )),
+        false
+    )
 );
 
 ////

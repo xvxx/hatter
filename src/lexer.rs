@@ -385,6 +385,7 @@ impl<'s> Lexer<'s> {
     fn scan_word(&mut self) -> Result<Syntax> {
         let mut in_code = false;
         let mut curlies = 0;
+        let start = self.pos;
 
         while let Some(&c) = self.peek() {
             if in_code {
@@ -411,7 +412,10 @@ impl<'s> Lexer<'s> {
             self.next();
         }
 
-        Ok(Syntax::Word)
+        match &self.source[start..=self.pos] {
+            "and" | "or" => Ok(Syntax::Op),
+            _ => Ok(Syntax::Word),
+        }
     }
 
     /// Determines if < is opening a tag or just a regular `<` sign

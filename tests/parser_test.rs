@@ -1,4 +1,43 @@
-use hatter::{parse, scan, Stmt};
+use hatter::{parse, scan, Stmt, Tag};
+
+macro_rules! bx {
+    ($code:expr) => {
+        Box::new($code)
+    };
+}
+
+macro_rules! boo {
+    ($boo:expr) => {
+        Stmt::Bool($boo)
+    };
+}
+
+macro_rules! word {
+    ($code:expr) => {
+        Stmt::Word($code.into())
+    };
+}
+
+macro_rules! string {
+    ($code:expr) => {
+        Stmt::String($code.into())
+    };
+}
+
+macro_rules! num {
+    ($num:expr) => {
+        Stmt::Number($num)
+    };
+}
+
+macro_rules! call {
+    ($name:expr, $($arg:expr),+) => {
+        Stmt::Call($name.into(), vec![$($arg),+])
+    };
+    ($name:expr) => {
+        Stmt::Call($name.into(), vec![])
+    };
+}
 
 fn print_nodes(i: usize, nodes: &[Stmt]) {
     println!("Computed nodes:");
@@ -41,25 +80,21 @@ macro_rules! parse_test {
 ////
 // boolean
 
-parse_test!(true_bool, "true", Stmt::Bool(true));
-parse_test!(false_bool, "false", Stmt::Bool(false));
+parse_test!(true_bool, "true", boo!(true));
+parse_test!(false_bool, "false", boo!(false));
 
 ////
 // number
 
-parse_test!(positive_number, "100", Stmt::Number(100));
-parse_test!(negative_number, "-400", Stmt::Number(-400));
-parse_test!(underscore_number, "1_422_200", Stmt::Number(1_422_200));
-parse_test!(
-    negative_underscore_number,
-    "-1_422_200",
-    Stmt::Number(-1_422_200)
-);
-parse_test!(binary_number, "0b101", Stmt::Number(5));
-parse_test!(octal_number, "0o755", Stmt::Number(493));
-parse_test!(hex_number, "0xdeadbeef", Stmt::Number(3735928559));
-// parse_test!(float_number, "3.14", Stmt::Number(3));
-// parse_test!(negative_float_number, "-1230.3552", Stmt::Number(-1230));
+parse_test!(positive_number, "100", num!(100));
+parse_test!(negative_number, "-400", num!(-400));
+parse_test!(underscore_number, "1_422_200", num!(1_422_200));
+parse_test!(negative_underscore_number, "-1_422_200", num!(-1_422_200));
+parse_test!(binary_number, "0b101", num!(5));
+parse_test!(octal_number, "0o755", num!(493));
+parse_test!(hex_number, "0xdeadbeef", num!(3735928559));
+// parse_test!(float_number, "3.14", num!(3));
+// parse_test!(negative_float_number, "-1230.3552", num!(-1230));
 
 ////
 // string
@@ -67,49 +102,43 @@ parse_test!(hex_number, "0xdeadbeef", Stmt::Number(3735928559));
 parse_test!(
     basic_string,
     r#""just a regular string""#,
-    Stmt::String("just a regular string".into())
+    string!("just a regular string")
 );
 parse_test!(
     interpolated_string,
     r#""just checking that {2 + 2} = 4""#,
-    Stmt::Call(
-        "concat".into(),
-        vec![
-            Stmt::String("just checking that ".into()),
-            Stmt::Call("+".into(), vec![Stmt::Number(2), Stmt::Number(2)]),
-            Stmt::String(" = 4".into()),
-        ]
+    call!(
+        "concat",
+        string!("just checking that "),
+        call!("+", num!(2), num!(2)),
+        string!(" = 4")
     )
 );
 parse_test!(
     single_quote_string,
     "'single quote'",
-    Stmt::String("single quote".into())
+    string!("single quote")
 );
 parse_test!(
     escaped_single_quote_string,
     r#"'what\'s up'"#,
-    Stmt::String("what\\'s up".into())
+    string!("what\\'s up")
 );
-parse_test!(
-    grave_string,
-    r#"`one two three`"#,
-    Stmt::String("one two three".into())
-);
+parse_test!(grave_string, r#"`one two three`"#, string!("one two three"));
 parse_test!(
     triple_string,
     r#" """one two three""" "#,
-    Stmt::String("one two three".into())
+    string!("one two three")
 );
 parse_test!(
     triple_single_string,
     r#"'''one two three'''"#,
-    Stmt::String("one two three".into())
+    string!("one two three")
 );
 parse_test!(
     triple_grave_string,
     r#"```one two three```"#,
-    Stmt::String("one two three".into())
+    string!("one two three")
 );
 parse_test!(
     triple_string_with_breaks,
@@ -118,7 +147,7 @@ one
 two
 three
 """"#,
-    Stmt::String("\none\ntwo\nthree\n".into())
+    string!("\none\ntwo\nthree\n")
 );
 
 ////
@@ -127,7 +156,7 @@ three
 parse_test!(
     basic_list,
     "[1,2,3]",
-    Stmt::List(vec![Stmt::Number(1), Stmt::Number(2), Stmt::Number(3)])
+    Stmt::List(vec![num!(1), num!(2), num!(3)])
 );
 
 parse_test!(
@@ -137,7 +166,7 @@ parse_test!(
 2,
         3
                 ]",
-    Stmt::List(vec![Stmt::Number(1), Stmt::Number(2), Stmt::Number(3)])
+    Stmt::List(vec![num!(1), num!(2), num!(3)])
 );
 
 parse_test!(
@@ -148,18 +177,14 @@ parse_test!(
     2
     3
 ]",
-    Stmt::List(vec![Stmt::Number(1), Stmt::Number(2), Stmt::Number(3)])
+    Stmt::List(vec![num!(1), num!(2), num!(3)])
 );
 
 parse_test!(
     string_list,
     "[ 'one',
     'two','three']",
-    Stmt::List(vec![
-        Stmt::String("one".into()),
-        Stmt::String("two".into()),
-        Stmt::String("three".into())
-    ])
+    Stmt::List(vec![string!("one"), string!("two"), string!("three")])
 );
 
 ////
@@ -169,9 +194,9 @@ parse_test!(
     basic_map,
     "{ one: 1, two: 2, three: 3 }",
     Stmt::Map(vec![
-        ("one".to_string(), Stmt::Number(1)),
-        ("two".to_string(), Stmt::Number(2)),
-        ("three".to_string(), Stmt::Number(3))
+        ("one".to_string(), num!(1)),
+        ("two".to_string(), num!(2)),
+        ("three".to_string(), num!(3))
     ])
 );
 
@@ -182,9 +207,9 @@ parse_test!(
                 two: 2, three:
         3}",
     Stmt::Map(vec![
-        ("one".to_string(), Stmt::Number(1)),
-        ("two".to_string(), Stmt::Number(2)),
-        ("three".to_string(), Stmt::Number(3))
+        ("one".to_string(), num!(1)),
+        ("two".to_string(), num!(2)),
+        ("three".to_string(), num!(3))
     ])
 );
 
@@ -197,10 +222,7 @@ parse_test!(
 if true
     "something"
 "#,
-    Stmt::If(vec![(
-        Stmt::Bool(true),
-        vec![Stmt::String("something".into())]
-    )])
+    Stmt::If(vec![(boo!(true), vec![string!("something")])])
 );
 
 parse_test!(
@@ -212,11 +234,8 @@ else
     "something else"
 "#,
     Stmt::If(vec![
-        (Stmt::Bool(true), vec![Stmt::String("something".into())]),
-        (
-            Stmt::Bool(true),
-            vec![Stmt::String("something else".into())]
-        ),
+        (boo!(true), vec![string!("something")]),
+        (boo!(true), vec![string!("something else")]),
     ])
 );
 
@@ -231,40 +250,28 @@ else
     "cero"
 "#,
     Stmt::If(vec![
-        (
-            Stmt::Call(">".into(), vec![Stmt::Word("i".into()), Stmt::Number(0)]),
-            vec![Stmt::String("greater".into())]
-        ),
-        (
-            Stmt::Call("<".into(), vec![Stmt::Word("i".into()), Stmt::Number(0)]),
-            vec![Stmt::String("lesser".into())]
-        ),
-        (Stmt::Bool(true), vec![Stmt::String("cero".into())]),
+        (call!(">", word!("i"), num!(0)), vec![string!("greater")]),
+        (call!("<", word!("i"), num!(0)), vec![string!("lesser")]),
+        (boo!(true), vec![string!("cero")]),
     ])
 );
 
 parse_test!(
     and_exprs,
     "true and false",
-    Stmt::Call("and".into(), vec![Stmt::Bool(true), Stmt::Bool(false)])
+    call!("and", boo!(true), boo!(false))
 );
 
 parse_test!(
     or_exprs,
     "true or false",
-    Stmt::Call("or".into(), vec![Stmt::Bool(true), Stmt::Bool(false)])
+    call!("or", boo!(true), boo!(false))
 );
 
 parse_test!(
     and_or_exprs,
     "true and false or false",
-    Stmt::Call(
-        "and".into(),
-        vec![
-            Stmt::Bool(true),
-            Stmt::Call("or".into(), vec![Stmt::Bool(false), Stmt::Bool(false)])
-        ]
-    )
+    call!("and", boo!(true), call!("or", boo!(false), boo!(false)))
 );
 
 ////
@@ -279,8 +286,8 @@ for v in abc
     Stmt::For(
         None,
         "v".into(),
-        Box::new(Stmt::Word("abc".into())),
-        vec![Stmt::Call("print".into(), vec![Stmt::Word("v".into())])]
+        bx!(word!("abc")),
+        vec![call!("print", word!("v"))]
     )
 );
 
@@ -293,17 +300,10 @@ for i, v in abc
     Stmt::For(
         Some("i".into()),
         "v".into(),
-        Box::new(Stmt::Word("abc".into())),
-        vec![Stmt::Call(
-            "print".into(),
-            vec![Stmt::Call(
-                "concat".into(),
-                vec![
-                    Stmt::Word("i".into()),
-                    Stmt::String(": ".into()),
-                    Stmt::Word("v".into())
-                ]
-            )]
+        bx!(word!("abc")),
+        vec![call!(
+            "print",
+            call!("concat", word!("i"), string!(": "), word!("v"))
         )]
     )
 );
@@ -319,22 +319,15 @@ for i, v in abc
     Stmt::For(
         Some("i".into()),
         "v".into(),
-        Box::new(Stmt::Word("abc".into())),
+        bx!(word!("abc")),
         vec![
-            Stmt::Call(
-                "print".into(),
-                vec![Stmt::Call(
-                    "concat".into(),
-                    vec![
-                        Stmt::Word("i".into()),
-                        Stmt::String(": ".into()),
-                        Stmt::Word("v".into())
-                    ]
-                )]
+            call!(
+                "print",
+                call!("concat", word!("i"), string!(": "), word!("v"))
             ),
             Stmt::If(vec![(
-                Stmt::Call(">".into(), vec![Stmt::Word("i".into()), Stmt::Number(20)]),
-                vec![Stmt::Word("break".into())]
+                call!(">", word!("i"), num!(20)),
+                vec![word!("break")]
             )])
         ]
     )
@@ -351,22 +344,15 @@ for i, v in abc
     Stmt::For(
         Some("i".into()),
         "v".into(),
-        Box::new(Stmt::Word("abc".into())),
+        bx!(word!("abc")),
         vec![
             Stmt::If(vec![(
-                Stmt::Call("<".into(), vec![Stmt::Word("i".into()), Stmt::Number(20)]),
-                vec![Stmt::Word("continue".into())]
+                call!("<", word!("i"), num!(20)),
+                vec![word!("continue")]
             )]),
-            Stmt::Call(
-                "print".into(),
-                vec![Stmt::Call(
-                    "concat".into(),
-                    vec![
-                        Stmt::Word("i".into()),
-                        Stmt::String(": ".into()),
-                        Stmt::Word("v".into())
-                    ]
-                )]
+            call!(
+                "print",
+                call!("concat", word!("i"), string!(": "), word!("v"))
             )
         ]
     )
@@ -381,18 +367,8 @@ for x in [1,2,3]
     Stmt::For(
         None,
         "x".into(),
-        Box::new(Stmt::List(vec![
-            Stmt::Number(1),
-            Stmt::Number(2),
-            Stmt::Number(3)
-        ])),
-        vec![Stmt::Call(
-            "print".into(),
-            vec![Stmt::Call(
-                "*".into(),
-                vec![Stmt::Word("x".into()), Stmt::Number(10)]
-            )]
-        )]
+        bx!(Stmt::List(vec![num!(1), num!(2), num!(3)])),
+        vec![call!("print", call!("*", word!("x"), num!(10)))]
     )
 );
 
@@ -405,20 +381,13 @@ for k, v in { first: 'Bilbo', last: 'Swaggins' }
     Stmt::For(
         Some("k".into()),
         "v".into(),
-        Box::new(Stmt::Map(vec![
-            ("first".to_string(), Stmt::String("Bilbo".into())),
-            ("last".to_string(), Stmt::String("Swaggins".into())),
+        bx!(Stmt::Map(vec![
+            ("first".to_string(), string!("Bilbo")),
+            ("last".to_string(), string!("Swaggins")),
         ])),
-        vec![Stmt::Call(
-            "print".into(),
-            vec![Stmt::Call(
-                "concat".into(),
-                vec![
-                    Stmt::Word("k".into()),
-                    Stmt::String(": ".into()),
-                    Stmt::Word("v".into())
-                ]
-            )]
+        vec![call!(
+            "print",
+            call!("concat", word!("k"), string!(": "), word!("v"))
         )]
     )
 );
@@ -447,13 +416,7 @@ def greet()
 "#,
     Stmt::Assign(
         "greet".into(),
-        Box::new(Stmt::Fn(
-            vec![],
-            vec![Stmt::Call(
-                "print".into(),
-                vec![Stmt::String("HEY!!".into())],
-            )]
-        )),
+        bx!(Stmt::Fn(vec![], vec![call!("print", string!("HEY!!"))])),
         false
     )
 );
@@ -466,18 +429,11 @@ def greet(name)
 "#,
     Stmt::Assign(
         "greet".into(),
-        Box::new(Stmt::Fn(
+        bx!(Stmt::Fn(
             vec!["name".into()],
-            vec![Stmt::Call(
-                "print".into(),
-                vec![Stmt::Call(
-                    "concat".into(),
-                    vec![
-                        Stmt::String("Hi there, ".into()),
-                        Stmt::Word("name".into()),
-                        Stmt::String("!".into())
-                    ]
-                )]
+            vec![call!(
+                "print",
+                call!("concat", string!("Hi there, "), word!("name"), string!("!"))
             )]
         )),
         false
@@ -492,20 +448,18 @@ def greet(title, name)
 "#,
     Stmt::Assign(
         "greet".into(),
-        Box::new(Stmt::Fn(
+        bx!(Stmt::Fn(
             vec!["title".into(), "name".into()],
-            vec![Stmt::Call(
-                "print".into(),
-                vec![Stmt::Call(
-                    "concat".into(),
-                    vec![
-                        Stmt::String("Hi there, ".into()),
-                        Stmt::Word("title".into()),
-                        Stmt::String(". ".into()),
-                        Stmt::Word("name".into()),
-                        Stmt::String("!".into())
-                    ]
-                )]
+            vec![call!(
+                "print",
+                call!(
+                    "concat",
+                    string!("Hi there, "),
+                    word!("title"),
+                    string!(". "),
+                    word!("name"),
+                    string!("!")
+                )
             )]
         )),
         false
@@ -522,23 +476,14 @@ def <<(a, b)
 "#,
     Stmt::Assign(
         "<<".into(),
-        Box::new(Stmt::Fn(
+        bx!(Stmt::Fn(
             vec!["a".into(), "b".into()],
             vec![
                 Stmt::If(vec![(
-                    Stmt::Call(
-                        "==".into(),
-                        vec![
-                            Stmt::Call("type".into(), vec![Stmt::Word("a".into())]),
-                            Stmt::String("list".into())
-                        ]
-                    ),
-                    vec![Stmt::Call(
-                        "append".into(),
-                        vec![Stmt::Word("a".into()), Stmt::Word("b".into())]
-                    )]
+                    call!("==", call!("type", word!("a")), string!("list")),
+                    vec![call!("append", word!("a"), word!("b"))]
                 )]),
-                Stmt::Return(Box::new(Stmt::Word("a".into())))
+                Stmt::Return(bx!(word!("a")))
             ]
         )),
         false
@@ -551,7 +496,7 @@ def <<(a, b)
 parse_test!(
     assign,
     "a := 123",
-    Stmt::Assign("a".into(), Box::new(Stmt::Number(123)), false)
+    Stmt::Assign("a".into(), bx!(num!(123)), false)
 );
 
 ////
@@ -560,32 +505,20 @@ parse_test!(
 parse_test!(
     reassign,
     "a = 123",
-    Stmt::Assign("a".into(), Box::new(Stmt::Number(123)), true)
+    Stmt::Assign("a".into(), bx!(num!(123)), true)
 );
 
 ////
 // call
 
-parse_test!(
-    basic_call,
-    "word(true)",
-    Stmt::Call("word".into(), vec![Stmt::Bool(true)])
-);
+parse_test!(basic_call, "word(true)", call!("word", boo!(true)));
 
-parse_test!(empty_call, "add()", Stmt::Call("add".into(), vec![]));
+parse_test!(empty_call, "add()", call!("add"));
 
 parse_test!(
     call_with_args,
     "something(a,b, true ,123)",
-    Stmt::Call(
-        "something".into(),
-        vec![
-            Stmt::Word("a".into()),
-            Stmt::Word("b".into()),
-            Stmt::Bool(true),
-            Stmt::Number(123)
-        ]
-    )
+    call!("something", word!("a"), word!("b"), boo!(true), num!(123))
 );
 
 parse_test!(
@@ -595,67 +528,31 @@ parse_test!(
         true,
         123
     )",
-    Stmt::Call(
-        "something".into(),
-        vec![
-            Stmt::Word("a".into()),
-            Stmt::Word("b".into()),
-            Stmt::Bool(true),
-            Stmt::Number(123)
-        ]
-    )
+    call!("something", word!("a"), word!("b"), boo!(true), num!(123))
 );
 
 parse_test!(
     call_with_named_args,
     "greet(name: 'Bob', title: 'Dr')",
-    Stmt::Call(
-        "something".into(),
-        vec![
-            Stmt::Word("a".into()),
-            Stmt::Word("b".into()),
-            Stmt::Bool(true),
-            Stmt::Number(123)
-        ]
-    )
+    call!("something", word!("a"), word!("b"), boo!(true), num!(123))
 );
 
 ////
 // op
 
-parse_test!(
-    basic_op,
-    "2 + 2",
-    Stmt::Call("+".into(), vec![Stmt::Number(2), Stmt::Number(2)])
-);
+parse_test!(basic_op, "2 + 2", call!("+", num!(2), num!(2)));
 
-parse_test!(
-    eq_op,
-    "2 == 2",
-    Stmt::Call("==".into(), vec![Stmt::Number(2), Stmt::Number(2)])
-);
+parse_test!(eq_op, "2 == 2", call!("==", num!(2), num!(2)));
 
-parse_test!(
-    neq_op,
-    "2 != 2",
-    Stmt::Call("!=".into(), vec![Stmt::Number(2), Stmt::Number(2)])
-);
+parse_test!(neq_op, "2 != 2", call!("!=", num!(2), num!(2)));
 
 parse_test!(
     chained_ops,
     "2 + 20 * 10 - 5",
-    Stmt::Call(
-        "-".into(),
-        vec![
-            Stmt::Call(
-                "+".into(),
-                vec![
-                    Stmt::Number(2),
-                    Stmt::Call("*".into(), vec![Stmt::Number(20), Stmt::Number(10),])
-                ]
-            ),
-            Stmt::Number(5)
-        ]
+    call!(
+        "-",
+        call!("+", num!(2), call!("*", num!(20), num!(10))),
+        num!(5)
     )
 );
 
@@ -687,3 +584,210 @@ parse_test!(
 //     <li.item#milkshake> Milkshake
 
 // <#my-id> Just some <.bold>cool</> "content."
+
+parse_test!(basic_tag, "<b> Hey there", {
+    let mut tag = Tag::new(word!("b"));
+    tag.set_body(vec![word!("Hey"), word!("there")]);
+    Stmt::Tag(tag)
+});
+
+parse_test!(self_closing_tag, "<end/>", {
+    let mut tag = Tag::new(word!("end"));
+    tag.close();
+    Stmt::Tag(tag)
+});
+
+parse_test!(nested_tag, "<b> Hey <i> there", {
+    let mut b = Tag::new(word!("b"));
+    let mut i = Tag::new(word!("i"));
+    i.set_body(vec![word!("there")]);
+    b.set_body(vec![word!("Hey"), Stmt::Tag(i)]);
+    Stmt::Tag(b)
+});
+
+parse_test!(close_shortcut, "<b> Hey <i> there </> fren ", {
+    let mut b = Tag::new(word!("b"));
+    let mut i = Tag::new(word!("i"));
+    i.set_body(vec![word!("there")]);
+    b.set_body(vec![word!("Hey"), Stmt::Tag(i), word!("fren")]);
+    Stmt::Tag(b)
+});
+
+parse_test!(basic_id_shortcut, "<b#shout> Hey yo", {
+    let mut b = Tag::new(word!("b"));
+    b.set_id(word!("shout"));
+    b.set_body(vec![word!("Hey"), word!("yo")]);
+    Stmt::Tag(b)
+});
+
+// parse_test!(
+//     basic_class_shortcut,
+//     "<span.clear> Welcome ",
+//     LCaret,
+//     Word,
+//     Op,
+//     Word,
+//     RCaret,
+//     Word
+// );
+// parse_test!(
+//     basic_classes,
+//     "<div.main.markdown> Yada yada... ",
+//     LCaret,
+//     Word,
+//     Op,
+//     Word,
+//     Op,
+//     Word,
+//     RCaret,
+//     Word,
+//     Word,
+//     Op
+// );
+// parse_test!(
+//     basic_name_shortcut,
+//     "<input@text/>",
+//     LCaret,
+//     Word,
+//     Op,
+//     Word,
+//     Op,
+//     RCaret
+// );
+// parse_test!(
+//     basic_type_shortcut,
+//     "<input:submit/> ",
+//     LCaret,
+//     Word,
+//     Colon,
+//     Word,
+//     Op,
+//     RCaret
+// );
+// parse_test!(
+//     mixed_shortcuts,
+//     "<div#main.markdown/> ",
+//     LCaret,
+//     Word,
+//     Op,
+//     Word,
+//     Op,
+//     Word,
+//     Op,
+//     RCaret
+// );
+// parse_test!(
+//     mixed_input_shortcuts,
+//     "<input#focused:text@search  /> ",
+//     LCaret,
+//     Word,
+//     Op,
+//     Word,
+//     Colon,
+//     Word,
+//     Op,
+//     Word,
+//     Op,
+//     RCaret
+// );
+// parse_test!(
+//     basic_attribute,
+//     r#"<div data-id="45">"#,
+//     LCaret,
+//     Word,
+//     Word,
+//     Op,
+//     String(false),
+//     RCaret
+// );
+// parse_test!(
+//     basic_attributes,
+//     r#"<input name="thing" placeholder="Other..."/>"#,
+//     LCaret,
+//     Word,
+//     Word,
+//     Op,
+//     String(false),
+//     Word,
+//     Op,
+//     String(false),
+//     Op,
+//     RCaret,
+// );
+// parse_test!(
+//     js_attributes,
+//     "<div onclick=(alert('lol'))>Click me",
+//     LCaret,
+//     Word,
+//     Word,
+//     Op,
+//     JS,
+//     RCaret,
+//     Word,
+//     Word
+// );
+// parse_test!(
+//     simple_code_attributes,
+//     "<div data-id=page.id>",
+//     LCaret,
+//     Word,
+//     Word,
+//     Op,
+//     Word,
+//     Op,
+//     Word,
+//     RCaret
+// );
+// parse_test!(
+//     shorthand_conditionals,
+//     "<div#id=has-id>",
+//     LCaret,
+//     Word,
+//     Op,
+//     Word,
+//     Op,
+//     Word,
+//     RCaret,
+// );
+// parse_test!(
+//     code_expr_attributes,
+//     "<div data-value={2 + 3}>",
+//     LCaret,
+//     Word,
+//     Word,
+//     Op,
+//     Word,
+//     RCaret
+// );
+// parse_test!(
+//     tag_everything,
+//     "<div#id.class1.class-2=is-it? :why-not @sure onclick=(alert(`it's ${2 + 2}`)) data-id=123 data-{value}=compute(value) />",
+//     LCaret,
+//     Word,
+//     Op,
+//     Word,
+//     Op,
+//     Word,
+//     Op,
+//     Word,
+//     Op,
+//     Word,
+//     Colon,
+//     Word,
+//     Op,
+//     Word,
+//     Word,
+//     Op,
+//     JS,
+//     Word,
+//     Op,
+//     Number,
+//     Word,
+//     Op,
+//     Word,
+//     LParen,
+//     Word,
+//     RParen,
+//     Op,
+//     RCaret
+// );

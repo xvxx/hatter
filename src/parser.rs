@@ -286,9 +286,7 @@ impl<'s, 't> Parser<'s, 't> {
             }
             _ => {
                 // check for += and friends
-                if !matches!(lit, "==" | "!=")
-                    && lit.bytes().last().filter(|b| *b == b'=').is_some()
-                {
+                if !matches!(lit, "==" | "!=") && matches!(lit.bytes().last(), Some(b'=')) {
                     let op = left.to_string();
                     self.skip();
                     Ok(Stmt::Assign(
@@ -475,12 +473,6 @@ impl<'s, 't> Parser<'s, 't> {
                 // pass these up the food chain
                 Syntax::Dedent | Syntax::Semi => break,
 
-                // probably implicit text...
-                Syntax::Op => {
-                    self.skip();
-                    block.push(Stmt::Word(self.next().to_string()));
-                }
-
                 // Unexpected
                 _ => return self.error("Block stmt"),
             };
@@ -635,7 +627,7 @@ impl<'s, 't> Parser<'s, 't> {
         self.tags += 1;
         self.expect(Syntax::LCaret)?;
         let mut tag = Tag::new(match self.peek_kind() {
-            Syntax::Op => Stmt::String("div".into()),
+            Syntax::Op | Syntax::Colon => Stmt::String("div".into()),
             _ => Stmt::String(self.expect(Syntax::Word)?.to_string()),
         });
 

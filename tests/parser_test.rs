@@ -707,7 +707,7 @@ parse_test!(shorthand_conditionals, "<div#id=has-id>", {
 
 parse_test!(code_expr_attributes, "<div data-value={2 + 3}>", {
     let mut tag = tag!("div");
-    tag.add_attr(string!("data-value"), string!("{2 + 3}"));
+    tag.add_attr(string!("data-value"), word!("{2 + 3}"));
     Stmt::Tag(tag)
 });
 
@@ -721,7 +721,7 @@ parse_test!(
         tag.add_class(call!("when", word!("is-it?"), string!("class-2")));
         tag.add_attr(string!("type"), string!("why-not"));
         tag.add_attr(string!("name"), string!("sure"));
-        tag.add_attr(string!("onclick"), string!("JS..."));
+        tag.add_attr(string!("onclick"), string!("(function(e){ (alert(`it's ${2 + 2}`)) })(event);"));
         tag.add_attr(string!("data-id"), num!(123));
         tag.add_attr(string!("data-{value}"), call!("compute", word!("value")));
         tag.close();
@@ -745,7 +745,7 @@ parse_test!(
 
 parse_test!(
     tag_with_many_classes,
-    "<div.with.many.classes> My <em.big>my</>!",
+    "<div.with.many.classes> My <em.big>my</>'!'",
     {
         let mut tag = tag!("div");
         tag.add_class(string!("with"));
@@ -768,8 +768,7 @@ parse_test!(
 "#,
     {
         let mut form = tag!("form");
-        form.add_attr(string!("method"), string!("GET"));
-        form.add_attr(string!("action"), string!("/search"));
+        form.add_attr(string!("GET"), string!("/search"));
         let mut text = tag!("input");
         text.add_attr(string!("type"), string!("text"));
         text.add_attr(string!("name"), string!("query"));
@@ -795,8 +794,7 @@ parse_test!(
 "#,
     {
         let mut form = tag!("form");
-        form.add_attr(string!("method"), string!("POST"));
-        form.add_attr(string!("action"), string!("/info"));
+        form.add_attr(string!("POST"), string!("/info"));
 
         let mut h3 = tag!("h3");
         h3.set_body(vec![string!("Your Information")]);
@@ -821,10 +819,12 @@ parse_test!(
         br.close();
 
         let mut submit = tag!("input");
-        submit.add_attr(string!("type"), word!("submit"));
+        submit.add_attr(string!("type"), string!("submit"));
+        submit.close();
 
         let mut reset = tag!("input");
-        reset.add_attr(string!("type"), word!("reset"));
+        reset.add_attr(string!("type"), string!("reset"));
+        reset.close();
 
         form.set_body(
             vec![h3, lbl1, lbl2, br, submit, reset]

@@ -454,7 +454,7 @@ impl<'s, 't> Parser<'s, 't> {
                 // Tag
                 Syntax::LCaret => {
                     // Look for </closing> tag and bail if found.
-                    if !indented && self.peek2().filter(|p| p.literal() == "/").is_some() {
+                    if !indented && self.peek2().filter(|p| p.to_str() == "/").is_some() {
                         break;
                     }
                     // Otherwise parse as regular tag expression.
@@ -633,7 +633,7 @@ impl<'s, 't> Parser<'s, 't> {
         }
         self.tags -= 1;
         self.expect(Syntax::LCaret)?;
-        self.expect_op("/")?;
+        self.expect(Syntax::Slash)?;
         // </>
         if self.peek_is(Syntax::RCaret) {
             self.skip();
@@ -662,11 +662,11 @@ impl<'s, 't> Parser<'s, 't> {
             match next.kind {
                 Syntax::Semi => {}
                 Syntax::RCaret => break,
+                Syntax::Slash => {
+                    tag.close();
+                    self.tags -= 1;
+                }
                 Syntax::Op | Syntax::Colon if head => match next.literal() {
-                    "/" => {
-                        tag.close();
-                        self.tags -= 1;
-                    }
                     "#" => {
                         let id = self.attr()?;
                         if self.peek_lit("=") {
@@ -705,7 +705,7 @@ impl<'s, 't> Parser<'s, 't> {
                     _ => return self.error("# . @ or :"),
                 },
                 Syntax::Word | Syntax::String(true) => {
-                    head = true;
+                    head = false;
                     self.back();
                     let name = self.attr()?;
                     // single word attributes, like `defer`
@@ -726,7 +726,7 @@ impl<'s, 't> Parser<'s, 't> {
                             )),
                         ),
 
-                        _ => return pos_error!(pos, "Expected Word, Number, or String"),
+                        _ => return self.error("Word, Number, or String"),
                     }
                 }
                 _ => return pos_error!(pos, "Expected Attribute or >, got {:?}", next),

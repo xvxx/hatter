@@ -25,7 +25,7 @@ impl<'s> Token<'s> {
         // We want this to fail if new variants are added.
         match self.kind {
             None | Number | String(..) | Word | JS | Op | Colon | Comma | LParen | RParen
-            | LCurly | RCurly | LStaple | RStaple | LCaret | RCaret | Slash => true,
+            | LCurly | RCurly | LStaple | RStaple | LCaret | RCaret | Slash | Equal => true,
             Indent | Dedent | Semi => false,
         }
     }

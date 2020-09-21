@@ -218,6 +218,13 @@ impl<'s> Lexer<'s> {
                         self.scan_op()?
                     }
                 }
+                '=' => {
+                    if self.in_tag() {
+                        Syntax::Equal
+                    } else {
+                        self.scan_op()?
+                    }
+                }
                 '/' => {
                     if self.in_tag() {
                         Syntax::Slash

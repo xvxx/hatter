@@ -20,6 +20,7 @@ pub enum Syntax {
     LCaret,       // <
     RCaret,       // >
     Slash,        // / (only in <tags>)
+    Equal,        // = (only in <tags>)
 }
 
 pub trait SyntaxTrait {

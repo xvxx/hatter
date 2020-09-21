@@ -75,11 +75,6 @@ impl<'s, 't> Parser<'s, 't> {
         self.peek().map(|t| t.kind).unwrap_or(Syntax::None)
     }
 
-    /// Check the next token's literal value.
-    fn peek_lit(&mut self, lit: &str) -> bool {
-        self.peek().filter(|t| t.literal() == lit).is_some()
-    }
-
     /// Check the next token's kind.
     fn peek_is(&mut self, kind: Syntax) -> bool {
         self.peek_kind() == kind
@@ -149,20 +144,6 @@ impl<'s, 't> Parser<'s, 't> {
             Ok(self.next())
         } else {
             self.error(format!("{:?}", kind))
-        }
-    }
-
-    /// Consumes and returns the next token if it's an Op that matches
-    ///the passed literal value.
-    fn expect_op(&mut self, lit: &str) -> Result<Token> {
-        if self
-            .peek()
-            .filter(|t| t.kind == Syntax::Op && t.literal() == lit)
-            .is_some()
-        {
-            Ok(self.next())
-        } else {
-            self.error(format!("op {}", lit))
         }
     }
 
@@ -669,7 +650,7 @@ impl<'s, 't> Parser<'s, 't> {
                 Syntax::Op | Syntax::Colon if head => match next.literal() {
                     "#" => {
                         let id = self.attr()?;
-                        if self.peek_lit("=") {
+                        if self.peek_is(Syntax::Equal) {
                             self.next();
                             let cond = self.expr()?;
                             tag.set_id(Stmt::Call("when".into(), vec![cond, id]));
@@ -679,7 +660,7 @@ impl<'s, 't> Parser<'s, 't> {
                     }
                     "." => {
                         let class = self.attr()?;
-                        if self.peek_lit("=") {
+                        if self.peek_is(Syntax::Equal) {
                             self.next();
                             let cond = self.expr()?;
                             tag.add_class(Stmt::Call("when".into(), vec![cond, class]));
@@ -694,7 +675,7 @@ impl<'s, 't> Parser<'s, 't> {
                             Stmt::String("type".into())
                         };
                         let expr = self.attr()?;
-                        if self.peek_lit("=") {
+                        if self.peek_is(Syntax::Equal) {
                             self.next();
                             let cond = self.expr()?;
                             tag.add_attr(attr_name, Stmt::Call("when".into(), vec![cond, expr]));
@@ -709,15 +690,14 @@ impl<'s, 't> Parser<'s, 't> {
                     self.back();
                     let name = self.attr()?;
                     // single word attributes, like `defer`
-                    if !self.peek_lit("=") {
+                    if !self.peek_is(Syntax::Equal) {
                         tag.add_attr(name, Stmt::Bool(true));
                         continue;
                     }
-                    self.expect_op("=")?;
+                    self.expect(Syntax::Equal)?;
                     match self.peek_kind() {
-                        Syntax::Number | Syntax::String(..) | Syntax::Word => {
-                            tag.add_attr(name, self.atom()?)
-                        }
+                        Syntax::Word => tag.add_attr(name, self.expr()?),
+                        Syntax::Number | Syntax::String(..) => tag.add_attr(name, self.atom()?),
                         Syntax::JS => tag.add_attr(
                             name,
                             Stmt::String(format!(

@@ -290,13 +290,13 @@ impl<'s, 't> Parser<'s, 't> {
                 }
             }
             "." => {
-                // convert word to str, ex: map.key => index(map, "key")
+                // convert word to str, ex: map.key => .(map, "key")
                 self.skip();
                 let right = self.expr()?;
                 if let Stmt::Word(word) = right {
-                    Ok(Stmt::Call("index".into(), vec![left, Stmt::String(word)]))
+                    Ok(Stmt::Call(".".into(), vec![left, Stmt::String(word)]))
                 } else {
-                    Ok(Stmt::Call("index".into(), vec![left, right]))
+                    Ok(Stmt::Call(".".into(), vec![left, right]))
                 }
             }
             _ => {

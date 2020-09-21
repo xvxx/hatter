@@ -735,7 +735,7 @@ parse_test!(
         let mut bold = tag!("div");
         bold.add_class(string!("bold"));
         bold.set_body(vec![word!("cool")]);
-        tag.set_body(vec![bold.into(), string!("content")]);
+        tag.set_body(vec![string!("Just some"), bold.into(), string!("content.")]);
         Stmt::Tag(tag)
     }
 );

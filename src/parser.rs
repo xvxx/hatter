@@ -639,7 +639,7 @@ impl<'s, 't> Parser<'s, 't> {
             self.skip();
             return Ok(());
         }
-        self.expect(Syntax::String(true))?;
+        self.expect(Syntax::Word)?;
         self.expect(Syntax::RCaret)?;
         Ok(())
     }

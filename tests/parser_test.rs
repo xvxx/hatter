@@ -6,6 +6,12 @@ macro_rules! bx {
     };
 }
 
+macro_rules! tag {
+    ($name:expr) => {
+        Tag::new(Stmt::Word($name.into()))
+    };
+}
+
 macro_rules! boo {
     ($boo:expr) => {
         Stmt::Bool($boo)
@@ -559,8 +565,158 @@ parse_test!(
 ////
 // tag
 
-// parse_test!(basic_tag, "<some-tag></some-tag>", Stmt::None);
-// parse_test!(basic_closed_tag, "<some-tag/>", Stmt::None);
+parse_test!(reg_tag, "<some-tag></some-tag>", {
+    let mut tag = tag!("some-tag");
+    Stmt::Tag(tag)
+});
+
+parse_test!(self_closing_tag, "<some-tag/>", {
+    let mut tag = tag!("some-tag");
+    tag.close();
+    Stmt::Tag(tag)
+});
+
+parse_test!(basic_tag, "<b> Hey there", {
+    let mut tag = tag!("b");
+    tag.set_body(vec![word!("Hey"), word!("there")]);
+    Stmt::Tag(tag)
+});
+
+parse_test!(self_closing_tag, "<end/>", {
+    let mut tag = tag!("end");
+    tag.close();
+    Stmt::Tag(tag)
+});
+
+parse_test!(nested_tag, "<b> Hey <i> there", {
+    let mut b = tag!("b");
+    let mut i = tag!("i");
+    i.set_body(vec![word!("there")]);
+    b.set_body(vec![word!("Hey"), Stmt::Tag(i)]);
+    Stmt::Tag(b)
+});
+
+parse_test!(close_shortcut, "<b> Hey <i> there </> fren ", {
+    let mut b = tag!("b");
+    let mut i = tag!("i");
+    i.set_body(vec![word!("there")]);
+    b.set_body(vec![word!("Hey"), Stmt::Tag(i), word!("fren")]);
+    Stmt::Tag(b)
+});
+
+parse_test!(basic_id_shortcut, "<b#shout> Hey yo", {
+    let mut b = tag!("b");
+    b.set_id(word!("shout"));
+    b.set_body(vec![word!("Hey"), word!("yo")]);
+    Stmt::Tag(b)
+});
+
+parse_test!(basic_class_shortcut, "<span.clear> Welcome ", {
+    let mut tag = tag!("span");
+    tag.add_class(word!("clear"));
+    tag.set_body(vec![word!("Welcome")]);
+    Stmt::Tag(tag)
+});
+
+parse_test!(basic_classes, "<div.main.markdown> Yada yada... ", {
+    let mut tag = tag!("div");
+    tag.add_class(word!("main"));
+    tag.add_class(word!("markdown"));
+    tag.set_body(vec![word!("Yada"), word!("yada")]);
+    Stmt::Tag(tag)
+});
+
+parse_test!(basic_name_shortcut, "<input@text/>", {
+    let mut tag = tag!("input");
+    tag.add_attr(word!("name"), word!("text"));
+    tag.close();
+    Stmt::Tag(tag)
+});
+
+parse_test!(basic_type_shortcut, "<input:submit/> ", {
+    let mut tag = tag!("input");
+    tag.add_attr(word!("type"), word!("submit"));
+    tag.close();
+    Stmt::Tag(tag)
+});
+
+parse_test!(mixed_shortcuts, "<div#main.markdown/> ", {
+    let mut tag = tag!("div");
+    tag.set_id(word!("main"));
+    tag.add_class(word!("markdown"));
+    tag.close();
+    Stmt::Tag(tag)
+});
+
+parse_test!(mixed_input_shortcuts, "<input#focused:text@search  /> ", {
+    let mut tag = tag!("input");
+    tag.set_id(word!("focused"));
+    tag.add_attr(word!("type"), word!("text"));
+    tag.add_attr(word!("name"), word!("search"));
+    tag.close();
+    Stmt::Tag(tag)
+});
+
+parse_test!(basic_attribute, r#"<div data-id="45">"#, {
+    let mut tag = tag!("div");
+    tag.add_attr(word!("data-id"), string!("45"));
+    Stmt::Tag(tag)
+});
+
+parse_test!(
+    basic_attributes,
+    r#"<input name="thing" placeholder="Other..."/>"#,
+    {
+        let mut tag = tag!("input");
+        tag.add_attr(word!("name"), string!("thing"));
+        tag.add_attr(word!("placeholder"), string!("Other..."));
+        tag.close();
+        Stmt::Tag(tag)
+    }
+);
+
+parse_test!(js_attributes, "<div onclick=(alert('lol'))>Click me", {
+    let mut tag = tag!("div");
+    tag.add_attr(word!("onclick"), string!("javascript..."));
+    tag.set_body(vec![string!("Click me")]);
+    Stmt::Tag(tag)
+});
+
+parse_test!(simple_code_attributes, "<div data-id=page.id>", {
+    let mut tag = tag!("div");
+    tag.add_attr(word!("data-id"), call!(".", word!("page"), word!("id")));
+    Stmt::Tag(tag)
+});
+
+parse_test!(shorthand_conditionals, "<div#id=has-id>", {
+    let mut tag = tag!("div");
+    tag.set_id(call!("when", word!("has-id"), word!("id")));
+    Stmt::Tag(tag)
+});
+
+parse_test!(code_expr_attributes, "<div data-value={2 + 3}>", {
+    let mut tag = tag!("div");
+    tag.add_attr(word!("data-value"), call!("+", num!(2), num!(3)));
+    Stmt::Tag(tag)
+});
+
+parse_test!(
+    tag_everything,
+    "<div#id.class1.class-2=is-it? :why-not @sure onclick=(alert(`it's ${2 + 2}`)) data-id=123 data-{value}=compute(value) />",
+    {
+        let mut tag = tag!("div");
+        tag.set_id(word!("id"));
+        tag.add_class(word!("class1"));
+        tag.add_class(call!("when", word!("is-it?"), word!("class-2")));
+        tag.add_attr(word!("type"), word!("why-not"));
+        tag.add_attr(word!("name"), word!("sure"));
+        tag.add_attr(word!("onclick"), string!("JS..."));
+        tag.add_attr(word!("data-id"), num!(123));
+        tag.add_attr(word!("data-{value}"), call!("compute", word!("value")));
+        tag.close();
+        Stmt::Tag(tag)
+    }
+);
 
 // TODO:
 
@@ -584,210 +740,3 @@ parse_test!(
 //     <li.item#milkshake> Milkshake
 
 // <#my-id> Just some <.bold>cool</> "content."
-
-parse_test!(basic_tag, "<b> Hey there", {
-    let mut tag = Tag::new(word!("b"));
-    tag.set_body(vec![word!("Hey"), word!("there")]);
-    Stmt::Tag(tag)
-});
-
-parse_test!(self_closing_tag, "<end/>", {
-    let mut tag = Tag::new(word!("end"));
-    tag.close();
-    Stmt::Tag(tag)
-});
-
-parse_test!(nested_tag, "<b> Hey <i> there", {
-    let mut b = Tag::new(word!("b"));
-    let mut i = Tag::new(word!("i"));
-    i.set_body(vec![word!("there")]);
-    b.set_body(vec![word!("Hey"), Stmt::Tag(i)]);
-    Stmt::Tag(b)
-});
-
-parse_test!(close_shortcut, "<b> Hey <i> there </> fren ", {
-    let mut b = Tag::new(word!("b"));
-    let mut i = Tag::new(word!("i"));
-    i.set_body(vec![word!("there")]);
-    b.set_body(vec![word!("Hey"), Stmt::Tag(i), word!("fren")]);
-    Stmt::Tag(b)
-});
-
-parse_test!(basic_id_shortcut, "<b#shout> Hey yo", {
-    let mut b = Tag::new(word!("b"));
-    b.set_id(word!("shout"));
-    b.set_body(vec![word!("Hey"), word!("yo")]);
-    Stmt::Tag(b)
-});
-
-// parse_test!(
-//     basic_class_shortcut,
-//     "<span.clear> Welcome ",
-//     LCaret,
-//     Word,
-//     Op,
-//     Word,
-//     RCaret,
-//     Word
-// );
-// parse_test!(
-//     basic_classes,
-//     "<div.main.markdown> Yada yada... ",
-//     LCaret,
-//     Word,
-//     Op,
-//     Word,
-//     Op,
-//     Word,
-//     RCaret,
-//     Word,
-//     Word,
-//     Op
-// );
-// parse_test!(
-//     basic_name_shortcut,
-//     "<input@text/>",
-//     LCaret,
-//     Word,
-//     Op,
-//     Word,
-//     Op,
-//     RCaret
-// );
-// parse_test!(
-//     basic_type_shortcut,
-//     "<input:submit/> ",
-//     LCaret,
-//     Word,
-//     Colon,
-//     Word,
-//     Op,
-//     RCaret
-// );
-// parse_test!(
-//     mixed_shortcuts,
-//     "<div#main.markdown/> ",
-//     LCaret,
-//     Word,
-//     Op,
-//     Word,
-//     Op,
-//     Word,
-//     Op,
-//     RCaret
-// );
-// parse_test!(
-//     mixed_input_shortcuts,
-//     "<input#focused:text@search  /> ",
-//     LCaret,
-//     Word,
-//     Op,
-//     Word,
-//     Colon,
-//     Word,
-//     Op,
-//     Word,
-//     Op,
-//     RCaret
-// );
-// parse_test!(
-//     basic_attribute,
-//     r#"<div data-id="45">"#,
-//     LCaret,
-//     Word,
-//     Word,
-//     Op,
-//     String(false),
-//     RCaret
-// );
-// parse_test!(
-//     basic_attributes,
-//     r#"<input name="thing" placeholder="Other..."/>"#,
-//     LCaret,
-//     Word,
-//     Word,
-//     Op,
-//     String(false),
-//     Word,
-//     Op,
-//     String(false),
-//     Op,
-//     RCaret,
-// );
-// parse_test!(
-//     js_attributes,
-//     "<div onclick=(alert('lol'))>Click me",
-//     LCaret,
-//     Word,
-//     Word,
-//     Op,
-//     JS,
-//     RCaret,
-//     Word,
-//     Word
-// );
-// parse_test!(
-//     simple_code_attributes,
-//     "<div data-id=page.id>",
-//     LCaret,
-//     Word,
-//     Word,
-//     Op,
-//     Word,
-//     Op,
-//     Word,
-//     RCaret
-// );
-// parse_test!(
-//     shorthand_conditionals,
-//     "<div#id=has-id>",
-//     LCaret,
-//     Word,
-//     Op,
-//     Word,
-//     Op,
-//     Word,
-//     RCaret,
-// );
-// parse_test!(
-//     code_expr_attributes,
-//     "<div data-value={2 + 3}>",
-//     LCaret,
-//     Word,
-//     Word,
-//     Op,
-//     Word,
-//     RCaret
-// );
-// parse_test!(
-//     tag_everything,
-//     "<div#id.class1.class-2=is-it? :why-not @sure onclick=(alert(`it's ${2 + 2}`)) data-id=123 data-{value}=compute(value) />",
-//     LCaret,
-//     Word,
-//     Op,
-//     Word,
-//     Op,
-//     Word,
-//     Op,
-//     Word,
-//     Op,
-//     Word,
-//     Colon,
-//     Word,
-//     Op,
-//     Word,
-//     Word,
-//     Op,
-//     JS,
-//     Word,
-//     Op,
-//     Number,
-//     Word,
-//     Op,
-//     Word,
-//     LParen,
-//     Word,
-//     RParen,
-//     Op,
-//     RCaret
-// );

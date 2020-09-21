@@ -272,20 +272,20 @@ else
 
 parse_test!(
     and_exprs,
-    "true and false",
-    call!("and", boo!(true), boo!(false))
+    "true && false",
+    call!("&&", boo!(true), boo!(false))
 );
 
 parse_test!(
     or_exprs,
-    "true or false",
-    call!("or", boo!(true), boo!(false))
+    "true || false",
+    call!("||", boo!(true), boo!(false))
 );
 
 parse_test!(
     and_or_exprs,
-    "true and false or false",
-    call!("and", boo!(true), call!("or", boo!(false), boo!(false)))
+    "true && false || false",
+    call!("&&", boo!(true), call!("||", boo!(false), boo!(false)))
 );
 
 ////

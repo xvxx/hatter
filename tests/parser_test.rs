@@ -566,12 +566,18 @@ parse_test!(
 // tag
 
 parse_test!(reg_tag, "<some-tag></some-tag>", {
-    let mut tag = tag!("some-tag");
+    let tag = tag!("some-tag");
     Stmt::Tag(tag)
 });
 
 parse_test!(self_closing_tag, "<some-tag/>", {
     let mut tag = tag!("some-tag");
+    tag.close();
+    Stmt::Tag(tag)
+});
+
+parse_test!(another_self_closing_tag, "<end/>", {
+    let mut tag = tag!("end");
     tag.close();
     Stmt::Tag(tag)
 });
@@ -582,17 +588,11 @@ parse_test!(basic_tag, "<b> Hey there", {
     Stmt::Tag(tag)
 });
 
-parse_test!(self_closing_tag, "<end/>", {
-    let mut tag = tag!("end");
-    tag.close();
-    Stmt::Tag(tag)
-});
-
 parse_test!(nested_tag, "<b> Hey <i> there", {
     let mut b = tag!("b");
     let mut i = tag!("i");
     i.set_body(vec![word!("there")]);
-    b.set_body(vec![word!("Hey"), Stmt::Tag(i)]);
+    b.set_body(vec![word!("Hey"), i.into()]);
     Stmt::Tag(b)
 });
 
@@ -600,7 +600,7 @@ parse_test!(close_shortcut, "<b> Hey <i> there </> fren ", {
     let mut b = tag!("b");
     let mut i = tag!("i");
     i.set_body(vec![word!("there")]);
-    b.set_body(vec![word!("Hey"), Stmt::Tag(i), word!("fren")]);
+    b.set_body(vec![word!("Hey"), i.into(), word!("fren")]);
     Stmt::Tag(b)
 });
 
@@ -718,25 +718,143 @@ parse_test!(
     }
 );
 
-// TODO:
+parse_test!(
+    random_tag,
+    r#"<#my-id> Just some <.bold>cool</> "content.""#,
+    {
+        let mut tag = tag!("div");
+        tag.set_id(word!("my-id"));
+        let mut bold = tag!("div");
+        bold.add_class(word!("bold"));
+        bold.set_body(vec![word!("cool")]);
+        tag.set_body(vec![bold.into(), string!("content")]);
+        Stmt::Tag(tag)
+    }
+);
 
-// <div.with.many.classes> My <em.big>my</>!
+parse_test!(
+    tag_with_many_classes,
+    "<div.with.many.classes> My <em.big>my</>!",
+    {
+        let mut tag = tag!("div");
+        tag.add_class(word!("with"));
+        tag.add_class(word!("many"));
+        tag.add_class(word!("classes"));
+        let mut em = tag!("em");
+        em.add_class(word!("big"));
+        em.set_body(vec![word!("my")]);
+        tag.set_body(vec![word!("My"), em.into(), string!("!")]);
+        Stmt::Tag(tag)
+    }
+);
 
-// <form GET="/search">
-//   <input:text@query/>
-//   <input:submit/>
+parse_test!(
+    indented_form,
+    r#"
+<form GET="/search">
+  <input:text@query/>
+  <input:submit/>
+"#,
+    {
+        let mut form = tag!("form");
+        form.add_attr(word!("method"), string!("GET"));
+        form.add_attr(word!("action"), string!("/search"));
+        let mut text = tag!("input");
+        text.add_attr(word!("type"), word!("text"));
+        text.add_attr(word!("name"), word!("query"));
+        text.close();
+        let mut btn = tag!("input");
+        btn.add_attr(word!("type"), word!("submit"));
+        btn.close();
+        form.set_body(vec![text.into(), btn.into()]);
+        Stmt::Tag(form)
+    }
+);
 
-// <form POST="/info">
-//   <h3> Your Information
-//    <label> <input@name:text placeholder="Name..."/>
-//    <label> <input@age:text placeholder="Age..."/>
-//    <br/>
-//    <input:submit/>
-//    <input:reset/>
+parse_test!(
+    full_form,
+    r#"
+<form POST="/info">
+   <h3> Your Information
+   <label> <input@name:text placeholder="Name..."/>
+   <label> <input@age:text placeholder="Age..."/>
+   <br/>
+   <input:submit/>
+   <input:reset/>
+"#,
+    {
+        let mut form = tag!("form");
+        form.add_attr(word!("method"), string!("POST"));
+        form.add_attr(word!("action"), string!("/info"));
 
-// <ul#menu>
-//     <li.item#burger> Burger
-//     <li.item#fries> Fries
-//     <li.item#milkshake> Milkshake
+        let mut h3 = tag!("h3");
+        h3.set_body(vec![string!("Your Information")]);
 
-// <#my-id> Just some <.bold>cool</> "content."
+        let mut lbl1 = tag!("label");
+        let mut name = tag!("input");
+        name.add_attr(word!("name"), string!("name"));
+        name.add_attr(word!("type"), string!("text"));
+        name.add_attr(word!("placeholder"), string!("Name..."));
+        name.close();
+        lbl1.set_body(vec![name.into()]);
+
+        let mut lbl2 = tag!("label");
+        let mut age = tag!("input");
+        age.add_attr(word!("name"), string!("age"));
+        age.add_attr(word!("type"), string!("text"));
+        age.add_attr(word!("placeholder"), string!("Age..."));
+        age.close();
+        lbl2.set_body(vec![age.into()]);
+
+        let mut br = tag!("br");
+        br.close();
+
+        let mut submit = tag!("input");
+        submit.add_attr(word!("type"), word!("submit"));
+
+        let mut reset = tag!("input");
+        reset.add_attr(word!("type"), word!("reset"));
+
+        form.set_body(
+            vec![h3, lbl1, lbl2, br, submit, reset]
+                .into_iter()
+                .map(|x| Stmt::Tag(x))
+                .collect(),
+        );
+
+        Stmt::Tag(form)
+    }
+);
+
+parse_test!(
+    nested_tag_list,
+    r#"
+<ul#menu>
+    <li.item#burger> Burger
+    <li.item#fries> Fries
+    <li.item#milkshake> Milkshake
+"#,
+    {
+        let mut ul = tag!("ul");
+        ul.set_id(word!("menu"));
+
+        let mut burger = tag!("li");
+        burger.add_class(word!("item"));
+        burger.set_id(word!("burger"));
+        burger.set_body(vec![word!("Burger")]);
+
+        let mut fries = tag!("li");
+        fries.add_class(word!("item"));
+        fries.set_id(word!("fries"));
+        fries.set_body(vec![word!("Fries")]);
+
+        let mut shake = tag!("li");
+        shake.add_class(word!("item"));
+        shake.set_id(word!("shake"));
+        shake.set_body(vec![word!("Milkshake")]);
+
+        ul.set_body(vec![burger.into(), fries.into(), shake.into()]);
+
+        Stmt::Tag(ul)
+    }
+);

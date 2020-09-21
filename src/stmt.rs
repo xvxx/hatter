@@ -19,6 +19,12 @@ pub enum Stmt {
     Fn(Vec<String>, Vec<Stmt>), // args, body
 }
 
+impl From<Tag> for Stmt {
+    fn from(tag: Tag) -> Stmt {
+        Stmt::Tag(tag)
+    }
+}
+
 impl Stmt {
     pub fn to_string(&self) -> String {
         match self {

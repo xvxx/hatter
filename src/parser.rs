@@ -654,13 +654,15 @@ impl<'s, 't> Parser<'s, 't> {
             _ => Stmt::String(self.expect(Syntax::Word)?.to_string()),
         });
 
+        // <#shortcuts.only.work.in@the:first-part-of-the-tag gotcha=true/>
+        let mut head = true;
         loop {
             let next = self.next();
             let pos = next.pos;
             match next.kind {
                 Syntax::Semi => {}
                 Syntax::RCaret => break,
-                Syntax::Op => match next.literal() {
+                Syntax::Op | Syntax::Colon if head => match next.literal() {
                     "/" => {
                         tag.close();
                         self.tags -= 1;
@@ -702,7 +704,8 @@ impl<'s, 't> Parser<'s, 't> {
                     }
                     _ => return self.error("# . @ or :"),
                 },
-                Syntax::String(true) => {
+                Syntax::Word | Syntax::String(true) => {
+                    head = true;
                     self.back();
                     let name = self.attr()?;
                     // single word attributes, like `defer`

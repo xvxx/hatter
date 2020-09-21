@@ -614,7 +614,7 @@ parse_test!(close_shortcut, "<b> Hey <i> there </> fren ", {
 
 parse_test!(basic_id_shortcut, "<b#shout> Hey yo", {
     let mut b = tag!("b");
-    b.set_id(word!("shout"));
+    b.set_id(string!("shout"));
     b.set_body(vec![string!("Hey yo")]);
     Stmt::Tag(b)
 });

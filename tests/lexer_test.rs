@@ -148,6 +148,10 @@ scan_test!(gt_is_op, "4 > 5", Number, Op, Number);
 scan_test!(lt_is_op, "4 < 5", Number, Op, Number);
 scan_test!(lt_with_word_is_caret, "<ding>", LCaret, Word, RCaret);
 scan_test!(lt_with_word_is_caret_2, "<ding >", LCaret, Word, RCaret);
+scan_test!(slash_is_an_op, "23 / 24", Number, Op, Number);
+scan_test!(but_not_in_a_tag, "<cat/>", LCaret, Word, Slash, RCaret);
+scan_test!(or_a_close_tag, "</>", LCaret, Slash, RCaret);
+scan_test!(or_a_closing_tag, "</div>", LCaret, Slash, Word, RCaret);
 
 ////
 // Tags
@@ -185,7 +189,7 @@ scan_test!(
     RCaret,
     Word,
     LCaret,
-    Op,
+    Slash,
     Word,
     RCaret,
 );
@@ -217,7 +221,7 @@ scan_test!(
     "<end/> ok",
     LCaret,
     Word,
-    Op,
+    Slash,
     RCaret,
     Word
 );
@@ -245,7 +249,7 @@ scan_test!(
     RCaret,
     Word,
     LCaret,
-    Op,
+    Slash,
     RCaret,
     Word
 );
@@ -291,7 +295,7 @@ scan_test!(
     Word,
     Op,
     Word,
-    Op,
+    Slash,
     RCaret
 );
 scan_test!(
@@ -301,7 +305,7 @@ scan_test!(
     Word,
     Colon,
     Word,
-    Op,
+    Slash,
     RCaret
 );
 scan_test!(
@@ -313,7 +317,7 @@ scan_test!(
     Word,
     Op,
     Word,
-    Op,
+    Slash,
     RCaret
 );
 scan_test!(
@@ -327,7 +331,7 @@ scan_test!(
     Word,
     Op,
     Word,
-    Op,
+    Slash,
     RCaret
 );
 scan_test!(
@@ -351,7 +355,7 @@ scan_test!(
     Word,
     Op,
     String(false),
-    Op,
+    Slash,
     RCaret,
 );
 scan_test!(
@@ -428,7 +432,7 @@ scan_test!(
     LParen,
     Word,
     RParen,
-    Op,
+    Slash,
     RCaret
 );
 

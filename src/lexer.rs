@@ -220,7 +220,7 @@ impl<'s> Lexer<'s> {
                 }
                 '/' => {
                     if self.in_tag() {
-                        Syntax::Op
+                        Syntax::Slash
                     } else {
                         self.scan_op()?
                     }

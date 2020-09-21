@@ -19,6 +19,7 @@ pub enum Syntax {
     RStaple,      // ]
     LCaret,       // <
     RCaret,       // >
+    Slash,        // / (only in <tags>)
 }
 
 pub trait SyntaxTrait {

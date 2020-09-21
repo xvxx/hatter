@@ -149,7 +149,7 @@ impl<'s> Lexer<'s> {
                 '"' | '\'' | '`' => self.scan_string(c)?,
 
                 ':' => {
-                    if self.peek_is('=') {
+                    if self.peek_is('=') || self.in_tag() {
                         self.scan_op()?
                     } else {
                         Syntax::Colon
@@ -165,7 +165,11 @@ impl<'s> Lexer<'s> {
                 }
 
                 '#' => {
-                    if self.peek().filter(|c| c.is_alphabetic()).is_some() {
+                    if self
+                        .peek()
+                        .filter(|c| **c == '{' || c.is_alphabetic())
+                        .is_some()
+                    {
                         self.scan_op()?
                     } else {
                         self.scan_comment()?

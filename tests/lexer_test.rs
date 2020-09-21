@@ -166,8 +166,9 @@ scan_test!(
 );
 scan_test!(angle_id, "<#id>", LCaret, Op, Word, RCaret);
 scan_test!(angle_class, "<.class>", LCaret, Op, Word, RCaret);
-scan_test!(angle_type, "<:type>", LCaret, Colon, Word, RCaret);
+scan_test!(angle_type, "<:type>", LCaret, Op, Word, RCaret);
 scan_test!(angle_name, "<@name>", LCaret, Op, Word, RCaret);
+
 scan_test!(
     angle_interpolated,
     "<div class=something-{2 + 2}-classy>",
@@ -175,6 +176,78 @@ scan_test!(
     Word,
     Word,
     Equal,
+    Word,
+    RCaret
+);
+scan_test!(
+    angle_interpolated_id_full,
+    "<div#{cool}>",
+    LCaret,
+    Word,
+    Op,
+    Word,
+    RCaret
+);
+scan_test!(
+    angle_interpolated_id_partial,
+    "<div#page-{id}>",
+    LCaret,
+    Word,
+    Op,
+    Word,
+    RCaret
+);
+scan_test!(
+    angle_interpolated_class_full,
+    "<div.{cool}>",
+    LCaret,
+    Word,
+    Op,
+    Word,
+    RCaret
+);
+scan_test!(
+    angle_interpolated_class_partial,
+    "<div.page-{id}>",
+    LCaret,
+    Word,
+    Op,
+    Word,
+    RCaret
+);
+scan_test!(
+    angle_interpolated_type_full,
+    "<input:{cool}>",
+    LCaret,
+    Word,
+    Op,
+    Word,
+    RCaret
+);
+scan_test!(
+    angle_interpolated_type_partial,
+    "<input:page-{id}>",
+    LCaret,
+    Word,
+    Op,
+    Word,
+    RCaret
+);
+scan_test!(
+    angle_interpolated_name_full,
+    "<input@{cool}>",
+    LCaret,
+    Word,
+    Op,
+    Word,
+    RCaret
+);
+scan_test!(
+    angle_interpolated_name_partial,
+    "<input@page-{id}>",
+    LCaret,
+    Word,
+    Op,
     Word,
     RCaret
 );
@@ -242,7 +315,7 @@ scan_test!(
     "<input:type>",
     LCaret,
     Word,
-    Colon,
+    Op,
     Word,
     RCaret
 );
@@ -347,7 +420,7 @@ scan_test!(
     "<input:submit/> ",
     LCaret,
     Word,
-    Colon,
+    Op,
     Word,
     Slash,
     RCaret
@@ -371,7 +444,7 @@ scan_test!(
     Word,
     Op,
     Word,
-    Colon,
+    Op,
     Word,
     Op,
     Word,
@@ -460,7 +533,7 @@ scan_test!(
     Word,   // class-2
     Equal,  // =
     Word,   // is-it?
-    Colon,  // :
+    Op,     // :
     Word,   // why-not
     Op,     // @
     Word,   // sure

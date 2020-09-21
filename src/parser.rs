@@ -627,7 +627,7 @@ impl<'s, 't> Parser<'s, 't> {
         self.tags += 1;
         self.expect(Syntax::LCaret)?;
         let mut tag = Tag::new(match self.peek_kind() {
-            Syntax::Op | Syntax::Colon => Stmt::String("div".into()),
+            Syntax::Op => Stmt::String("div".into()),
             _ => Stmt::String(self.expect(Syntax::Word)?.to_string()),
         });
 
@@ -643,12 +643,12 @@ impl<'s, 't> Parser<'s, 't> {
                     tag.close();
                     self.tags -= 1;
                 }
-                Syntax::Op | Syntax::Colon if head => match next.literal() {
+                Syntax::Op if head => match next.literal() {
                     "#" => {
                         let id = self.attr()?;
                         if self.peek_is(Syntax::Equal) {
                             self.next();
-                            let cond = self.expr()?;
+                            let cond = self.atom()?;
                             tag.set_id(Stmt::Call("when".into(), vec![cond, id]));
                         } else {
                             tag.set_id(id);
@@ -658,7 +658,7 @@ impl<'s, 't> Parser<'s, 't> {
                         let class = self.attr()?;
                         if self.peek_is(Syntax::Equal) {
                             self.next();
-                            let cond = self.expr()?;
+                            let cond = self.atom()?;
                             tag.add_class(Stmt::Call("when".into(), vec![cond, class]));
                         } else {
                             tag.add_class(class);
@@ -673,7 +673,7 @@ impl<'s, 't> Parser<'s, 't> {
                         let expr = self.attr()?;
                         if self.peek_is(Syntax::Equal) {
                             self.next();
-                            let cond = self.expr()?;
+                            let cond = self.atom()?;
                             tag.add_attr(attr_name, Stmt::Call("when".into(), vec![cond, expr]));
                         } else {
                             tag.add_attr(attr_name.into(), expr);

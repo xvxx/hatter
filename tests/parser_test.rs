@@ -613,29 +613,29 @@ parse_test!(basic_id_shortcut, "<b#shout> Hey yo", {
 
 parse_test!(basic_class_shortcut, "<span.clear> Welcome ", {
     let mut tag = tag!("span");
-    tag.add_class(word!("clear"));
+    tag.add_class(string!("clear"));
     tag.set_body(vec![word!("Welcome")]);
     Stmt::Tag(tag)
 });
 
 parse_test!(basic_classes, "<div.main.markdown> Yada yada... ", {
     let mut tag = tag!("div");
-    tag.add_class(word!("main"));
-    tag.add_class(word!("markdown"));
-    tag.set_body(vec![word!("Yada"), word!("yada")]);
+    tag.add_class(string!("main"));
+    tag.add_class(string!("markdown"));
+    tag.set_body(vec![string!("Yada yada...")]);
     Stmt::Tag(tag)
 });
 
 parse_test!(basic_name_shortcut, "<input@text/>", {
     let mut tag = tag!("input");
-    tag.add_attr(word!("name"), word!("text"));
+    tag.add_attr(word!("name"), string!("text"));
     tag.close();
     Stmt::Tag(tag)
 });
 
 parse_test!(basic_type_shortcut, "<input:submit/> ", {
     let mut tag = tag!("input");
-    tag.add_attr(word!("type"), word!("submit"));
+    tag.add_attr(word!("type"), string!("submit"));
     tag.close();
     Stmt::Tag(tag)
 });
@@ -643,7 +643,7 @@ parse_test!(basic_type_shortcut, "<input:submit/> ", {
 parse_test!(mixed_shortcuts, "<div#main.markdown/> ", {
     let mut tag = tag!("div");
     tag.set_id(word!("main"));
-    tag.add_class(word!("markdown"));
+    tag.add_class(string!("markdown"));
     tag.close();
     Stmt::Tag(tag)
 });
@@ -651,8 +651,8 @@ parse_test!(mixed_shortcuts, "<div#main.markdown/> ", {
 parse_test!(mixed_input_shortcuts, "<input#focused:text@search  /> ", {
     let mut tag = tag!("input");
     tag.set_id(word!("focused"));
-    tag.add_attr(word!("type"), word!("text"));
-    tag.add_attr(word!("name"), word!("search"));
+    tag.add_attr(word!("type"), string!("text"));
+    tag.add_attr(word!("name"), string!("search"));
     tag.close();
     Stmt::Tag(tag)
 });
@@ -696,7 +696,7 @@ parse_test!(shorthand_conditionals, "<div#id=has-id>", {
 
 parse_test!(code_expr_attributes, "<div data-value={2 + 3}>", {
     let mut tag = tag!("div");
-    tag.add_attr(word!("data-value"), call!("+", num!(2), num!(3)));
+    tag.add_attr(word!("data-value"), string!("{2 + 3}"));
     Stmt::Tag(tag)
 });
 
@@ -706,10 +706,10 @@ parse_test!(
     {
         let mut tag = tag!("div");
         tag.set_id(word!("id"));
-        tag.add_class(word!("class1"));
-        tag.add_class(call!("when", word!("is-it?"), word!("class-2")));
-        tag.add_attr(word!("type"), word!("why-not"));
-        tag.add_attr(word!("name"), word!("sure"));
+        tag.add_class(string!("class1"));
+        tag.add_class(call!("when", word!("is-it?"), string!("class-2")));
+        tag.add_attr(word!("type"), string!("why-not"));
+        tag.add_attr(word!("name"), string!("sure"));
         tag.add_attr(word!("onclick"), string!("JS..."));
         tag.add_attr(word!("data-id"), num!(123));
         tag.add_attr(word!("data-{value}"), call!("compute", word!("value")));
@@ -725,7 +725,7 @@ parse_test!(
         let mut tag = tag!("div");
         tag.set_id(word!("my-id"));
         let mut bold = tag!("div");
-        bold.add_class(word!("bold"));
+        bold.add_class(string!("bold"));
         bold.set_body(vec![word!("cool")]);
         tag.set_body(vec![bold.into(), string!("content")]);
         Stmt::Tag(tag)
@@ -737,11 +737,11 @@ parse_test!(
     "<div.with.many.classes> My <em.big>my</>!",
     {
         let mut tag = tag!("div");
-        tag.add_class(word!("with"));
-        tag.add_class(word!("many"));
-        tag.add_class(word!("classes"));
+        tag.add_class(string!("with"));
+        tag.add_class(string!("many"));
+        tag.add_class(string!("classes"));
         let mut em = tag!("em");
-        em.add_class(word!("big"));
+        em.add_class(string!("big"));
         em.set_body(vec![word!("my")]);
         tag.set_body(vec![word!("My"), em.into(), string!("!")]);
         Stmt::Tag(tag)
@@ -760,11 +760,11 @@ parse_test!(
         form.add_attr(word!("method"), string!("GET"));
         form.add_attr(word!("action"), string!("/search"));
         let mut text = tag!("input");
-        text.add_attr(word!("type"), word!("text"));
-        text.add_attr(word!("name"), word!("query"));
+        text.add_attr(word!("type"), string!("text"));
+        text.add_attr(word!("name"), string!("query"));
         text.close();
         let mut btn = tag!("input");
-        btn.add_attr(word!("type"), word!("submit"));
+        btn.add_attr(word!("type"), string!("submit"));
         btn.close();
         form.set_body(vec![text.into(), btn.into()]);
         Stmt::Tag(form)

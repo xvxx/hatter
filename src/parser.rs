@@ -735,6 +735,10 @@ impl<'s, 't> Parser<'s, 't> {
 
     /// Parse a tag attribute, which may have {interpolation}.
     fn attr(&mut self) -> Result<Stmt> {
-        self.string()
+        match self.peek_kind() {
+            Syntax::Word => Ok(Stmt::String(self.next().to_string())),
+            Syntax::String(..) => self.string(),
+            _ => self.error("attr"),
+        }
     }
 }

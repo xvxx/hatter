@@ -174,7 +174,7 @@ scan_test!(
     LCaret,
     Word,
     Word,
-    Op,
+    Equal,
     Word,
     RCaret
 );
@@ -184,7 +184,7 @@ scan_test!(
     LCaret,
     Word,
     Word,
-    Op,
+    Equal,
     JS,
     RCaret,
     Word,
@@ -340,7 +340,7 @@ scan_test!(
     LCaret,
     Word,
     Word,
-    Op,
+    Equal,
     String(false),
     RCaret
 );
@@ -350,10 +350,10 @@ scan_test!(
     LCaret,
     Word,
     Word,
-    Op,
+    Equal,
     String(false),
     Word,
-    Op,
+    Equal,
     String(false),
     Slash,
     RCaret,
@@ -364,7 +364,7 @@ scan_test!(
     LCaret,
     Word,
     Word,
-    Op,
+    Equal,
     JS,
     RCaret,
     Word,
@@ -376,7 +376,7 @@ scan_test!(
     LCaret,
     Word,
     Word,
-    Op,
+    Equal,
     Word,
     Op,
     Word,
@@ -389,7 +389,7 @@ scan_test!(
     Word,
     Op,
     Word,
-    Op,
+    Equal,
     Word,
     RCaret,
 );
@@ -399,41 +399,41 @@ scan_test!(
     LCaret,
     Word,
     Word,
-    Op,
+    Equal,
     Word,
     RCaret
 );
 scan_test!(
     tag_everything,
     "<div#id.class1.class-2=is-it? :why-not @sure onclick=(alert(`it's ${2 + 2}`)) data-id=123 data-{value}=compute(value) />",
-    LCaret,
-    Word,
-    Op,
-    Word,
-    Op,
-    Word,
-    Op,
-    Word,
-    Op,
-    Word,
-    Colon,
-    Word,
-    Op,
-    Word,
-    Word,
-    Op,
-    JS,
-    Word,
-    Op,
-    Number,
-    Word,
-    Op,
-    Word,
-    LParen,
-    Word,
-    RParen,
-    Slash,
-    RCaret
+    LCaret, // <
+    Word,   // div
+    Op,     // #
+    Word,   // id
+    Op,     // .
+    Word,   // class1
+    Op,     // .
+    Word,   // class-2
+    Equal,  // =
+    Word,   // is-it?
+    Colon,  // :
+    Word,   // why-not
+    Op,     // @
+    Word,   // sure
+    Word,   // onclick
+    Equal,  // =
+    JS,     // js
+    Word,   // data-id
+    Equal,  // =
+    Number, // 123
+    Word,   // data-{value}
+    Equal,  // =
+    Word,   // compute
+    LParen, // (
+    Word,   // value
+    RParen, // )
+    Slash,  // /
+    RCaret // >
 );
 
 ////

@@ -123,8 +123,8 @@ scan_test!(
     Word
 );
 scan_test!(word_ending_with_question, "word-ending-in?", Word);
-scan_test!(and_is_an_op, "and", Op);
-scan_test!(or_is_an_op, "or", Op);
+scan_test!(and_is_a_word, "and", Word);
+scan_test!(or_is_a_word, "or", Word);
 scan_test!(not_is_a_word, "not", Word);
 scan_test!(return_is_a_word, "return", Word);
 scan_test!(break_is_a_word, "break", Word);

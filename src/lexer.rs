@@ -387,7 +387,6 @@ impl<'s> Lexer<'s> {
     /// Set `in_code` to `true` if the first char of the word is `{`
     fn scan_word(&mut self, mut in_code: bool) -> Result<Syntax> {
         let mut curlies = 0;
-        let start = self.pos;
 
         while let Some(&c) = self.peek() {
             if in_code {
@@ -414,10 +413,7 @@ impl<'s> Lexer<'s> {
             self.next();
         }
 
-        match &self.source[start..=self.pos] {
-            "and" | "or" => Ok(Syntax::Op),
-            _ => Ok(Syntax::Word),
-        }
+        Ok(Syntax::Word)
     }
 
     /// Determines if < is opening a tag or just a regular `<` sign

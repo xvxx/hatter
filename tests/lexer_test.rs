@@ -179,6 +179,50 @@ scan_test!(
     RCaret
 );
 scan_test!(
+    angle_interpolated_attr_name_partial,
+    "<div my-{name}-name=true/>",
+    LCaret,
+    Word,
+    Word,
+    Equal,
+    Word,
+    Slash,
+    RCaret
+);
+scan_test!(
+    angle_interpolated_attr_name_full,
+    "<div {name}=true/>",
+    LCaret,
+    Word,
+    Word,
+    Equal,
+    Word,
+    Slash,
+    RCaret
+);
+scan_test!(
+    angle_interpolated_attr_value_partial,
+    "<div data-name=some-{thing}/>",
+    LCaret,
+    Word,
+    Word,
+    Equal,
+    Word,
+    Slash,
+    RCaret
+);
+scan_test!(
+    angle_interpolated_attr_value_full,
+    "<div data-name={true}/>",
+    LCaret,
+    Word,
+    Word,
+    Equal,
+    Word,
+    Slash,
+    RCaret
+);
+scan_test!(
     angle_js,
     "<span onclick=(alert('He he he!'))>Something</span>",
     LCaret,

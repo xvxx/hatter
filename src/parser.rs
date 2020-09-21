@@ -80,6 +80,11 @@ impl<'s, 't> Parser<'s, 't> {
         self.peek_kind() == kind
     }
 
+    /// Check kind of the token after peek().
+    fn peek2_is(&mut self, kind: Syntax) -> bool {
+        self.peek2().filter(|t| t.kind == kind).is_some()
+    }
+
     /// Will self.next() deliver EOF?
     fn peek_eof(&mut self) -> bool {
         self.peek().is_none()
@@ -237,25 +242,24 @@ impl<'s, 't> Parser<'s, 't> {
 
     /// Parse a code expression.
     fn expr(&mut self) -> Result<Stmt> {
-        let left = self.atom()?;
-        match self.peek_kind() {
-            // Two or more words in a row become a String.
-            Syntax::Word => {
-                let mut out = left.to_string();
-                while !self.peek_eof() {
-                    match self.peek_kind() {
-                        Syntax::Word => {
-                            out.push(' ');
-                            out.push_str(self.next().to_str());
-                        }
-                        Syntax::Op => out.push_str(self.next().to_str()),
-                        _ => return Ok(out.into()),
+        // Two or more words in a row become a String.
+        if self.peek_is(Syntax::Word) && self.peek2_is(Syntax::Word) {
+            let mut out = self.next().to_string();
+            while !self.peek_eof() {
+                match self.peek_kind() {
+                    Syntax::Word => {
+                        out.push(' ');
+                        out.push_str(self.next().to_str());
                     }
+                    Syntax::Op => out.push_str(self.next().to_str()),
+                    _ => return Ok(out.into()),
                 }
             }
-            // Only keep parsing if next token is an Op.
-            Syntax::Op => {}
-            _ => return Ok(left),
+        }
+
+        let left = self.atom()?;
+        if !self.peek_is(Syntax::Op) {
+            return Ok(left);
         }
 
         let next = self.peek().unwrap();
@@ -435,7 +439,7 @@ impl<'s, 't> Parser<'s, 't> {
                 // Tag
                 Syntax::LCaret => {
                     // Look for </closing> tag and bail if found.
-                    if !indented && self.peek2().filter(|p| p.to_str() == "/").is_some() {
+                    if !indented && self.peek2_is(Syntax::Slash) {
                         break;
                     }
                     // Otherwise parse as regular tag expression.
@@ -575,7 +579,7 @@ impl<'s, 't> Parser<'s, 't> {
 
     /// Parse a <tag> and its contents or a </tag>.
     fn tag(&mut self) -> Result<Stmt> {
-        if self.peek2().filter(|p| p.literal() == "/").is_some() {
+        if self.peek2_is(Syntax::Slash) {
             self.close_tag()?;
             return Ok(Stmt::None);
         }

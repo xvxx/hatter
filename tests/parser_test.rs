@@ -605,9 +605,9 @@ parse_test!(nested_tag, "<b> Hey <i> there", {
 });
 
 parse_test!(close_shortcut, "<b> Hey <i> there </> fren ", {
-    let mut b = tag!("b");
     let mut i = tag!("i");
     i.set_body(vec![word!("there")]);
+    let mut b = tag!("b");
     b.set_body(vec![word!("Hey"), i.into(), word!("fren")]);
     Stmt::Tag(b)
 });
@@ -685,20 +685,23 @@ parse_test!(
 
 parse_test!(js_attributes, "<div onclick=(alert('lol'))>Click me", {
     let mut tag = tag!("div");
-    tag.add_attr(string!("onclick"), string!("javascript..."));
+    tag.add_attr(
+        string!("onclick"),
+        string!("(function(e){ (alert('lol')) })(event);"),
+    );
     tag.set_body(vec![string!("Click me")]);
     Stmt::Tag(tag)
 });
 
 parse_test!(simple_code_attributes, "<div data-id=page.id>", {
     let mut tag = tag!("div");
-    tag.add_attr(string!("data-id"), call!(".", word!("page"), word!("id")));
+    tag.add_attr(string!("data-id"), call!(".", word!("page"), string!("id")));
     Stmt::Tag(tag)
 });
 
 parse_test!(shorthand_conditionals, "<div#id=has-id>", {
     let mut tag = tag!("div");
-    tag.set_id(call!("when", word!("has-id"), word!("id")));
+    tag.set_id(call!("when", word!("has-id"), string!("id")));
     Stmt::Tag(tag)
 });
 
@@ -840,7 +843,7 @@ parse_test!(
 <ul#menu>
     <li.item#burger> Burger
     <li.item#fries> Fries
-    <li.item#milkshake> Milkshake
+    <li.item#shake> Milkshake
 "#,
     {
         let mut ul = tag!("ul");

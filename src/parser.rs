@@ -257,9 +257,24 @@ impl<'s, 't> Parser<'s, 't> {
     /// Parse a code expression.
     fn expr(&mut self) -> Result<Stmt> {
         let left = self.atom()?;
-
-        if self.peek_kind() != Syntax::Op {
-            return Ok(left);
+        match self.peek_kind() {
+            // Two or more words in a row become a String.
+            Syntax::Word => {
+                let mut out = left.to_string();
+                while !self.peek_eof() {
+                    match self.peek_kind() {
+                        Syntax::Word => {
+                            out.push(' ');
+                            out.push_str(self.next().to_str());
+                        }
+                        Syntax::Op => out.push_str(self.next().to_str()),
+                        _ => return Ok(out.into()),
+                    }
+                }
+            }
+            // Only keep parsing if next token is an Op.
+            Syntax::Op => {}
+            _ => return Ok(left),
         }
 
         let next = self.peek().unwrap();
@@ -636,7 +651,7 @@ impl<'s, 't> Parser<'s, 't> {
         self.expect(Syntax::LCaret)?;
         let mut tag = Tag::new(match self.peek_kind() {
             Syntax::Op => Stmt::String("div".into()),
-            _ => self.attr()?,
+            _ => Stmt::String(self.expect(Syntax::Word)?.to_string()),
         });
 
         loop {

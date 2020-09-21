@@ -39,6 +39,11 @@ impl<'s> Token<'s> {
         }
     }
 
+    /// Also...
+    pub fn to_str(&self) -> &str {
+        self.literal()
+    }
+
     /// Create a string of the literal value.
     pub fn to_string(&self) -> String {
         self.literal().to_string()

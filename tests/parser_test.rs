@@ -8,7 +8,7 @@ macro_rules! bx {
 
 macro_rules! tag {
     ($name:expr) => {
-        Tag::new(Stmt::Word($name.into()))
+        Tag::new(Stmt::String($name.into()))
     };
 }
 
@@ -154,6 +154,14 @@ two
 three
 """"#,
     string!("\none\ntwo\nthree\n")
+);
+
+parse_test!(one_word_is_just_a_word, "one", word!("one"),);
+parse_test!(two_words_are_a_string, "one two", string!("one two"),);
+parse_test!(
+    two_words_with_op_are_a_string,
+    "One and... two!",
+    string!("One and... two!")
 );
 
 ////
@@ -584,7 +592,7 @@ parse_test!(another_self_closing_tag, "<end/>", {
 
 parse_test!(basic_tag, "<b> Hey there", {
     let mut tag = tag!("b");
-    tag.set_body(vec![word!("Hey"), word!("there")]);
+    tag.set_body(vec![string!("Hey there")]);
     Stmt::Tag(tag)
 });
 

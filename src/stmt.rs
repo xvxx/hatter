@@ -25,6 +25,12 @@ impl From<Tag> for Stmt {
     }
 }
 
+impl From<String> for Stmt {
+    fn from(s: String) -> Stmt {
+        Stmt::String(s)
+    }
+}
+
 impl Stmt {
     pub fn to_string(&self) -> String {
         match self {

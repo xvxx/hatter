@@ -251,21 +251,6 @@ impl<'s, 't> Parser<'s, 't> {
 
     /// Parse a code expression.
     fn expr(&mut self) -> Result<Stmt> {
-        // Two or more words in a row become a String.
-        if self.peek_is(Syntax::Word) && self.peek2_is(Syntax::Word) {
-            let mut out = self.next().to_string();
-            while !self.peek_eof() {
-                match self.peek_kind() {
-                    Syntax::Word => {
-                        out.push(' ');
-                        out.push_str(self.next().to_str());
-                    }
-                    Syntax::Op => out.push_str(self.next().to_str()),
-                    _ => return Ok(out.into()),
-                }
-            }
-        }
-
         let left = self.atom()?;
         if !self.peek_is(Syntax::Op) {
             return Ok(left);
@@ -516,7 +501,27 @@ impl<'s, 't> Parser<'s, 't> {
                                 });
                                 self.expect(Syntax::Semi)?;
                             }
-                            _ => block.push(self.expr()?),
+                            _ => {
+                                // two words in a row become a string
+                                if self
+                                    .peek2()
+                                    .filter(|p| matches!(p.kind, Syntax::Word | Syntax::Comma))
+                                    .is_some()
+                                {
+                                    let mut out = self.next().to_string();
+                                    while !self.peek_eof() {
+                                        match self.peek_kind() {
+                                            Syntax::Word => out.push(' '),
+                                            Syntax::Op | Syntax::Comma => {}
+                                            _ => break,
+                                        }
+                                        out.push_str(self.next().to_str())
+                                    }
+                                    block.push(out.into());
+                                } else {
+                                    block.push(self.expr()?);
+                                }
+                            }
                         }
                     }
                 }

@@ -711,6 +711,115 @@ parse_test!(code_expr_attributes, "<div data-value={2 + 3}>", {
     Stmt::Tag(tag)
 });
 
+parse_test!(code_expr_attribute_names, "<div data-{2 + 2}=true>", {
+    let mut tag = tag!("div");
+    tag.add_attr(
+        call!("concat", string!("data-"), call!("+", num!(2), num!(2))),
+        boo!(true),
+    );
+    Stmt::Tag(tag)
+});
+
+parse_test!(angle_interpolated_id_full, "<div#{cool}>", {
+    let mut tag = tag!("div");
+    tag.set_id(word!("cool"));
+    Stmt::Tag(tag)
+});
+
+parse_test!(angle_interpolated_id_partial, "<div#page-{id}>", {
+    let mut tag = tag!("div");
+    tag.set_id(call!("concat", string!("page-"), word!("cool")));
+    Stmt::Tag(tag)
+});
+
+parse_test!(angle_interpolated_class_full, "<div.{cool}>", {
+    let mut tag = tag!("div");
+    tag.add_class(word!("cool"));
+    Stmt::Tag(tag)
+});
+
+parse_test!(angle_interpolated_class_partial, "<div.page-{id}>", {
+    let mut tag = tag!("div");
+    tag.add_class(call!("concat", string!("page-"), word!("cool")));
+    Stmt::Tag(tag)
+});
+
+parse_test!(angle_interpolated_type_full, "<input:{cool}>", {
+    let mut tag = tag!("input");
+    tag.add_attr(string!("type"), word!("cool"));
+    Stmt::Tag(tag)
+});
+
+parse_test!(angle_interpolated_type_partial, "<input:page-{id}>", {
+    let mut tag = tag!("input");
+    tag.add_attr(
+        string!("type"),
+        call!("concat", string!("page-"), word!("id")),
+    );
+    Stmt::Tag(tag)
+});
+
+parse_test!(angle_interpolated_name_full, "<input@{cool}>", {
+    let mut tag = tag!("input");
+    tag.add_attr(string!("name"), word!("cool"));
+    Stmt::Tag(tag)
+});
+
+parse_test!(angle_interpolated_name_partial, "<input@page-{id}>", {
+    let mut tag = tag!("input");
+    tag.add_attr(
+        string!("name"),
+        call!("concat", string!("page-"), word!("id")),
+    );
+    Stmt::Tag(tag)
+});
+
+parse_test!(
+    angle_interpolated_attr_name_partial,
+    "<div my-{name}-name=true/>",
+    {
+        let mut tag = tag!("div");
+        tag.add_attr(
+            call!("concat", string!("my-"), word!("name"), string!("-name")),
+            boo!(true),
+        );
+        tag.close();
+        Stmt::Tag(tag)
+    }
+);
+
+parse_test!(angle_interpolated_attr_name_full, "<div {name}=true/>", {
+    let mut tag = tag!("div");
+    tag.add_attr(word!("name"), boo!(true));
+    tag.close();
+    Stmt::Tag(tag)
+});
+
+parse_test!(
+    angle_interpolated_attr_value_partial,
+    "<div data-name=some-{thing}/>",
+    {
+        let mut tag = tag!("div");
+        tag.add_attr(
+            string!("data-name"),
+            call!("concat", string!("some-"), word!("thing")),
+        );
+        tag.close();
+        Stmt::Tag(tag)
+    }
+);
+
+parse_test!(
+    angle_interpolated_attr_value_full,
+    "<div data-name={true}/>",
+    {
+        let mut tag = tag!("div");
+        tag.add_attr(string!("data-name"), boo!(true));
+        tag.close();
+        Stmt::Tag(tag)
+    }
+);
+
 parse_test!(
     tag_everything,
     "<div#id.class1.class-2=is-it? :why-not @sure onclick=(alert(`it's ${2 + 2}`)) data-id=123 data-{value}=compute(value) />",
@@ -723,7 +832,7 @@ parse_test!(
         tag.add_attr(string!("name"), string!("sure"));
         tag.add_attr(string!("onclick"), string!("(function(e){ (alert(`it's ${2 + 2}`)) })(event);"));
         tag.add_attr(string!("data-id"), num!(123));
-        tag.add_attr(string!("data-{value}"), call!("compute", word!("value")));
+        tag.add_attr(call!("concat", string!("data-"), word!("value")), call!("compute", word!("value")));
         tag.close();
         Stmt::Tag(tag)
     }

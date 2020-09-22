@@ -1,4 +1,4 @@
-use crate::{Error, Result, Syntax};
+use crate::{Error, ErrorKind, Result, Syntax};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Token<'s> {
@@ -62,14 +62,14 @@ impl<'s> Token<'s> {
         self.literal()
             .replace('_', "")
             .parse::<isize>()
-            .map_err(|e| Error::new(e.to_string(), self.pos, 1))
+            .map_err(|e| Error::new(ErrorKind::ParseError, e.to_string(), self.pos, 1))
     }
 
     /// Convert into native number or error. No weak typing.
     pub fn to_f64(&self) -> Result<f64> {
         self.literal()
             .parse::<f64>()
-            .map_err(|e| Error::new(e.to_string(), self.pos, 1))
+            .map_err(|e| Error::new(ErrorKind::ParseError, e.to_string(), self.pos, 1))
     }
 
     /// 0b10101 to isize

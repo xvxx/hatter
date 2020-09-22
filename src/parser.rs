@@ -131,14 +131,22 @@ impl<'s, 't> Parser<'s, 't> {
 
     /// Trigger parse error for next() token.
     fn error<T, S: AsRef<str>>(&mut self, msg: S) -> Result<T> {
+        use crate::ErrorKind::ParseError;
+
         Err(if let Some(got) = self.try_next() {
             Error::new(
+                ParseError,
                 format!("expected {}, got {:?}", msg.as_ref(), got.kind),
                 got.pos,
                 got.len,
             )
         } else {
-            Error::new(format!("expected {}, got EOF", msg.as_ref()), 0, 0)
+            Error::new(
+                ParseError,
+                format!("expected {}, got EOF", msg.as_ref()),
+                0,
+                0,
+            )
         })
     }
 

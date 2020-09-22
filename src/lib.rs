@@ -30,8 +30,8 @@ pub mod repl;
 
 pub use {
     builtins::builtins,
-    env::{eval, render, Env, Scope},
-    error::{print_error, Error},
+    env::{eval, render, Env, Jump, Scope},
+    error::{print_error, Error, ErrorKind},
     lexer::scan,
     parser::parse,
     stmt::{Stmt, Tag},

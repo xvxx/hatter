@@ -1,16 +1,34 @@
 #![allow(unused_macros)]
-use std::{error, fmt, io, num};
+use {
+    crate::Jump,
+    std::{error, fmt, io, num},
+};
+
+/// What kind of error?
+#[derive(Debug, PartialEq)]
+pub enum ErrorKind {
+    SyntaxError,
+    ParseError,
+    RuntimeError,
+    Jump(Jump),
+}
 
 #[derive(Debug, PartialEq)]
 pub struct Error {
+    pub kind: ErrorKind,
     pub details: String,
     pub pos: usize,
     pub len: usize,
 }
 
 impl Error {
-    pub fn new(details: String, pos: usize, len: usize) -> Error {
-        Error { details, pos, len }
+    pub fn new(kind: ErrorKind, details: String, pos: usize, len: usize) -> Error {
+        Error {
+            kind,
+            details,
+            pos,
+            len,
+        }
     }
 }
 
@@ -29,6 +47,7 @@ impl fmt::Display for Error {
 impl From<num::ParseIntError> for Error {
     fn from(error: num::ParseIntError) -> Self {
         Error {
+            kind: ErrorKind::ParseError,
             details: format!("{}", error),
             pos: 0,
             len: 0,
@@ -39,6 +58,7 @@ impl From<num::ParseIntError> for Error {
 impl From<io::Error> for Error {
     fn from(error: io::Error) -> Self {
         Error {
+            kind: ErrorKind::RuntimeError,
             details: format!("{}", error),
             pos: 0,
             len: 0,
@@ -55,8 +75,8 @@ impl From<Error> for io::Error {
 /// Create an error with line and col information.
 macro_rules! scan_error {
     ($pos:expr, $len:expr, $msg:expr) => {{
-        use crate::Error;
-        Err(Error::new($msg.into(), $pos, $len))
+        use crate::{Error, ErrorKind};
+        Err(Error::new(ErrorKind::SyntaxError, $msg.into(), $pos, $len))
     }};
     ($pos:expr, $len:expr, $msg:expr, $($args:expr),+) => {
         scan_error!($pos, $len, format!($msg, $($args),*));
@@ -66,19 +86,27 @@ macro_rules! scan_error {
 /// Create an error at a position in the source.
 macro_rules! pos_error {
     ($pos:expr, $msg:expr) => {{
-        use crate::Error;
-        Err(Error::new($msg.into(), $pos, 1))
+        use crate::{Error, ErrorKind};
+        Err(Error::new(ErrorKind::ParseError, $msg.into(), $pos, 1))
     }};
     ($pos:expr, $msg:expr, $($args:expr),+) => {
         pos_error!($pos, format!($msg, $($args),+));
     };
 }
 
+/// Create a Jump (break, continue, etc)
+macro_rules! jump {
+    ($jump:expr) => {{
+        use crate::{Error, ErrorKind};
+        Err(Error::new(ErrorKind::Jump($jump), "".to_string(), 0, 0))
+    }};
+}
+
 /// Convenient way to create an Err(Error{}).
 macro_rules! error {
     ($msg:expr) => {{
-        use crate::Error;
-        Err(Error::new($msg.into(), 0, 0))
+        use crate::{Error, ErrorKind};
+        Err(Error::new(ErrorKind::RuntimeError, $msg.into(), 0, 0))
     }};
     ($msg:expr, $($args:expr),*) => {
         error!(format!($msg, $($args),*));

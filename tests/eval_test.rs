@@ -15,7 +15,26 @@ macro_rules! num {
     };
 }
 
+macro_rules! string {
+    ($s:expr) => {
+        Value::from($s)
+    };
+}
+
+macro_rules! list {
+    ($($args:expr),+) => {
+        Value::from(vec![$($args),+])
+    };
+}
+
 #[test]
 fn it_works() {
-    assert_eq!(num!(4), eval!("2 + 2"));
+    assert_eq!(eval!("22"), num!(22));
+    assert_eq!(eval!("2 + 2"), num!(4));
+    assert_eq!(eval!("Hayay!"), string!("'Hayay!'"));
+}
+
+#[test]
+fn test_list() {
+    assert_eq!(eval!("[1,2,3]"), list![num!(1), num!(2), num!(3)]);
 }

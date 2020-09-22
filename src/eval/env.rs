@@ -245,29 +245,36 @@ impl Env {
 
         // id
         if tag.id.is_some() {
-            out.push_str(&format!("id='{}'", self.eval(&tag.id)?));
-            out.push(' ');
+            let val = self.eval(&tag.id)?;
+            if val.to_bool() {
+                out.push_str(&format!("id='{}'", val.to_string()));
+                out.push(' ');
+            }
         }
 
         // classes
         if !tag.classes.is_empty() {
-            out.push_str(&format!(
-                "class='{}'",
-                tag.classes
-                    .iter()
-                    .map(|class| self.eval(class).and_then(|v| Ok(v.to_string())))
-                    .collect::<Result<Vec<_>>>()?
-                    .join(" ")
-            ));
+            let mut classes = vec![];
+            for class in &tag.classes {
+                let val = self.eval(class)?;
+                if val.to_bool() {
+                    classes.push(val.to_string());
+                }
+            }
+            out.push_str(&format!("class='{}'", classes.join(" ")));
             out.push(' ');
         }
 
         // attributes
         for (name, val) in &tag.attrs {
+            let val = self.eval(val)?;
+            if !val.to_bool() {
+                continue;
+            }
             out.push_str(&format!(
                 "{}='{}'",
                 self.eval(name)?.to_string(),
-                self.eval(val)?.to_string()
+                val.to_string()
             ));
             out.push(' ');
         }

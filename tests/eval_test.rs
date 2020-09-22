@@ -84,3 +84,36 @@ for x in [10,20,30,40]
         "10\n30\n40\n"
     );
 }
+
+#[test]
+fn test_return() {
+    assert_render!(
+        r#"
+def test()
+    print("OK")
+test()
+"#,
+        "OK\n"
+    );
+
+    assert_eval!(
+        r#"
+def test()
+    return 1 + 1
+test()
+"#,
+        num!(2)
+    );
+
+    assert_render!(
+        r#"
+def test()
+    if true
+        print("BYE")
+        return
+    print("OK!")
+test()
+"#,
+        "BYE\n"
+    );
+}

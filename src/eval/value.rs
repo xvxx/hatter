@@ -48,7 +48,7 @@ impl fmt::Debug for Value {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use Value::*;
         match self {
-            None => f.debug_struct("None").finish(),
+            None => write!(f, "None"),
             Bool(b) => write!(f, "{}", b),
             Number(num) => write!(f, "{}", num),
             String(s) => write!(f, r#""{}""#, s),

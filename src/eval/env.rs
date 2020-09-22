@@ -142,7 +142,7 @@ impl Env {
     /// Evaluate one statement, returning its Value.
     fn eval(&mut self, stmt: &Stmt) -> Result<Value> {
         Ok(match stmt {
-            Stmt::None => return error!("Stmt::None should never make it to eval()"),
+            Stmt::None => Value::None,
             Stmt::Bool(x) => x.into(),
             Stmt::Number(x) => x.into(),
             Stmt::String(x) => x.into(),

@@ -172,8 +172,19 @@ impl Env {
                 }
             }
             Stmt::Call(name, args) => {
-                if let Some(Value::Fn { .. }) = self.lookup(&name) {
-                    unimplemented!()
+                if let Some(Value::Fn { params, body }) = self.lookup(&name) {
+                    let params = params.clone();
+                    let body = body.clone();
+                    self.push_scope();
+                    for (i, a) in args.iter().enumerate() {
+                        if let Some(name) = params.get(i) {
+                            let val = self.eval(&a)?;
+                            self.set(name, val);
+                        }
+                    }
+                    let out = self.block(&body)?;
+                    self.pop_scope();
+                    out
                 } else if let Some(f) = self.helpers.get(name) {
                     let f = f.clone();
                     let args = args

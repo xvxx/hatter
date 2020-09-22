@@ -225,6 +225,12 @@ into_number_as!(&isize, i32);
 into_bool!(bool);
 into_bool!(&bool);
 
+impl From<&Value> for Value {
+    fn from(v: &Value) -> Value {
+        v.clone()
+    }
+}
+
 impl<T: Into<Value>> From<Vec<T>> for Value {
     fn from(vec: Vec<T>) -> Self {
         Value::List(vec.into_iter().map(val).collect())

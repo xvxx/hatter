@@ -38,6 +38,14 @@ impl From<&str> for Stmt {
 }
 
 impl Stmt {
+    pub fn is_some(&self) -> bool {
+        !self.is_none()
+    }
+
+    pub fn is_none(&self) -> bool {
+        matches!(self, Stmt::None)
+    }
+
     pub fn to_string(&self) -> String {
         match self {
             Stmt::None => "Stmt::None".to_string(),

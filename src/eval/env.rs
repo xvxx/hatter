@@ -2,7 +2,7 @@ use {
     crate::{builtins, Builtin, ErrorKind, Result, Stmt, Tag, Value},
     std::{
         collections::{BTreeMap, HashMap},
-        ops,
+        mem, ops,
         rc::Rc,
     },
 };
@@ -60,7 +60,7 @@ impl Env {
 
     /// Return and clear output.
     pub fn out(&mut self) -> String {
-        std::mem::replace(&mut self.out, String::new())
+        mem::replace(&mut self.out, String::new())
     }
 
     /// Nearest (currently active) scope.
@@ -133,7 +133,7 @@ impl Env {
         for stmt in stmts {
             out = self.eval(&stmt)?;
             if !matches!(out, Value::None) {
-                self.out.push_str(&out.to_string());
+                self.print(&out);
             }
         }
         Ok(out)
@@ -233,8 +233,68 @@ impl Env {
         })
     }
 
-    fn eval_tag(&mut self, _tag: &Tag) -> Result<Value> {
-        Ok(Value::None)
+    /// Turn a <tag> into a Value::String.
+    fn eval_tag(&mut self, tag: &Tag) -> Result<Value> {
+        let mut out = String::new();
+        out.push('<');
+
+        // tag name
+        let tagname = self.eval(&tag.tag)?.to_string();
+        out.push_str(&tagname);
+        out.push(' ');
+
+        // id
+        if tag.id.is_some() {
+            out.push_str(&format!("id='{}'", self.eval(&tag.id)?));
+            out.push(' ');
+        }
+
+        // classes
+        if !tag.classes.is_empty() {
+            out.push_str(&format!(
+                "class='{}'",
+                tag.classes
+                    .iter()
+                    .map(|class| self.eval(class).and_then(|v| Ok(v.to_string())))
+                    .collect::<Result<Vec<_>>>()?
+                    .join(" ")
+            ));
+            out.push(' ');
+        }
+
+        // attributes
+        for (name, val) in &tag.attrs {
+            out.push_str(&format!(
+                "{}='{}'",
+                self.eval(name)?.to_string(),
+                self.eval(val)?.to_string()
+            ));
+            out.push(' ');
+        }
+
+        // check for self-closing tag
+        if tag.closed {
+            out.push('/');
+            out.push('>');
+            return Ok(out.into());
+        }
+
+        // trim trailing space
+        if matches!(out.bytes().last(), Some(b' ')) {
+            out.truncate(out.len() - 1);
+        }
+
+        // close tag
+        out.push('>');
+
+        // body
+        let old_out = self.out();
+        self.block(&tag.body)?;
+        out.push_str(&mem::replace(&mut self.out, old_out));
+
+        // closing tag
+        out.push_str(&format!("</{}>", tagname));
+        Ok(out.into())
     }
 
     /// Evaluate a for loop.

@@ -157,401 +157,242 @@ scan_test!(or_a_closing_tag, "</div>", LCaret, Slash, Word, RCaret);
 // Tags
 
 scan_test!(angle_is_op, "<", Op);
-scan_test!(
-    angle_followed_by_word_is_not_op,
-    "<div>",
-    LCaret,
-    Word,
-    RCaret
-);
 scan_test!(angle_id, "<#id>", LCaret, Op, Word, RCaret);
 scan_test!(angle_class, "<.class>", LCaret, Op, Word, RCaret);
 scan_test!(angle_type, "<:type>", LCaret, Op, Word, RCaret);
 scan_test!(angle_name, "<@name>", LCaret, Op, Word, RCaret);
 
-scan_test!(
-    angle_interpolated,
-    "<div class=something-{2 + 2}-classy>",
-    LCaret,
-    Word,
-    Word,
-    Equal,
-    Word,
-    RCaret
-);
-scan_test!(
-    angle_interpolated_id_full,
-    "<div#{cool}>",
-    LCaret,
-    Word,
-    Op,
-    Word,
-    RCaret
-);
-scan_test!(
-    angle_interpolated_id_partial,
-    "<div#page-{id}>",
-    LCaret,
-    Word,
-    Op,
-    Word,
-    RCaret
-);
-scan_test!(
-    angle_interpolated_class_full,
-    "<div.{cool}>",
-    LCaret,
-    Word,
-    Op,
-    Word,
-    RCaret
-);
-scan_test!(
-    angle_interpolated_class_partial,
-    "<div.page-{id}>",
-    LCaret,
-    Word,
-    Op,
-    Word,
-    RCaret
-);
-scan_test!(
-    angle_interpolated_type_full,
-    "<input:{cool}>",
-    LCaret,
-    Word,
-    Op,
-    Word,
-    RCaret
-);
-scan_test!(
-    angle_interpolated_type_partial,
-    "<input:page-{id}>",
-    LCaret,
-    Word,
-    Op,
-    Word,
-    RCaret
-);
-scan_test!(
-    angle_interpolated_name_full,
-    "<input@{cool}>",
-    LCaret,
-    Word,
-    Op,
-    Word,
-    RCaret
-);
-scan_test!(
-    angle_interpolated_name_partial,
-    "<input@page-{id}>",
-    LCaret,
-    Word,
-    Op,
-    Word,
-    RCaret
-);
-scan_test!(
-    angle_interpolated_attr_name_partial,
-    "<div my-{name}-name=true/>",
-    LCaret,
-    Word,
-    Word,
-    Equal,
-    Word,
-    Slash,
-    RCaret
-);
-scan_test!(
-    angle_interpolated_attr_name_full,
-    "<div {name}=true/>",
-    LCaret,
-    Word,
-    Word,
-    Equal,
-    Word,
-    Slash,
-    RCaret
-);
-scan_test!(
-    angle_interpolated_attr_value_partial,
-    "<div data-name=some-{thing}/>",
-    LCaret,
-    Word,
-    Word,
-    Equal,
-    Word,
-    Slash,
-    RCaret
-);
-scan_test!(
-    angle_interpolated_attr_value_full,
-    "<div data-name={true}/>",
-    LCaret,
-    Word,
-    Word,
-    Equal,
-    Word,
-    Slash,
-    RCaret
-);
-scan_test!(
-    angle_js,
-    "<span onclick=(alert('He he he!'))>Something</span>",
-    LCaret,
-    Word,
-    Word,
-    Equal,
-    JS,
-    RCaret,
-    Word,
-    LCaret,
-    Slash,
-    Word,
-    RCaret,
-);
-scan_test!(
-    angle_input_type,
-    "<input:type>",
-    LCaret,
-    Word,
-    Op,
-    Word,
-    RCaret
-);
-scan_test!(
-    angle_input_name,
-    "<input@name>",
-    LCaret,
-    Word,
-    Op,
-    Word,
-    RCaret
-);
+#[rustfmt::skip]
+mod skipfmt {
+    use super::*;
+
+    scan_test!(angle_followed_by_word_is_not_op,
+        "<div>",
+        LCaret, Word, RCaret
+    );
+
+    scan_test!(angle_interpolated,
+        "<div class=something-{2 + 2}-classy>",
+        LCaret, Word, Word, Equal, Word, RCaret
+    );
+
+    scan_test!(angle_interpolated_id_full,
+        "<div#{cool}>",
+        LCaret, Word, Op, Word, RCaret
+    );
+
+    scan_test!(angle_interpolated_id_partial,
+        "<div#page-{id}>",
+        LCaret, Word, Op, Word, RCaret
+    );
+
+    scan_test!(angle_interpolated_class_full,
+        "<div.{cool}>",
+        LCaret, Word, Op, Word, RCaret
+    );
+
+    scan_test!(angle_interpolated_class_partial,
+        "<div.page-{id}>",
+        LCaret, Word, Op, Word, RCaret
+    );
+
+    scan_test!(angle_interpolated_type_full,
+        "<input:{cool}>",
+        LCaret, Word, Op, Word, RCaret
+    );
+
+    scan_test!(angle_interpolated_type_partial,
+        "<input:page-{id}>",
+        LCaret, Word, Op, Word, RCaret
+    );
+
+    scan_test!(angle_interpolated_name_full,
+        "<input@{cool}>",
+        LCaret, Word, Op, Word, RCaret
+    );
+
+    scan_test!(angle_interpolated_name_partial,
+        "<input@page-{id}>",
+        LCaret, Word, Op, Word, RCaret
+    );
+
+    scan_test!(angle_interpolated_attr_name_partial,
+        "<div my-{name}-name=true/>",
+        LCaret, Word, Word, Equal, Word, Slash, RCaret
+    );
+
+    scan_test!(angle_interpolated_attr_name_full,
+        "<div {name}=true/>",
+        LCaret, Word, Word, Equal, Word, Slash, RCaret
+    );
+
+    scan_test!(angle_interpolated_attr_value_partial,
+        "<div data-name=some-{thing}/>",
+        LCaret, Word, Word, Equal, Word, Slash, RCaret
+    );
+
+    scan_test!(angle_interpolated_attr_value_full,
+        "<div data-name={true}/>",
+        LCaret, Word, Word, Equal, Word, Slash, RCaret
+    );
+
+    scan_test!(angle_js,
+        "<span onclick=(alert('He he he!'))>Something</span>",
+        LCaret, Word, Word, Equal, JS, RCaret, Word, LCaret,
+        Slash, Word, RCaret,
+    );
+
+    scan_test!(angle_input_type,
+        "<input:type>",
+        LCaret, Word, Op, Word, RCaret
+    );
+
+    scan_test!(angle_input_name,
+        "<input@name>",
+        LCaret, Word, Op, Word, RCaret
+    );
+}
 
 ////
 // Tag
 
 scan_test!(basic_tag, "<b> Hey there", LCaret, Word, RCaret, Word, Word);
-scan_test!(
-    self_closing_tag,
-    "<end/> ok",
-    LCaret,
-    Word,
-    Slash,
-    RCaret,
-    Word
-);
-scan_test!(
-    nested_tag,
-    "<b> Hey <i> there",
-    LCaret,
-    Word,
-    RCaret,
-    Word,
-    LCaret,
-    Word,
-    RCaret,
-    Word
-);
-scan_test!(
-    close_shortcut,
-    "<b> Hey <i> there </> fren ",
-    LCaret,
-    Word,
-    RCaret,
-    Word,
-    LCaret,
-    Word,
-    RCaret,
-    Word,
-    LCaret,
-    Slash,
-    RCaret,
-    Word
-);
-scan_test!(
-    basic_id_shortcut,
-    "<b#shout> Hey yo",
-    LCaret,
-    Word,
-    Op,
-    Word,
-    RCaret,
-    Word,
-    Word
-);
-scan_test!(
-    basic_class_shortcut,
-    "<span.clear> Welcome ",
-    LCaret,
-    Word,
-    Op,
-    Word,
-    RCaret,
-    Word
-);
-scan_test!(
-    basic_classes,
-    "<div.main.markdown> Yada yada... ",
-    LCaret,
-    Word,
-    Op,
-    Word,
-    Op,
-    Word,
-    RCaret,
-    Word,
-    Word,
-    Op
-);
-scan_test!(
-    basic_name_shortcut,
-    "<input@text/>",
-    LCaret,
-    Word,
-    Op,
-    Word,
-    Slash,
-    RCaret
-);
-scan_test!(
-    basic_type_shortcut,
-    "<input:submit/> ",
-    LCaret,
-    Word,
-    Op,
-    Word,
-    Slash,
-    RCaret
-);
-scan_test!(
-    mixed_shortcuts,
-    "<div#main.markdown/> ",
-    LCaret,
-    Word,
-    Op,
-    Word,
-    Op,
-    Word,
-    Slash,
-    RCaret
-);
-scan_test!(
-    mixed_input_shortcuts,
-    "<input#focused:text@search  /> ",
-    LCaret,
-    Word,
-    Op,
-    Word,
-    Op,
-    Word,
-    Op,
-    Word,
-    Slash,
-    RCaret
-);
-scan_test!(
-    basic_attribute,
-    r#"<div data-id="45">"#,
-    LCaret,
-    Word,
-    Word,
-    Equal,
-    String(false),
-    RCaret
-);
-scan_test!(
-    basic_attributes,
-    r#"<input name="thing" placeholder="Other..."/>"#,
-    LCaret,
-    Word,
-    Word,
-    Equal,
-    String(false),
-    Word,
-    Equal,
-    String(false),
-    Slash,
-    RCaret,
-);
-scan_test!(
-    js_attributes,
-    "<div onclick=(alert('lol'))>Click me",
-    LCaret,
-    Word,
-    Word,
-    Equal,
-    JS,
-    RCaret,
-    Word,
-    Word
-);
-scan_test!(
-    simple_code_attributes,
-    "<div data-id=page.id>",
-    LCaret,
-    Word,
-    Word,
-    Equal,
-    Word,
-    Op,
-    Word,
-    RCaret
-);
-scan_test!(
-    shorthand_conditionals,
-    "<div#id=has-id>",
-    LCaret,
-    Word,
-    Op,
-    Word,
-    Equal,
-    Word,
-    RCaret,
-);
-scan_test!(
-    code_expr_attributes,
-    "<div data-value={2 + 3}>",
-    LCaret,
-    Word,
-    Word,
-    Equal,
-    Word,
-    RCaret
-);
-scan_test!(
-    tag_everything,
-    "<div#id.class1.class-2=is-it? :why-not @sure onclick=(alert(`it's ${2 + 2}`)) data-id=123 data-{value}=compute(value) />",
-    LCaret, // <
-    Word,   // div
-    Op,     // #
-    Word,   // id
-    Op,     // .
-    Word,   // class1
-    Op,     // .
-    Word,   // class-2
-    Equal,  // =
-    Word,   // is-it?
-    Op,     // :
-    Word,   // why-not
-    Op,     // @
-    Word,   // sure
-    Word,   // onclick
-    Equal,  // =
-    JS,     // js
-    Word,   // data-id
-    Equal,  // =
-    Number, // 123
-    Word,   // data-{value}
-    Equal,  // =
-    Word,   // compute
-    LParen, // (
-    Word,   // value
-    RParen, // )
-    Slash,  // /
-    RCaret // >
-);
+
+#[rustfmt::skip]
+mod skipfmt_tag {
+    use super::*;
+
+    scan_test!(
+        self_closing_tag,
+        "<end/> ok",
+        LCaret, Word, Slash, RCaret, Word
+    );
+
+    scan_test!(
+        nested_tag,
+        "<b> Hey <i> there",
+        LCaret, Word, RCaret, Word, LCaret, Word, RCaret, Word
+    );
+
+    scan_test!(
+        close_shortcut,
+        "<b> Hey <i> there </> fren ",
+        LCaret,
+        Word, RCaret, Word, LCaret, Word, RCaret, Word, LCaret, Slash, RCaret, Word
+    );
+
+    scan_test!(
+        basic_id_shortcut,
+        "<b#shout> Hey yo",
+        LCaret, Word, Op, Word, RCaret, Word, Word
+    );
+
+    scan_test!(
+        basic_class_shortcut,
+        "<span.clear> Welcome ",
+        LCaret, Word, Op, Word, RCaret, Word
+    );
+
+    scan_test!(
+        basic_classes,
+        "<div.main.markdown> Yada yada... ",
+        LCaret, Word, Op, Word, Op, Word, RCaret, Word, Word, Op
+    );
+
+    scan_test!(
+        basic_name_shortcut,
+        "<input@text/>",
+        LCaret, Word, Op, Word, Slash, RCaret
+    );
+
+    scan_test!(
+        basic_type_shortcut,
+        "<input:submit/> ",
+        LCaret, Word, Op, Word, Slash, RCaret
+    );
+
+    scan_test!(
+        mixed_shortcuts,
+        "<div#main.markdown/> ",
+        LCaret, Word, Op, Word, Op, Word, Slash, RCaret
+    );
+
+    scan_test!(
+        mixed_input_shortcuts,
+        "<input#focused:text@search  /> ",
+        LCaret, Word, Op, Word, Op, Word, Op, Word, Slash, RCaret
+    );
+
+    scan_test!(
+        basic_attribute,
+        r#"<div data-id="45">"#,
+        LCaret, Word, Word, Equal, String(false), RCaret
+    );
+
+    scan_test!(
+        basic_attributes,
+        r#"<input name="thing" placeholder="Other..."/>"#,
+        LCaret, Word, Word, Equal, String(false), Word, Equal,
+        String(false), Slash, RCaret,
+    );
+
+    scan_test!(
+        js_attributes,
+        "<div onclick=(alert('lol'))>Click me",
+        LCaret, Word, Word, Equal, JS, RCaret, Word, Word
+    );
+
+    scan_test!(
+        simple_code_attributes,
+        "<div data-id=page.id>",
+        LCaret, Word, Word, Equal, Word, Op, Word, RCaret
+    );
+
+    scan_test!(
+        shorthand_conditionals,
+        "<div#id=has-id>",
+        LCaret, Word, Op, Word, Equal, Word, RCaret,
+    );
+
+    scan_test!(
+        code_expr_attributes,
+        "<div data-value={2 + 3}>",
+        LCaret, Word, Word, Equal, Word, RCaret
+    );
+
+    scan_test!(
+        tag_everything,
+        "<div#id.class1.class-2=is-it? :why-not @sure onclick=(alert(`it's ${2 + 2}`)) data-id=123 data-{value}=compute(value) />",
+        LCaret, // <
+        Word,   // div
+        Op,     // #
+        Word,   // id
+        Op,     // .
+        Word,   // class1
+        Op,     // .
+        Word,   // class-2
+        Equal,  // =
+        Word,   // is-it?
+        Op,     // :
+        Word,   // why-not
+        Op,     // @
+        Word,   // sure
+        Word,   // onclick
+        Equal,  // =
+        JS,     // js
+        Word,   // data-id
+        Equal,  // =
+        Number, // 123
+        Word,   // data-{value}
+        Equal,  // =
+        Word,   // compute
+        LParen, // (
+        Word,   // value
+        RParen, // )
+        Slash,  // /
+        RCaret // >
+    );
+}
 
 ////
 // Indents
@@ -656,105 +497,79 @@ else
     Dedent, String(false), Semi, String(false)
 );
 
-scan_test!(
-    ignore_whitespace_in_parens,
-    r#"
+#[rustfmt::skip]
+mod skipfmt_indent {
+use super::*;
+
+    scan_test!(
+        ignore_whitespace_in_parens,
+        r#"
 add(
     1,
     2,    3
 )
 "#,
-    Word,
-    LParen,
-    Semi,
-    Number,
-    Comma,
-    Semi,
-    Number,
-    Comma,
-    Number,
-    Semi,
-    RParen,
-);
+        Word, LParen, Semi, Number, Comma, Semi, Number, Comma, Number, Semi, RParen,
+    );
 
-scan_test!(
-    newlines_are_commas_in_fn_calls,
-    r#"
+    scan_test!(
+        newlines_are_commas_in_fn_calls,
+        r#"
 add(
     1
     2,    3
     4
 )
 "#,
-    Word,
-    LParen,
-    Semi,
-    Number,
-    Semi,
-    Number,
-    Comma,
-    Number,
-    Semi,
-    Number,
-    Semi,
-    RParen,
-);
+        Word, LParen, Semi, Number, Semi, Number, Comma, Number, Semi, Number, Semi, RParen,
+    );
 
-scan_test!(
-    comments_dont_eat_indents,
-    r#"
+    scan_test!(
+        comments_dont_eat_indents,
+        r#"
 if true # this should work
     print("Told ya")
 "#,
-    Word,
-    Word,
-    Indent,
-    Word,
-    LParen,
-    String(false),
-    RParen,
-    Semi,
-    Dedent,
-);
+        Word, Word, Indent, Word, LParen, String(false), RParen, Semi, Dedent,
+    );
 
-#[rustfmt::skip]
-scan_test!(basic_indented_tag, r#"
+    scan_test!(basic_indented_tag, r#"
 <ul>
     <li> Kewl
     <li> Very!
 "#,
-LCaret, Word, RCaret,
-    Indent, LCaret, Word, RCaret, Word, Semi,
-    LCaret, Word, RCaret, Word, Op, Semi,
-Dedent
-);
+    LCaret, Word, RCaret,
+        Indent, LCaret, Word, RCaret, Word, Semi,
+        LCaret, Word, RCaret, Word, Op, Semi,
+    Dedent
+    );
 
-#[rustfmt::skip]
-scan_test!(basic_nested_tag, r#"
+    scan_test!(basic_nested_tag, r#"
 <main> <ul>
     <li> Kewl <b> beans
     <li> Very!
 "#,
-LCaret, Word, RCaret,
-LCaret, Word, RCaret,
-    Indent, LCaret, Word, RCaret, Word, LCaret, Word, RCaret, Word, Semi,
-    LCaret, Word, RCaret, Word, Op, Semi,
-Dedent
-);
+        LCaret, Word, RCaret,
+        LCaret, Word, RCaret,
+            Indent, LCaret, Word, RCaret, Word, LCaret, Word, RCaret, Word, Semi,
+            LCaret, Word, RCaret, Word, Op, Semi,
+        Dedent
+    );
 
-#[rustfmt::skip]
-scan_test!(nested_tag_and_code, r#"
+    scan_test!(nested_tag_and_code, r#"
 <main> <ul> for bean in beans
     <li> Kewl <b> bean
     <li> Very: <b> if 2 > 1
         <em> Nuty!
 "#,
-LCaret, Word, RCaret,
-LCaret, Word, RCaret,
-Word, Word, Word, Word,
-    Indent, LCaret, Word, RCaret, Word, LCaret, Word, RCaret, Word, Semi,
-    LCaret, Word, RCaret, Word, Colon, LCaret, Word, RCaret, Word, Number, Op, Number,
-        Indent, LCaret, Word, RCaret, Word, Op, Semi,
-    Dedent,
-Dedent
-);
+        LCaret, Word, RCaret,
+        LCaret, Word, RCaret,
+        Word, Word, Word, Word,
+            Indent, LCaret, Word, RCaret, Word, LCaret, Word, RCaret, Word, Semi,
+            LCaret, Word, RCaret, Word, Colon, LCaret, Word, RCaret, Word, Number, Op, Number,
+                Indent, LCaret, Word, RCaret, Word, Op, Semi,
+            Dedent,
+        Dedent
+    );
+
+}

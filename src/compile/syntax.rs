@@ -33,7 +33,7 @@ pub trait SyntaxTrait {
 impl SyntaxTrait for char {
     /// Is this char valid in a `Syntax::Word`?
     fn is_word_char(&self) -> bool {
-        self.is_alphanumeric() || *self == '-' || *self == '_'
+        self.is_alphanumeric() || matches!(*self, '-' | '_' | '\'')
     }
 
     /// Is this valid in the opening section of a <tag>?

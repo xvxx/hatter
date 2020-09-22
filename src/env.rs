@@ -1,5 +1,5 @@
 use {
-    crate::{builtins, Builtin, Result, Stmt, Tag, Value},
+    crate::{builtins, Builtin, ErrorKind, Result, Stmt, Tag, Value},
     std::{
         collections::{BTreeMap, HashMap},
         ops,
@@ -17,6 +17,14 @@ pub fn eval(stmts: &[Stmt]) -> Result<Value> {
 pub fn render(stmts: &[Stmt]) -> Result<String> {
     let mut env = Env::new();
     env.render(stmts)
+}
+
+/// Error-ish that lets us abort what we're doing.
+#[derive(Debug, PartialEq)]
+pub enum Jump {
+    Break,
+    Continue,
+    Return(Value),
 }
 
 /// Name -> Val map
@@ -107,6 +115,12 @@ impl Env {
         self.helpers.insert(key.as_ref().to_string(), rc!(f));
     }
 
+    /// Print something. Includes trailing newline.
+    pub fn print<V: Into<Value>>(&mut self, val: V) {
+        self.out.push_str(&val.into().to_string());
+        self.out.push('\n');
+    }
+
     /// Render statements into a String.
     pub fn render(&mut self, stmts: &[Stmt]) -> Result<String> {
         self.block(stmts)?;
@@ -146,6 +160,11 @@ impl Env {
                 Value::from(map)
             }
             Stmt::Word(word) => {
+                match word.as_ref() {
+                    "break" => return jump!(Jump::Break),
+                    "continue" => return jump!(Jump::Continue),
+                    _ => {}
+                }
                 if let Some(val) = self.lookup(&word) {
                     val.clone()
                 } else {
@@ -166,7 +185,7 @@ impl Env {
                     return error!("can't find fn: {}", name);
                 }
             }
-            Stmt::Return(expr) => self.eval(expr)?,
+            Stmt::Return(expr) => return jump!(Jump::Return(self.eval(expr)?)),
             Stmt::If(conds) => {
                 let mut out = Value::None;
                 for (test, body) in conds {
@@ -177,32 +196,7 @@ impl Env {
                 }
                 out
             }
-            Stmt::For(key, var, expr, body) => {
-                let iter = self.eval(&expr)?;
-                match iter {
-                    Value::List(list) => {
-                        for (k, v) in list.iter().enumerate() {
-                            if let Some(keyvar) = key {
-                                self.set(keyvar, k);
-                            }
-                            self.set(var, v.clone());
-                            self.block(&body)?;
-                        }
-                        Value::None
-                    }
-                    Value::Map(map) => {
-                        for (k, v) in map {
-                            if let Some(keyvar) = key {
-                                self.set(keyvar, k.clone());
-                            }
-                            self.set(var, v.clone());
-                            self.block(&body)?;
-                        }
-                        Value::None
-                    }
-                    _ => return error!("expected List or Map"),
-                }
-            }
+            Stmt::For(..) => self.eval_for(stmt)?,
             Stmt::Assign(name, expr, is_reassign) => {
                 let exists = self.contains_key(name);
                 if exists && !is_reassign {
@@ -224,5 +218,46 @@ impl Env {
 
     fn eval_tag(&mut self, _tag: &Tag) -> Result<Value> {
         Ok(Value::None)
+    }
+
+    /// Evaluate a for loop.
+    fn eval_for(&mut self, stmt: &Stmt) -> Result<Value> {
+        if let Stmt::For(key, val, expr, body) = stmt {
+            match self.eval(&expr)? {
+                Value::List(list) => self.inner_for(key, val, list.iter().enumerate(), body)?,
+                Value::Map(map) => self.inner_for(key, val, map.iter(), body)?,
+                v => return error!("expected List or Map, got {:?}", v),
+            }
+        }
+
+        Ok(Value::None)
+    }
+
+    /// Shared "inner" for loop, over both maps and lists.
+    fn inner_for<'o, K>(
+        &mut self,
+        key: &Option<String>,
+        var: &str,
+        iter: impl Iterator<Item = (K, &'o Value)>,
+        body: &[Stmt],
+    ) -> Result<()>
+    where
+        K: Into<Value>,
+    {
+        for (k, v) in iter {
+            if let Some(keyvar) = key {
+                self.set(keyvar, k);
+            }
+            self.set(var, v.clone());
+            match self.block(&body) {
+                Ok(_) => {}
+                Err(e) => match e.kind {
+                    ErrorKind::Jump(Jump::Break) => break,
+                    ErrorKind::Jump(Jump::Continue) => continue,
+                    _ => return Err(e),
+                },
+            }
+        }
+        Ok(())
     }
 }

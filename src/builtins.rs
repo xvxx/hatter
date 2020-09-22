@@ -125,13 +125,13 @@ pub fn builtins() -> HashMap<String, Rc<Builtin>> {
         }
         Value::None
     }
-    fn print(_: &mut Env, args: &[Value]) -> Value {
+    fn print(env: &mut Env, args: &[Value]) -> Value {
         let len = args.len();
         for (i, arg) in args.iter().enumerate() {
             if i == len - 1 {
-                println!("{}", arg);
+                env.print(format!("{}", arg));
             } else {
-                print!("{} ", arg);
+                env.print(format!("{} ", arg));
             }
         }
         Value::None

@@ -123,7 +123,14 @@ impl Env {
 
     /// Render statements into a String.
     pub fn render(&mut self, stmts: &[Stmt]) -> Result<String> {
+        let autohtml = self.first_is_head(stmts);
+        if autohtml {
+            self.print("<!DOCTYPE html>\n<html>");
+        }
         self.block(stmts)?;
+        if autohtml {
+            self.print("\n</html>\n");
+        }
         Ok(self.out())
     }
 
@@ -131,6 +138,13 @@ impl Env {
     pub fn block(&mut self, stmts: &[Stmt]) -> Result<Value> {
         let mut out = Value::None;
         for stmt in stmts {
+            if let Stmt::Word(w) = stmt {
+                // solo word, not a variable? print it
+                if !self.is_keyword_or_var(w) {
+                    self.print(w);
+                    continue;
+                }
+            }
             out = self.eval(&stmt)?;
             if !matches!(out, Value::None) {
                 self.print(&out);
@@ -343,5 +357,20 @@ impl Env {
             }
         }
         Ok(())
+    }
+
+    /// Is the first stmt a <head> tag?
+    fn first_is_head(&self, stmts: &[Stmt]) -> bool {
+        if let Some(Stmt::Tag(tag)) = stmts.get(0) {
+            if let Stmt::String(tag) = &*tag.tag {
+                return tag == "head";
+            }
+        }
+        false
+    }
+
+    /// Is the given string a keyword or existing variable?
+    fn is_keyword_or_var(&self, it: &str) -> bool {
+        self.contains_key(it) || matches!(it, "break" | "continue")
     }
 }

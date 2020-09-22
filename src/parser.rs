@@ -646,20 +646,20 @@ impl<'s, 't> Parser<'s, 't> {
                 }
                 Syntax::Op if head => match next.literal() {
                     "#" => {
-                        let id = self.attr()?;
+                        let id = self.string()?;
                         if self.peek_is(Syntax::Equal) {
                             self.skip();
-                            let cond = self.atom()?;
+                            let cond = self.attr()?;
                             tag.set_id(Stmt::Call("when".into(), vec![cond, id]));
                         } else {
                             tag.set_id(id);
                         }
                     }
                     "." => {
-                        let class = self.attr()?;
+                        let class = self.string()?;
                         if self.peek_is(Syntax::Equal) {
                             self.skip();
-                            let cond = self.atom()?;
+                            let cond = self.attr()?;
                             tag.add_class(Stmt::Call("when".into(), vec![cond, class]));
                         } else {
                             tag.add_class(class);
@@ -671,10 +671,10 @@ impl<'s, 't> Parser<'s, 't> {
                         } else {
                             Stmt::String("type".into())
                         };
-                        let expr = self.attr()?;
+                        let expr = self.string()?;
                         if self.peek_is(Syntax::Equal) {
                             self.skip();
-                            let cond = self.atom()?;
+                            let cond = self.attr()?;
                             tag.add_attr(attr_name, Stmt::Call("when".into(), vec![cond, expr]));
                         } else {
                             tag.add_attr(attr_name.into(), expr);
@@ -685,7 +685,7 @@ impl<'s, 't> Parser<'s, 't> {
                 Syntax::Word | Syntax::String(true) => {
                     head = false;
                     self.back();
-                    let name = self.attr()?;
+                    let name = self.string()?;
                     // single word attributes, like `defer`
                     if !self.peek_is(Syntax::Equal) {
                         tag.add_attr(name, Stmt::Bool(true));
@@ -720,8 +720,24 @@ impl<'s, 't> Parser<'s, 't> {
         Ok(tag)
     }
 
-    /// Parse a tag attribute, which may have {interpolation}.
-    fn attr(&mut self) -> Result<Stmt> {
-        self.string()
+    pub fn attr(&mut self) -> Result<Stmt> {
+        if let Some(tok) = self.peek() {
+            match tok.kind {
+                Syntax::String(..) => self.string(),
+                Syntax::Word => {
+                    let lit = tok.literal();
+                    if lit.starts_with('{') && lit.ends_with('}') {
+                        self.string()
+                    } else if tok.literal().contains('{') {
+                        self.string()
+                    } else {
+                        self.word()
+                    }
+                }
+                _ => self.error("String or Word"),
+            }
+        } else {
+            Ok(Stmt::None)
+        }
     }
 }

@@ -699,6 +699,45 @@ parse_test!(simple_code_attributes, "<div data-id=page.id>", {
     Stmt::Tag(tag)
 });
 
+parse_test!(
+    exprs_in_shorthand,
+    "<div #cool={true} .class1={page.id} .class{num}={page.id} .{all} #{any} :{cool} data-curly={page.id} data-expr={page.id} data-math={2 + 2} data-wow='wow!'>",
+    {
+        let mut tag = tag!("div");
+        tag.set_id(call!("when", boo!(true), string!("cool")));
+        tag.add_class(call!(
+            "when",
+            call!(".", word!("page"), string!("id")),
+            string!("class1")
+        ));
+        tag.add_class(call!(
+            "when",
+            call!(".", word!("page"), string!("id")),
+            call!("concat", string!("class"), word!("num"))
+        ));
+        tag.add_class(word!("all"));
+        tag.set_id(word!("any"));
+        tag.add_attr(string!("type"), word!("cool"));
+        tag.add_attr(
+            string!("data-curly"),
+            call!(".", word!("page"), string!("id")),
+        );
+        tag.add_attr(
+            string!("data-expr"),
+            call!(".", word!("page"), string!("id")),
+        );
+        tag.add_attr(
+            string!("data-math"),
+            call!("+", num!(2), num!(2))
+        );
+        tag.add_attr(
+            string!("data-wow"),
+            string!("wow!")
+        );
+        Stmt::Tag(tag)
+    }
+);
+
 parse_test!(shorthand_conditionals, "<div#id=has-id>", {
     let mut tag = tag!("div");
     tag.set_id(call!("when", word!("has-id"), string!("id")));

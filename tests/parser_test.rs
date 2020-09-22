@@ -728,7 +728,7 @@ parse_test!(angle_interpolated_id_full, "<div#{cool}>", {
 
 parse_test!(angle_interpolated_id_partial, "<div#page-{id}>", {
     let mut tag = tag!("div");
-    tag.set_id(call!("concat", string!("page-"), word!("cool")));
+    tag.set_id(call!("concat", string!("page-"), word!("id")));
     Stmt::Tag(tag)
 });
 
@@ -740,7 +740,7 @@ parse_test!(angle_interpolated_class_full, "<div.{cool}>", {
 
 parse_test!(angle_interpolated_class_partial, "<div.page-{id}>", {
     let mut tag = tag!("div");
-    tag.add_class(call!("concat", string!("page-"), word!("cool")));
+    tag.add_class(call!("concat", string!("page-"), word!("id")));
     Stmt::Tag(tag)
 });
 

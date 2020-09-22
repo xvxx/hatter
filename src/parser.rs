@@ -162,6 +162,7 @@ impl<'s, 't> Parser<'s, 't> {
         let tok = self.next();
         let is_interpolated = match tok.kind {
             Syntax::String(is) => is,
+            Syntax::Word => true,
             _ => return self.error("String"),
         };
 
@@ -647,7 +648,7 @@ impl<'s, 't> Parser<'s, 't> {
                     "#" => {
                         let id = self.attr()?;
                         if self.peek_is(Syntax::Equal) {
-                            self.next();
+                            self.skip();
                             let cond = self.atom()?;
                             tag.set_id(Stmt::Call("when".into(), vec![cond, id]));
                         } else {
@@ -657,7 +658,7 @@ impl<'s, 't> Parser<'s, 't> {
                     "." => {
                         let class = self.attr()?;
                         if self.peek_is(Syntax::Equal) {
-                            self.next();
+                            self.skip();
                             let cond = self.atom()?;
                             tag.add_class(Stmt::Call("when".into(), vec![cond, class]));
                         } else {
@@ -672,7 +673,7 @@ impl<'s, 't> Parser<'s, 't> {
                         };
                         let expr = self.attr()?;
                         if self.peek_is(Syntax::Equal) {
-                            self.next();
+                            self.skip();
                             let cond = self.atom()?;
                             tag.add_attr(attr_name, Stmt::Call("when".into(), vec![cond, expr]));
                         } else {
@@ -714,10 +715,6 @@ impl<'s, 't> Parser<'s, 't> {
 
     /// Parse a tag attribute, which may have {interpolation}.
     fn attr(&mut self) -> Result<Stmt> {
-        match self.peek_kind() {
-            Syntax::Word => Ok(Stmt::String(self.next().to_string())),
-            Syntax::String(..) => self.string(),
-            _ => self.error("attr"),
-        }
+        self.string()
     }
 }

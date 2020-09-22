@@ -30,10 +30,7 @@ pub fn run() -> Result<(), io::Error> {
                     help(&mut env, &[]);
                     continue;
                 }
-                match scan(&line)
-                    .and_then(|t| parse(&t))
-                    .and_then(|ast| env.render(&ast))
-                {
+                match compile(&line).and_then(|ast| env.render(&ast)) {
                     Ok(out) => {
                         if !out.trim().is_empty() {
                             println!("{}", out);

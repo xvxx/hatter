@@ -1,4 +1,4 @@
-use hatter::{parse, scan, Stmt, Tag};
+use hatter::{compile, Stmt, Tag};
 
 macro_rules! bx {
     ($code:expr) => {
@@ -62,7 +62,7 @@ macro_rules! parse_test {
     ($name:ident, $code:expr, $($stmt:expr,)+) => {
         #[test]
         fn $name() {
-            let nodes = scan($code).and_then(|t| parse(&t)).unwrap();
+            let nodes = compile($code).unwrap();
             let mut i = 0;
             $(
                 let node = nodes.get(i).unwrap();

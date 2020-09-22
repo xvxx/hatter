@@ -1,5 +1,5 @@
 use {
-    hatter::{eval, parse, scan, Stmt, Syntax, Token},
+    hatter::{render, parse, scan, Stmt, Syntax, Token},
     std::{
         env,
         io::{self, Write},
@@ -71,14 +71,10 @@ fn main() -> io::Result<()> {
         return Ok(());
     }
 
-    if command == "check" {
-        unimplemented!();
-    }
-
     write!(
         io::stdout(),
         "{}",
-        eval(&ast)
+        render(&ast)
             .map_err(|e| print_error(&path, &source, e))
             .unwrap()
     )
@@ -91,8 +87,6 @@ fn print_usage() -> Result<(), io::Error> {
 Commands:
   scan        Print tokens.
   parse       Print AST.
-  check       Check for compile errors only.
-  compile     Compile to HASM.
   print       Print HTML. (default)
 "#
     );

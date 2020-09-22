@@ -1,20 +1,14 @@
-use hatter::{eval, parse, render, scan, Value};
+use hatter::{compile, eval, render, Value};
 
 macro_rules! eval {
     ($code:expr) => {
-        scan(&$code)
-            .and_then(|t| parse(&t))
-            .and_then(|ast| eval(&ast))
-            .unwrap()
+        compile(&$code).and_then(|ast| eval(&ast)).unwrap()
     };
 }
 
 macro_rules! render {
     ($code:expr) => {
-        scan(&$code)
-            .and_then(|t| parse(&t))
-            .and_then(|ast| render(&ast))
-            .unwrap()
+        compile(&$code).and_then(|ast| render(&ast)).unwrap()
     };
 }
 

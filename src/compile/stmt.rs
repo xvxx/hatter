@@ -1,5 +1,4 @@
-mod tag;
-pub use tag::Tag;
+use crate::Tag;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Stmt {

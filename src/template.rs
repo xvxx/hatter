@@ -1,5 +1,5 @@
 use {
-    crate::{parse, scan, Result, Stmt},
+    crate::{compile, Result, Stmt},
     std::{fs::File, io::Read, path::Path},
 };
 
@@ -28,10 +28,7 @@ impl Template {
 
     pub fn compile(&mut self) -> Result<()> {
         if self.compiled.is_none() {
-            self.compiled = Some(
-                scan(&self.source)
-                    .and_then(|t| parse(&t))?
-            );
+            self.compiled = Some(compile(&self.source)?);
         }
         Ok(())
     }

@@ -102,9 +102,9 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
   - `<i>delicious</>` becomes `<i>delicious</i>`
 - Call functions defined in Rust:
   - `<div.name> to-uppercase(name)`
-- Define your own functions:
+- Define your own Hatter functions:
   - `def greet(name) do print("Hey there, {name}!")
-  - `greet("Lydia")`
+  - `greet("Lydia")` prints `Hey there, Lydia!`
 - Easy inline JavaScript:
   - `<li> <a onclick=(alert("Oink!"))> 🐷`
 - Hatter will add a `<!DOCTYPE>` and wrap everything in `<html>` if

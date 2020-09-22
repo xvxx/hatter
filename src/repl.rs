@@ -1,5 +1,5 @@
 use {
-    crate::{parse, scan, Env, Value},
+    crate::{compile, Env, Value},
     rustyline::{error::ReadlineError, Editor},
     std::io,
 };
@@ -74,7 +74,7 @@ fn banner() {
     `---------------'  ;    _,.---._    \  ,'\  \
                       :   ,'   ,-.. `.   \'   \ :
                       |  ;_\  (___)`  `-..__  : |
-                      ;-'`{purple}*{gold}'"  `{purple}*{gold}'    `--._ ` | ;
+                      ;-'`{blue}*{gold}'"  `{blue}*{gold}'    `--._ ` | ;
                      /,-'/  -.        `---.`  |"
                      /_,'`--='.       `-.._,-" _
                       (/\\,--. \    ___-.`:   //___
@@ -116,8 +116,9 @@ fn vars(env: &mut Env, _: &[Value]) -> Value {
 }
 
 fn fns(env: &mut Env, _: &[Value]) -> Value {
-    for (name, _) in env.helpers() {
-        println!("{}", name);
-    }
-    Value::None
+    env.helpers()
+        .iter()
+        .map(|(name, _)| name)
+        .collect::<Vec<_>>()
+        .into()
 }

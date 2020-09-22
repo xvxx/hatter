@@ -15,17 +15,14 @@ macro_rules! rc {
 
 #[macro_use]
 mod error;
-mod builtins;
 mod compile;
-mod env;
+mod eval;
 mod template;
-mod value;
 
 #[cfg(feature = "repl")]
 pub mod repl;
 
 pub use {
-    builtins::builtins,
     compile::{
         compile,
         lexer::scan,
@@ -35,10 +32,13 @@ pub use {
         tag::Tag,
         token::Token,
     },
-    env::{eval, render, Env, Jump, Scope},
     error::{print_error, Error, ErrorKind},
+    eval::{
+        builtins::builtins,
+        env::{eval, render, Env, Jump, Scope},
+        value::{Builtin, Object, Value},
+    },
     template::Template,
-    value::{Builtin, Object, Value},
 };
 
 pub type Result<T> = std::result::Result<T, Error>;

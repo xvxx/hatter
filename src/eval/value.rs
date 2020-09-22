@@ -146,10 +146,17 @@ impl Value {
     }
 
     pub fn to_string(&self) -> String {
-        if let Value::Number(num) = self {
-            format!("{}", num)
-        } else {
-            self.to_str().to_string()
+        match self {
+            Value::Number(num) => format!("{}", num),
+            Value::String(s) => format!(r#""{}""#, s),
+            Value::List(li) => format!(
+                "[{}]",
+                li.iter()
+                    .map(|v| v.to_string())
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            ),
+            _ => self.to_str().to_string(),
         }
     }
 

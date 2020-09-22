@@ -693,8 +693,15 @@ impl<'s, 't> Parser<'s, 't> {
                     }
                     self.expect(Syntax::Equal)?;
                     match self.peek_kind() {
-                        Syntax::Word => tag.add_attr(name, self.expr()?),
                         Syntax::Number | Syntax::String(..) => tag.add_attr(name, self.atom()?),
+                        Syntax::Word => tag.add_attr(
+                            name,
+                            if self.peek().filter(|p| p.to_str().contains('{')).is_some() {
+                                self.string()?
+                            } else {
+                                self.expr()?
+                            },
+                        ),
                         Syntax::JS => tag.add_attr(
                             name,
                             Stmt::String(format!(

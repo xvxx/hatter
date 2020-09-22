@@ -707,7 +707,7 @@ parse_test!(shorthand_conditionals, "<div#id=has-id>", {
 
 parse_test!(code_expr_attributes, "<div data-value={2 + 3}>", {
     let mut tag = tag!("div");
-    tag.add_attr(string!("data-value"), word!("{2 + 3}"));
+    tag.add_attr(string!("data-value"), call!("+", num!(2), num!(3)));
     Stmt::Tag(tag)
 });
 

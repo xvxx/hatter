@@ -1,5 +1,5 @@
 use {
-    crate::{eval, parse, scan, Env, Value},
+    crate::{parse, scan, Env, Value},
     rustyline::{error::ReadlineError, Editor},
     std::io,
 };
@@ -12,6 +12,11 @@ pub fn run() -> Result<(), io::Error> {
     env.helper("vars", vars);
     env.helper("fns", fns);
     let history_file = ".hatter_history";
+    let (red, clear) = if std::env::var("NO_COLOR").is_ok() {
+        ("", "")
+    } else {
+        ("\x1b[0;91m", "\x1b[0m")
+    };
 
     // `()` can be used when no completer is required
     let mut rl = Editor::<()>::new();
@@ -34,7 +39,7 @@ pub fn run() -> Result<(), io::Error> {
                             println!("{}", out);
                         }
                     }
-                    Err(e) => eprintln!("{}", e),
+                    Err(e) => eprintln!("{}{}{}", red, e, clear),
                 }
             }
             Err(ReadlineError::Interrupted) | Err(ReadlineError::Eof) => {
@@ -42,7 +47,7 @@ pub fn run() -> Result<(), io::Error> {
                 break;
             }
             Err(err) => {
-                println!("Error: {:?}", err);
+                println!("{}Error: {:?}{}", red, err, clear);
                 break;
             }
         }

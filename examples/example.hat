@@ -15,6 +15,6 @@ nav-links := [
 
 <div#main.markdown-body>
   if logged-in?
-    <h1> Welcome back, <span.username> name </>!
+    <h1> Welcome back, <span.username> name </>'!'
   else
     <h1> Nice to, uh, see you. <span.aside> Have we met..?

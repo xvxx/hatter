@@ -218,14 +218,13 @@ impl Env {
             }
             Stmt::Return(expr) => return jump!(Jump::Return(self.eval(expr)?)),
             Stmt::If(conds) => {
-                let mut out = Value::None;
                 for (test, body) in conds {
                     if self.eval(test)?.to_bool() {
-                        out = self.block(body)?;
+                        self.block(body)?;
                         break;
                     }
                 }
-                out
+                Value::None
             }
             Stmt::For(..) => self.eval_for(stmt)?,
             Stmt::Assign(name, expr, is_reassign) => {

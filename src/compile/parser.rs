@@ -505,14 +505,19 @@ impl<'s, 't> Parser<'s, 't> {
                                 // two words in a row become a string
                                 if self
                                     .peek2()
-                                    .filter(|p| matches!(p.kind, Syntax::Word | Syntax::Comma))
+                                    .filter(|p| {
+                                        matches!(
+                                            p.kind,
+                                            Syntax::Word | Syntax::Comma | Syntax::Colon
+                                        )
+                                    })
                                     .is_some()
                                 {
                                     let mut out = self.next().to_string();
                                     while !self.peek_eof() {
                                         match self.peek_kind() {
                                             Syntax::Word => out.push(' '),
-                                            Syntax::Op | Syntax::Comma => {}
+                                            Syntax::Op | Syntax::Comma | Syntax::Colon => {}
                                             _ => break,
                                         }
                                         out.push_str(self.next().to_str())

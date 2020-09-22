@@ -28,6 +28,7 @@ impl<'s, 't> Parser<'s, 't> {
             ast: vec![],
             tags: 0,
             pos: 0,
+
             #[cfg(debug_assertions)]
             peeked: 0,
         }
@@ -252,6 +253,7 @@ impl<'s, 't> Parser<'s, 't> {
     /// Parse a code expression.
     fn expr(&mut self) -> Result<Stmt> {
         let left = self.atom()?;
+
         if !self.peek_is(Syntax::Op) {
             return Ok(left);
         }
@@ -589,14 +591,16 @@ impl<'s, 't> Parser<'s, 't> {
 
         let mut args = vec![];
         self.expect(Syntax::LParen)?;
+        self.eat(Syntax::Semi);
         while !self.peek_eof() && !self.peek_is(Syntax::RParen) {
             args.push(self.expect(Syntax::Word)?.to_string());
-            if self.peek_is(Syntax::Comma) {
+            if self.peek_is(Syntax::Comma) || self.peek_is(Syntax::Semi) {
                 self.next();
             } else {
                 break;
             }
         }
+        self.eat(Syntax::Semi);
         self.expect(Syntax::RParen)?;
 
         let body = self.block()?;
@@ -674,7 +678,7 @@ impl<'s, 't> Parser<'s, 't> {
     /// Parse just a closing tag, starting after the <
     fn close_tag(&mut self) -> Result<()> {
         if self.tags == 0 {
-            return self.error("open tags");
+            return self.error("Open Tag");
         }
         self.tags -= 1;
         self.expect(Syntax::LCaret)?;

@@ -481,6 +481,35 @@ def greet(title, name)
 );
 
 parse_test!(
+    basic_def_with_whitespace_args,
+    r#"
+def greet(
+    title
+    name, suffix
+)
+    print("Hi there, {title}. {name}!")
+"#,
+    Stmt::Assign(
+        "greet".into(),
+        bx!(Stmt::Fn(
+            vec!["title".into(), "name".into(), "suffix".into()],
+            vec![call!(
+                "print",
+                call!(
+                    "concat",
+                    string!("Hi there, "),
+                    word!("title"),
+                    string!(". "),
+                    word!("name"),
+                    string!("!")
+                )
+            )]
+        )),
+        false
+    )
+);
+
+parse_test!(
     def_op,
     r#"
 def <<(a, b)
@@ -1021,5 +1050,28 @@ parse_test!(
         ul.set_body(vec![burger.into(), fries.into(), shake.into()]);
 
         Stmt::Tag(ul)
+    }
+);
+
+parse_test!(
+    nested_nested_tags,
+    r#"
+<div> <ul>
+    <li> Fun
+<span> Top-level
+"#,
+    {
+        let mut div = tag!("div");
+        let mut ul = tag!("ul");
+        let mut li = tag!("li");
+        li.set_body(vec![word!("Fun")]);
+        ul.set_body(vec![li.into()]);
+        div.set_body(vec![ul.into()]);
+        Stmt::Tag(div)
+    },
+    {
+        let mut span = tag!("span");
+        span.set_body(vec![word!("Top-level")]);
+        Stmt::Tag(span)
     }
 );

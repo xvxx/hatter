@@ -520,6 +520,11 @@ impl<'s> Lexer<'s> {
             indent = 0;
         }
 
+        // EOF
+        if self.peek().is_none() {
+            return Ok(Syntax::None);
+        }
+
         // if the next token is an operator, continue the last line
         if self.peek().filter(|c| c.is_op() && c != &&'<').is_some() {
             return Ok(Syntax::None);

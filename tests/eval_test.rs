@@ -117,3 +117,29 @@ test()
         "BYE\n"
     );
 }
+
+#[test]
+fn test_nesting() {
+    assert_render!(
+        r#"
+<ul> for x in [1,2,3]
+    <li> x
+<span> The End
+"#,
+        "<ul><li>1\n</li>\n<li>2\n</li>\n<li>3\n</li>\n</ul>
+<span>The End\n</span>
+"
+    );
+
+    assert_render!(
+        r#"
+<#main> <ul> for x in [1,2,3]
+    <li> x
+<#footer>
+    <p> Thanks
+"#,
+        "<div id='main'><ul><li>1\n</li>\n<li>2\n</li>\n<li>3\n</li>\n</ul>\n</div>
+<div id='footer'><p>Thanks\n</p>\n</div>
+"
+    );
+}

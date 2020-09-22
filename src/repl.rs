@@ -33,7 +33,7 @@ pub fn run() -> Result<(), io::Error> {
                 match compile(&line).and_then(|ast| env.render(&ast)) {
                     Ok(out) => {
                         if !out.trim().is_empty() {
-                            println!("{}", out);
+                            print!("{}", out);
                         }
                     }
                     Err(e) => eprintln!("{}{}{}", red, e, clear),

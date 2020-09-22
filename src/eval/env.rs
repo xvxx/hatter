@@ -182,9 +182,15 @@ impl Env {
                             self.set(name, val);
                         }
                     }
-                    let out = self.block(&body)?;
+                    let out = self.block(&body);
                     self.pop_scope();
-                    out
+                    match out {
+                        Ok(v) => v,
+                        Err(e) => match e.kind {
+                            ErrorKind::Jump(Jump::Return(v)) => v,
+                            _ => return Err(e),
+                        },
+                    }
                 } else if let Some(f) = self.helpers.get(name) {
                     let f = f.clone();
                     let args = args

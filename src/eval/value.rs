@@ -35,7 +35,12 @@ pub trait Object {
 
 impl fmt::Display for Value {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.to_string())
+        match self {
+            Value::Number(num) => write!(f, "{}", num),
+            Value::String(s) => write!(f, "{}", s),
+            Value::List(..) => write!(f, "{:?}", self),
+            _ => write!(f, "{}", self.to_str()),
+        }
     }
 }
 
@@ -44,21 +49,19 @@ impl fmt::Debug for Value {
         use Value::*;
         match self {
             None => f.debug_struct("None").finish(),
-            Bool(b) => f.debug_struct(if *b { "True" } else { "False" }).finish(),
-            Number(num) => f.debug_struct("Number").field("val", &num).finish(),
-            String(s) => f.debug_struct("String").field("val", &s).finish(),
+            Bool(b) => write!(f, "{}", b),
+            Number(num) => write!(f, "{}", num),
+            String(s) => write!(f, r#""{}""#, s),
             Fn { .. } => f.debug_struct("Function").field("val", &"?").finish(),
-            List(list) => f
-                .debug_struct("List")
-                .field(
-                    "val",
-                    &list
-                        .iter()
-                        .map(|i| format!("{:?}", i))
-                        .collect::<Vec<_>>()
-                        .join(", "),
-                )
-                .finish(),
+            List(list) => write!(
+                f,
+                "[{}]",
+                &list
+                    .iter()
+                    .map(|i| format!("{:?}", i))
+                    .collect::<Vec<_>>()
+                    .join(", "),
+            ),
             Map(..) => f.debug_struct("Map").field("val", &"?").finish(),
             Object(..) => f.debug_struct("Object").field("val", &"?").finish(),
         }
@@ -142,21 +145,6 @@ impl Value {
                     "false"
                 }
             }
-        }
-    }
-
-    pub fn to_string(&self) -> String {
-        match self {
-            Value::Number(num) => format!("{}", num),
-            Value::String(s) => format!(r#""{}""#, s),
-            Value::List(li) => format!(
-                "[{}]",
-                li.iter()
-                    .map(|v| v.to_string())
-                    .collect::<Vec<_>>()
-                    .join(", ")
-            ),
-            _ => self.to_str().to_string(),
         }
     }
 

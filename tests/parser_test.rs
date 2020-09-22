@@ -548,7 +548,13 @@ parse_test!(
 parse_test!(
     call_with_named_args,
     "greet(name: 'Bob', title: 'Dr')",
-    call!("something", word!("a"), word!("b"), boo!(true), num!(123))
+    call!(
+        "greet",
+        Stmt::Args(vec![
+            ("name".into(), "Bob".into()),
+            ("title".into(), "Dr".into())
+        ])
+    )
 );
 
 ////

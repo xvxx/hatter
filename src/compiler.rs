@@ -138,6 +138,7 @@ impl Compiler {
 
         Ok(match expr {
             None => vec![],
+            Args(..) => vec![],
             Bool(b) => vec![Code::Print(b.into())],
             Number(n) => vec![Code::Print(n.into())],
             String(s) => vec![Code::Print(s.into())],

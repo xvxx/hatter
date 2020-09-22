@@ -383,32 +383,79 @@ impl<'s, 't> Parser<'s, 't> {
                 if !self.peek_is(Syntax::LParen) {
                     return Ok(word);
                 } else {
-                    self.expect(Syntax::LParen)?;
                     let name = word.to_string();
-                    let mut args = vec![];
-                    while let Some(tok) = self.peek() {
-                        match tok.kind {
-                            Syntax::RParen => {
-                                self.skip();
-                                break;
-                            }
-                            Syntax::Comma | Syntax::Semi => self.skip(),
-                            Syntax::LParen
-                            | Syntax::LCurly
-                            | Syntax::LStaple
-                            | Syntax::String(..)
-                            | Syntax::Number
-                            | Syntax::Word => {
-                                args.push(self.expr()?);
-                            }
-                            _ => return self.error(")"),
-                        }
-                    }
-                    Ok(Stmt::Call(name, args))
+                    Ok(Stmt::Call(name, self.args()?))
                 }
             }
             _ => self.error("Atom"),
         }
+    }
+
+    /// Parse (args) part of a function call.
+    fn args(&mut self) -> Result<Vec<Stmt>> {
+        self.expect(Syntax::LParen)?;
+        if self.peek_is(Syntax::RParen) {
+            self.skip();
+            return Ok(vec![]);
+        }
+
+        // parse (keyword: args)
+        if self.peek2_is(Syntax::Colon) {
+            return Ok(vec![self.keyword_args()?]);
+        }
+
+        let mut args = vec![];
+        while let Some(tok) = self.peek() {
+            match tok.kind {
+                Syntax::RParen => {
+                    self.skip();
+                    break;
+                }
+                Syntax::Comma | Syntax::Semi => self.skip(),
+                Syntax::LParen
+                | Syntax::LCurly
+                | Syntax::LStaple
+                | Syntax::String(..)
+                | Syntax::Number
+                | Syntax::Word => {
+                    args.push(self.expr()?);
+                }
+                _ => return self.error(")"),
+            }
+        }
+        Ok(args)
+    }
+
+    // parse (keyword: args)
+    fn keyword_args(&mut self) -> Result<Stmt> {
+        let mut args = vec![];
+        let mut is_kw = true;
+        let mut keyword = String::new();
+        while let Some(tok) = self.peek() {
+            match tok.kind {
+                Syntax::RParen => {
+                    self.skip();
+                    break;
+                }
+                Syntax::Comma | Syntax::Semi => self.skip(),
+                Syntax::Word if is_kw => {
+                    keyword = self.next().to_string();
+                    self.expect(Syntax::Colon)?;
+                    is_kw = false;
+                }
+                Syntax::LParen
+                | Syntax::LCurly
+                | Syntax::LStaple
+                | Syntax::String(..)
+                | Syntax::Number
+                | Syntax::Word => {
+                    args.push((std::mem::replace(&mut keyword, String::new()), self.expr()?));
+                    is_kw = true;
+                }
+                _ => return self.error(")"),
+            }
+        }
+        Ok(Stmt::Args(args))
     }
 
     /// Parse a block of code, either:

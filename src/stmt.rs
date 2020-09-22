@@ -17,6 +17,7 @@ pub enum Stmt {
     Assign(String, Box<Stmt>, bool),                   // var, val, reassign?
     Tag(Tag),
     Fn(Vec<String>, Vec<Stmt>), // args, body
+    Args(Vec<(String, Stmt)>),  // keyword args
 }
 
 impl From<Tag> for Stmt {
@@ -31,6 +32,12 @@ impl From<String> for Stmt {
     }
 }
 
+impl From<&str> for Stmt {
+    fn from(s: &str) -> Stmt {
+        Stmt::String(s.to_string())
+    }
+}
+
 impl Stmt {
     pub fn to_string(&self) -> String {
         match self {
@@ -41,6 +48,11 @@ impl Stmt {
             Stmt::Word(s) => s.clone(),
             Stmt::Tag(tag) => format!("{:?}", tag),
             Stmt::Return(ex) => format!("return {:?}", ex),
+            Stmt::Args(args) => args
+                .iter()
+                .map(|(k, v)| format!("{}: {:?}", k, v))
+                .collect::<Vec<_>>()
+                .join(", "),
             Stmt::List(list) => format!(
                 "[{}]",
                 list.iter()

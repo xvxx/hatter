@@ -1,12 +1,12 @@
 use {
-    crate::{compile, parse, scan, Code, Result},
+    crate::{parse, scan, Result, Stmt},
     std::{fs::File, io::Read, path::Path},
 };
 
 /// Compiled HTML template.
 pub struct Template {
     source: String,
-    compiled: Option<Vec<Code>>,
+    compiled: Option<Vec<Stmt>>,
 }
 
 impl Template {
@@ -17,10 +17,10 @@ impl Template {
         }
     }
 
-    pub fn codes(&mut self) -> Result<&[Code]> {
+    pub fn stmts(&mut self) -> Result<&[Stmt]> {
         self.compile()?;
-        if let Some(codes) = &self.compiled {
-            Ok(codes)
+        if let Some(stmts) = &self.compiled {
+            Ok(stmts)
         } else {
             Ok(&[])
         }
@@ -30,8 +30,7 @@ impl Template {
         if self.compiled.is_none() {
             self.compiled = Some(
                 scan(&self.source)
-                    .and_then(|t| parse(&t))
-                    .and_then(|ast| compile(&ast))?,
+                    .and_then(|t| parse(&t))?
             );
         }
         Ok(())

@@ -1,5 +1,5 @@
 use {
-    hatter::{compile, parse, scan, vm, Code, Stmt, Syntax, Token},
+    hatter::{eval, parse, scan, Stmt, Syntax, Token},
     std::{
         env,
         io::{self, Write},
@@ -75,18 +75,10 @@ fn main() -> io::Result<()> {
         unimplemented!();
     }
 
-    let compiled = compile(&ast)
-        .map_err(|e| print_error(&path, &source, e))
-        .unwrap();
-    if command == "compile" {
-        print_codes(compiled);
-        return Ok(());
-    }
-
     write!(
         io::stdout(),
         "{}",
-        vm::run(&compiled)
+        eval(&ast)
             .map_err(|e| print_error(&path, &source, e))
             .unwrap()
     )
@@ -130,12 +122,6 @@ fn print_tokens(mut tokens: Vec<Token>) {
 fn print_ast(ast: &[Stmt]) {
     for expr in ast {
         println!("{:#?}", expr);
-    }
-}
-
-fn print_codes(codes: Vec<Code>) {
-    for (i, code) in codes.iter().enumerate() {
-        println!("{:>04}{}{:?}", i, " ".repeat(3), code);
     }
 }
 

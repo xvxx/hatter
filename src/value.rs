@@ -1,5 +1,5 @@
 use {
-    crate::{Code, VM},
+    crate::{Env, Stmt},
     std::{
         collections::{BTreeMap, HashMap},
         fmt,
@@ -7,7 +7,7 @@ use {
     },
 };
 
-pub type Builtin = dyn Fn(&mut VM, &[Value]) -> Value;
+pub type Builtin = dyn Fn(&mut Env, &[Value]) -> Value;
 
 #[derive(Clone)]
 pub enum Value {
@@ -19,7 +19,7 @@ pub enum Value {
     Map(BTreeMap<String, Value>),
     Fn {
         params: Vec<String>,
-        body: Vec<Code>,
+        body: Vec<Stmt>,
     },
     Object(Rc<dyn Object>),
 }
@@ -61,6 +61,44 @@ impl fmt::Debug for Value {
                 .finish(),
             Map(..) => f.debug_struct("Map").field("val", &"?").finish(),
             Object(..) => f.debug_struct("Object").field("val", &"?").finish(),
+        }
+    }
+}
+
+impl PartialEq for Value {
+    fn eq(&self, other: &Value) -> bool {
+        match self {
+            Value::None | Value::Fn { .. } | Value::Object(..) => false,
+            Value::Bool(true) => matches!(other, Value::Bool(true)),
+            Value::Bool(false) => matches!(other, Value::Bool(false)),
+            Value::Number(num) => {
+                if let Value::Number(n2) = other {
+                    num == n2
+                } else {
+                    false
+                }
+            }
+            Value::String(s) => {
+                if let Value::String(s2) = other {
+                    s == s2
+                } else {
+                    false
+                }
+            }
+            Value::List(list) => {
+                if let Value::List(l2) = other {
+                    list == l2
+                } else {
+                    false
+                }
+            }
+            Value::Map(map) => {
+                if let Value::Map(m2) = other {
+                    map == m2
+                } else {
+                    false
+                }
+            }
         }
     }
 }
@@ -247,6 +285,29 @@ where
             Value::None
         } else {
             o.unwrap().into()
+        }
+    }
+}
+
+impl From<Vec<(String, Stmt)>> for Value {
+    fn from(pairs: Vec<(String, Stmt)>) -> Value {
+        let mut map: BTreeMap<String, Value> = BTreeMap::new();
+        for (k, v) in pairs {
+            map.insert(k, Value::from(v));
+        }
+        map.into()
+    }
+}
+
+impl From<Stmt> for Value {
+    fn from(s: Stmt) -> Value {
+        match s {
+            Stmt::Bool(x) => Value::from(x),
+            Stmt::Number(x) => Value::from(x),
+            Stmt::String(x) => Value::from(x),
+            Stmt::List(x) => Value::from(x),
+            Stmt::Map(x) => Value::from(x),
+            _ => unimplemented!(),
         }
     }
 }

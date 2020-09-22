@@ -1,12 +1,12 @@
 use {
-    crate::{Builtin, Value, VM},
+    crate::{Builtin, Env, Value},
     std::{collections::HashMap, rc::Rc},
 };
 
 pub fn builtins() -> HashMap<String, Rc<Builtin>> {
     let mut map: HashMap<String, Rc<Builtin>> = HashMap::new();
 
-    fn eq(_: &mut VM, args: &[Value]) -> Value {
+    fn eq(_: &mut Env, args: &[Value]) -> Value {
         if let Some(val) = args.get(0) {
             match val {
                 Value::None => match args.get(1) {
@@ -32,14 +32,14 @@ pub fn builtins() -> HashMap<String, Rc<Builtin>> {
             Value::None
         }
     }
-    fn neq(vm: &mut VM, args: &[Value]) -> Value {
+    fn neq(vm: &mut Env, args: &[Value]) -> Value {
         match eq(vm, args) {
             Value::Bool(b) => !b,
             _ => false,
         }
         .into()
     }
-    fn not(_: &mut VM, args: &[Value]) -> Value {
+    fn not(_: &mut Env, args: &[Value]) -> Value {
         if let Some(val) = args.get(0) {
             match val {
                 Value::None | Value::Bool(false) => Value::Bool(true),
@@ -49,21 +49,21 @@ pub fn builtins() -> HashMap<String, Rc<Builtin>> {
             Value::None
         }
     }
-    fn concat(_: &mut VM, args: &[Value]) -> Value {
+    fn concat(_: &mut Env, args: &[Value]) -> Value {
         let mut sum = String::new();
         for arg in args {
             sum.push_str(&arg.to_string());
         }
         return Value::String(sum);
     }
-    fn when(_: &mut VM, args: &[Value]) -> Value {
+    fn when(_: &mut Env, args: &[Value]) -> Value {
         if matches!(&args[0], Value::None | Value::Bool(false)) {
             return Value::None;
         } else {
             return args[1].clone();
         }
     }
-    fn index(_: &mut VM, args: &[Value]) -> Value {
+    fn index(_: &mut Env, args: &[Value]) -> Value {
         if args.len() != 2 {
             return Value::None;
         }
@@ -83,7 +83,7 @@ pub fn builtins() -> HashMap<String, Rc<Builtin>> {
             _ => Value::None,
         }
     }
-    fn add(_: &mut VM, args: &[Value]) -> Value {
+    fn add(_: &mut Env, args: &[Value]) -> Value {
         if let Some(Value::Number(_)) = args.get(0) {
             let mut sum = 0.0;
             let mut iter = args.iter();
@@ -101,7 +101,7 @@ pub fn builtins() -> HashMap<String, Rc<Builtin>> {
         }
         Value::None
     }
-    fn sub(_: &mut VM, args: &[Value]) -> Value {
+    fn sub(_: &mut Env, args: &[Value]) -> Value {
         if let Some(Value::Number(a)) = args.get(0) {
             if let Some(Value::Number(b)) = args.get(1) {
                 return Value::Number(a - b);
@@ -109,7 +109,7 @@ pub fn builtins() -> HashMap<String, Rc<Builtin>> {
         }
         Value::None
     }
-    fn mul(_: &mut VM, args: &[Value]) -> Value {
+    fn mul(_: &mut Env, args: &[Value]) -> Value {
         if let Some(Value::Number(a)) = args.get(0) {
             if let Some(Value::Number(b)) = args.get(1) {
                 return Value::Number(a * b);
@@ -117,7 +117,7 @@ pub fn builtins() -> HashMap<String, Rc<Builtin>> {
         }
         Value::None
     }
-    fn div(_: &mut VM, args: &[Value]) -> Value {
+    fn div(_: &mut Env, args: &[Value]) -> Value {
         if let Some(Value::Number(a)) = args.get(0) {
             if let Some(Value::Number(b)) = args.get(1) {
                 return Value::Number(a / b);
@@ -125,7 +125,7 @@ pub fn builtins() -> HashMap<String, Rc<Builtin>> {
         }
         Value::None
     }
-    fn print(_: &mut VM, args: &[Value]) -> Value {
+    fn print(_: &mut Env, args: &[Value]) -> Value {
         let len = args.len();
         for (i, arg) in args.iter().enumerate() {
             if i == len - 1 {
@@ -136,7 +136,7 @@ pub fn builtins() -> HashMap<String, Rc<Builtin>> {
         }
         Value::None
     }
-    fn gt(_: &mut VM, args: &[Value]) -> Value {
+    fn gt(_: &mut Env, args: &[Value]) -> Value {
         if let Some(Value::Number(a)) = args.get(0) {
             if let Some(Value::Number(b)) = args.get(1) {
                 return Value::Bool(a > b);
@@ -144,7 +144,7 @@ pub fn builtins() -> HashMap<String, Rc<Builtin>> {
         }
         Value::None
     }
-    fn gte(_: &mut VM, args: &[Value]) -> Value {
+    fn gte(_: &mut Env, args: &[Value]) -> Value {
         if let Some(Value::Number(a)) = args.get(0) {
             if let Some(Value::Number(b)) = args.get(1) {
                 return Value::Bool(a >= b);
@@ -152,7 +152,7 @@ pub fn builtins() -> HashMap<String, Rc<Builtin>> {
         }
         Value::None
     }
-    fn lt(_: &mut VM, args: &[Value]) -> Value {
+    fn lt(_: &mut Env, args: &[Value]) -> Value {
         if let Some(Value::Number(a)) = args.get(0) {
             if let Some(Value::Number(b)) = args.get(1) {
                 return Value::Bool(a < b);
@@ -160,7 +160,7 @@ pub fn builtins() -> HashMap<String, Rc<Builtin>> {
         }
         Value::None
     }
-    fn lte(_: &mut VM, args: &[Value]) -> Value {
+    fn lte(_: &mut Env, args: &[Value]) -> Value {
         if let Some(Value::Number(a)) = args.get(0) {
             if let Some(Value::Number(b)) = args.get(1) {
                 return Value::Bool(a <= b);
@@ -168,21 +168,21 @@ pub fn builtins() -> HashMap<String, Rc<Builtin>> {
         }
         Value::None
     }
-    fn to_uppercase(_: &mut VM, args: &[Value]) -> Value {
+    fn to_uppercase(_: &mut Env, args: &[Value]) -> Value {
         if let Some(Value::String(s)) = args.get(0) {
             Value::String(s.to_uppercase())
         } else {
             Value::String("Expected String".to_string())
         }
     }
-    fn to_lowercase(_: &mut VM, args: &[Value]) -> Value {
+    fn to_lowercase(_: &mut Env, args: &[Value]) -> Value {
         if let Some(Value::String(s)) = args.get(0) {
             Value::String(s.to_lowercase())
         } else {
             Value::String("Expected String".to_string())
         }
     }
-    fn replace(_: &mut VM, args: &[Value]) -> Value {
+    fn replace(_: &mut Env, args: &[Value]) -> Value {
         if let (Some(Value::String(s)), Some(Value::String(search)), Some(Value::String(replace))) =
             (args.get(0), args.get(1), args.get(2))
         {
@@ -191,7 +191,7 @@ pub fn builtins() -> HashMap<String, Rc<Builtin>> {
             Value::String("Expected String".to_string())
         }
     }
-    fn len(_: &mut VM, args: &[Value]) -> Value {
+    fn len(_: &mut Env, args: &[Value]) -> Value {
         match args.get(0) {
             Some(Value::List(list)) => list.len().into(),
             Some(Value::Map(map)) => map.len().into(),
@@ -199,7 +199,7 @@ pub fn builtins() -> HashMap<String, Rc<Builtin>> {
             _ => 0.into(),
         }
     }
-    fn empty_(vm: &mut VM, args: &[Value]) -> Value {
+    fn empty_(vm: &mut Env, args: &[Value]) -> Value {
         if let Value::Number(n) = len(vm, args) {
             n == 0.0
         } else {
@@ -207,7 +207,7 @@ pub fn builtins() -> HashMap<String, Rc<Builtin>> {
         }
         .into()
     }
-    fn r#type(_: &mut VM, args: &[Value]) -> Value {
+    fn r#type(_: &mut Env, args: &[Value]) -> Value {
         if args.is_empty() {
             return Value::None;
         }

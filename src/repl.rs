@@ -1,5 +1,5 @@
 use {
-    crate::{compile, parse, scan, Value, VM},
+    crate::{eval, parse, scan, Env, Value},
     rustyline::{error::ReadlineError, Editor},
     std::io,
 };
@@ -7,10 +7,10 @@ use {
 /// Start the REPL.
 pub fn run() -> Result<(), io::Error> {
     banner();
-    let mut vm = VM::new(true);
-    vm.helper("help", help);
-    vm.helper("vars", vars);
-    vm.helper("builtins", builtins);
+    let mut env = Env::new();
+    env.helper("help", help);
+    env.helper("vars", vars);
+    env.helper("fns", fns);
     let history_file = ".hatter_history";
 
     // `()` can be used when no completer is required
@@ -22,16 +22,14 @@ pub fn run() -> Result<(), io::Error> {
             Ok(line) => {
                 rl.add_history_entry(line.as_str());
                 if line == "help" {
-                    help(&mut vm, &[]);
+                    help(&mut env, &[]);
                     continue;
                 }
                 match scan(&line)
                     .and_then(|t| parse(&t))
-                    .and_then(|ast| compile(&ast))
-                    .and_then(|codes| vm.run(&codes))
+                    .and_then(|ast| env.render(&ast))
                 {
-                    Ok(..) => {
-                        let out = vm.out();
+                    Ok(out) => {
                         if !out.trim().is_empty() {
                             println!("{}", out);
                         }
@@ -98,16 +96,16 @@ fn banner() {
     );
 }
 
-fn help(_: &mut VM, _: &[Value]) -> Value {
+fn help(_: &mut Env, _: &[Value]) -> Value {
     println!("REPL commands:\n");
     println!("  - help()");
     println!("  - vars()");
-    print!("  - builtins()");
+    print!("  - fns()");
     Value::None
 }
 
-fn vars(vm: &mut VM, _: &[Value]) -> Value {
-    for scope in vm.scopes() {
+fn vars(env: &mut Env, _: &[Value]) -> Value {
+    for scope in env.scopes() {
         for (k, v) in scope {
             println!("{}: {:?}", k, v);
         }
@@ -115,8 +113,8 @@ fn vars(vm: &mut VM, _: &[Value]) -> Value {
     Value::None
 }
 
-fn builtins(vm: &mut VM, _: &[Value]) -> Value {
-    for (name, _) in vm.builtins() {
+fn fns(env: &mut Env, _: &[Value]) -> Value {
+    for (name, _) in env.helpers() {
         println!("{}", name);
     }
     Value::None

@@ -465,6 +465,28 @@ impl<'s, 't> Parser<'s, 't> {
     /// - to the next ; if the next() char isn't an Indent
     fn block(&mut self) -> Result<Vec<Stmt>> {
         let mut block = vec![];
+
+        self.expect(Syntax::Indent)?;
+
+        while !self.peek_eof() {
+            match self.peek_kind() {
+                // keep going if we're indented
+                Syntax::Semi => self.skip(),
+
+                // pass these up the food chain
+                Syntax::Dedent => break,
+
+                // everything else is a stmt
+                _ => block.push(self.stmt()?),
+            };
+        }
+
+        Ok(block)
+    }
+
+    /// Parse the innerHTML of a <tag>. Code and stuff.
+    fn tag_body(&mut self) -> Result<Vec<Stmt>> {
+        let mut block = vec![];
         let mut indented = false;
 
         if self.peek_is(Syntax::Indent) {
@@ -659,7 +681,7 @@ impl<'s, 't> Parser<'s, 't> {
             return Ok(Stmt::Tag(tag));
         }
 
-        tag.set_body(self.block()?);
+        tag.set_body(self.tag_body()?);
 
         match self.peek_kind() {
             Syntax::Semi | Syntax::None => {

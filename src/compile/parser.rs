@@ -235,7 +235,7 @@ impl<'s, 't> Parser<'s, 't> {
     }
 
     /// Parse a function literal.
-    fn func(&mut self) -> Result<Stmt> {
+    fn fn_literal(&mut self) -> Result<Stmt> {
         self.expect(Syntax::LParen)?;
         let mut args = vec![];
         while !self.peek_is(Syntax::RParen) {
@@ -247,7 +247,11 @@ impl<'s, 't> Parser<'s, 't> {
             }
         }
         self.expect(Syntax::RParen)?;
-        Ok(Stmt::Fn(args, self.block()?))
+        if self.peek_is(Syntax::Indent) {
+            Ok(Stmt::Fn(args, self.block()?))
+        } else {
+            Ok(Stmt::Fn(args, vec![self.stmt()?]))
+        }
     }
 
     /// Parse a code expression.
@@ -373,7 +377,7 @@ impl<'s, 't> Parser<'s, 't> {
                 // check for "fn()" literal
                 if let Stmt::Word(w) = &word {
                     if w == "fn" {
-                        return self.func();
+                        return self.fn_literal();
                     }
                 }
 
@@ -470,71 +474,6 @@ impl<'s, 't> Parser<'s, 't> {
 
         while !self.peek_eof() {
             match self.peek_kind() {
-                // Literal
-                Syntax::String(..)
-                | Syntax::Number
-                | Syntax::LParen
-                | Syntax::LStaple
-                | Syntax::LCurly => {
-                    block.push(self.expr()?);
-                }
-
-                // Tag
-                Syntax::LCaret => {
-                    // Look for </closing> tag and bail if found.
-                    if !indented && self.peek2_is(Syntax::Slash) {
-                        break;
-                    }
-                    // Otherwise parse as regular tag expression.
-                    block.push(self.expr()?);
-                }
-
-                // Keyword or Stmtession
-                Syntax::Word => {
-                    if let Some(word) = self.peek() {
-                        match word.literal() {
-                            "if" => block.push(self.if_expr()?),
-                            "for" => block.push(self.for_expr()?),
-                            "def" => block.push(self.def_stmt()?),
-                            "return" => {
-                                self.skip();
-                                block.push(if self.peek_is(Syntax::Semi) {
-                                    Stmt::Return(bx!(Stmt::None))
-                                } else {
-                                    Stmt::Return(bx!(self.expr()?))
-                                });
-                                self.expect(Syntax::Semi)?;
-                            }
-                            _ => {
-                                // two words in a row become a string
-                                if self
-                                    .peek2()
-                                    .filter(|p| {
-                                        matches!(
-                                            p.kind,
-                                            Syntax::Word | Syntax::Comma | Syntax::Colon
-                                        )
-                                    })
-                                    .is_some()
-                                {
-                                    let mut out = self.next().to_string();
-                                    while !self.peek_eof() {
-                                        match self.peek_kind() {
-                                            Syntax::Word => out.push(' '),
-                                            Syntax::Op | Syntax::Comma | Syntax::Colon => {}
-                                            _ => break,
-                                        }
-                                        out.push_str(self.next().to_str())
-                                    }
-                                    block.push(out.into());
-                                } else {
-                                    block.push(self.expr()?);
-                                }
-                            }
-                        }
-                    }
-                }
-
                 // keep going if we're indented
                 Syntax::Semi if indented => {
                     self.skip();
@@ -543,12 +482,79 @@ impl<'s, 't> Parser<'s, 't> {
                 // pass these up the food chain
                 Syntax::Dedent | Syntax::Semi => break,
 
-                // Unexpected
-                _ => return self.error("Block stmt"),
+                // Look for </closing> tag and bail if found.
+                Syntax::LCaret if self.peek2_is(Syntax::Slash) => break,
+
+                // everything else is a stmt
+                _ => block.push(self.stmt()?),
             };
         }
 
         Ok(block)
+    }
+
+    /// Parse a single statement.
+    fn stmt(&mut self) -> Result<Stmt> {
+        match self.peek_kind() {
+            // Literal
+            Syntax::String(..)
+            | Syntax::Number
+            | Syntax::LParen
+            | Syntax::LStaple
+            | Syntax::LCurly => self.expr(),
+
+            // Tag
+            Syntax::LCaret => {
+                // Otherwise parse as regular tag expression.
+                self.expr()
+            }
+
+            // Keyword or Stmtession
+            Syntax::Word => {
+                let word = self.peek().unwrap();
+                match word.literal() {
+                    "if" => self.if_expr(),
+                    "for" => self.for_expr(),
+                    "def" => self.def_stmt(),
+                    "return" => {
+                        self.skip();
+                        let ret = if self.peek_is(Syntax::Semi) {
+                            Stmt::Return(bx!(Stmt::None))
+                        } else {
+                            Stmt::Return(bx!(self.expr()?))
+                        };
+                        self.expect(Syntax::Semi)?;
+                        Ok(ret)
+                    }
+                    _ => {
+                        // two words in a row become a string
+                        if self
+                            .peek2()
+                            .filter(|p| {
+                                matches!(p.kind, Syntax::Word | Syntax::Comma | Syntax::Colon)
+                            })
+                            .is_some()
+                        {
+                            let mut out = self.next().to_string();
+                            while !self.peek_eof() {
+                                match self.peek_kind() {
+                                    Syntax::Word => out.push(' '),
+                                    Syntax::Op | Syntax::Comma | Syntax::Colon => {}
+                                    _ => break,
+                                }
+                                out.push_str(self.next().to_str())
+                            }
+                            Ok(out.into())
+                        } else {
+                            self.expr()
+                        }
+                    }
+                }
+            }
+
+            // Unexpected
+            _ => self.error("Stmt"),
+        }
     }
 
     /// Parse a `for` statement:

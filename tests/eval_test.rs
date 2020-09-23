@@ -12,6 +12,11 @@ macro_rules! render {
     };
 }
 
+macro_rules! boo {
+    ($boo:expr) => {
+        Value::Bool($boo)
+    };
+}
 macro_rules! num {
     ($num:expr) => {
         Value::from($num)
@@ -27,6 +32,32 @@ macro_rules! string {
 macro_rules! list {
     ($($args:expr),+) => {
         Value::from(vec![$($args),+])
+    };
+    ($($args:expr,)+) => {
+        Value::from(vec![$($args),+])
+    };
+}
+
+macro_rules! map {
+    ($($key:expr => $val:expr),+) => {{
+        use std::collections::BTreeMap;
+        let mut map = BTreeMap::new();
+        $(
+            map.insert($key.to_string(), $val);
+        )+
+        Value::from(map)
+    }};
+    ($($key:expr => $val:expr,)+) => {
+        map!($($key => $val),+)
+    }
+}
+
+macro_rules! assert_error {
+    ($code:expr) => {
+        match compile(&$code).and_then(|ast| eval(&ast)) {
+            Ok(v) => assert!(false, "Expected Error, got {:?}", v),
+            Err(..) => assert!(true),
+        }
     };
 }
 

@@ -37,8 +37,8 @@ impl<'s, 't> Parser<'s, 't> {
     /// Parse `TokenStream` into `AST`.
     pub fn parse(&mut self) -> Result<()> {
         while !self.peek_eof() {
-            let mut block = self.block()?;
-            self.ast.append(&mut block);
+            let stmt = self.stmt()?;
+            self.ast.push(stmt);
             match self.peek_kind() {
                 Syntax::Dedent | Syntax::Semi => self.skip(),
                 _ => {}

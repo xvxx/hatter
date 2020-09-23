@@ -88,6 +88,24 @@ fn test_list() {
 }
 
 #[test]
+fn test_if() {
+    assert_render!(
+        r#"
+if true
+    print("yay")
+"#,
+        "yay\n"
+    );
+
+    assert_render!(r#"if true do print("yay")"#, "yay\n");
+    assert_render!(r#"if false do print("yay") else do print("nay")"#, "nay\n");
+    assert_render!(
+        r#"if false do print("yay") else if 1 > 0 do print("nay") else do print("cray")"#,
+        "nay\n"
+    );
+}
+
+#[test]
 fn test_for() {
     assert_render!(
         r#"
@@ -116,10 +134,27 @@ for x in [10,20,30,40]
 "#,
         "10\n30\n40\n"
     );
+
+    assert_render!(
+        r#"
+for x in [10,20,30,40]
+    if x == 20 do continue
+    print(x)
+"#,
+        "10\n30\n40\n"
+    );
 }
 
 #[test]
-fn test_return() {
+fn test_def() {
+    assert_render!(
+        r#"
+def test() do print("OK")
+test()
+"#,
+        "OK\n"
+    );
+
     assert_render!(
         r#"
 def test()
@@ -128,7 +163,10 @@ test()
 "#,
         "OK\n"
     );
+}
 
+#[test]
+fn test_return() {
     assert_eval!(
         r#"
 def test()

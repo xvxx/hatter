@@ -467,7 +467,6 @@ impl<'s, 't> Parser<'s, 't> {
         let mut block = vec![];
 
         self.expect(Syntax::Indent)?;
-
         while !self.peek_eof() {
             match self.peek_kind() {
                 // keep going if we're indented
@@ -480,6 +479,7 @@ impl<'s, 't> Parser<'s, 't> {
                 _ => block.push(self.stmt()?),
             };
         }
+        self.expect(Syntax::Dedent)?;
 
         Ok(block)
     }
@@ -604,7 +604,6 @@ impl<'s, 't> Parser<'s, 't> {
         let iter = self.expr()?;
         let body = self.block()?;
 
-        self.expect(Syntax::Dedent)?;
         Ok(Stmt::For(key, val, bx!(iter), body))
     }
 
@@ -642,30 +641,22 @@ impl<'s, 't> Parser<'s, 't> {
         let test = self.expr()?;
         let body = self.block()?;
         conds.push((test, body));
-        while self.peek_is(Syntax::Dedent) {
-            if let Some(next) = self.peek2() {
-                if next.literal() == "else" {
-                    self.skip(); // skip dedent
-                    self.skip(); // skip else
-                    let mut test = Stmt::Bool(true);
-                    if let Some(word) = self.peek() {
-                        if word.literal() == "if" {
-                            self.skip();
-                            test = self.expr()?;
-                        }
-                    }
-                    let body = if self.peek_is(Syntax::Indent) {
-                        self.block()?
-                    } else {
-                        vec![self.expr()?]
-                    };
-                    conds.push((test, body));
-                    continue;
+        while let Some(next) = self.peek() {
+            if next.to_str() != "else" {
+                break;
+            }
+            self.skip(); // skip else
+            let mut test = Stmt::Bool(true);
+            if let Some(word) = self.peek() {
+                if word.literal() == "if" {
+                    self.skip();
+                    test = self.expr()?;
                 }
             }
-            break;
+            let body = self.block()?;
+            conds.push((test, body));
+            continue;
         }
-        self.expect(Syntax::Dedent)?;
         Ok(Stmt::If(conds))
     }
 

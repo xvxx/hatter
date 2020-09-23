@@ -174,3 +174,186 @@ fn test_nesting() {
 "
     );
 }
+
+////
+// Hatter in a Hurry
+
+#[test]
+fn hatter_in_a_hurry() {
+    assert_eval!("false", boo!(false));
+    assert_eval!("true", boo!(true));
+
+    assert_eval!("200", num!(200.0));
+    assert_eval!("-10_150_203", num!(-10_150_203));
+    assert_eval!("0b101", num!(0b101));
+    assert_eval!("0o123", num!(0o123));
+    assert_eval!("0xabba", num!(0xabba));
+
+    assert_eval!("3.14", num!(3.14));
+    assert_eval!("-102.123", num!(-102.123));
+
+    assert_eval!(r#""Heya pal!""#, string!("Heya pal!"));
+    assert_eval!(r#"'Also, hi.'"#, string!("Also, hi."));
+    assert_eval!(r#"`Also, hello.`"#, string!("Also, hello."));
+    assert_eval!(
+        r#""""
+    Triple version of ', ", and `
+    works for multi-line strings.
+""""#,
+        string!("")
+    );
+    assert_eval!(
+        r#""Double quoted strings are interpolated: {2 + 2}""#,
+        string!("")
+    );
+
+    assert_eval!(r#"[1, 2, 3]"#, list!(num!(1), num!(2), num!(3)));
+    assert_eval!(
+        r#"["John", "Paul", "George", "Ringo"]"#,
+        list!(
+            string!("John"),
+            string!("Paul"),
+            string!("George"),
+            string!("Ringo"),
+        )
+    );
+    assert_eval!(
+        r#"[true, 2, "Paul"]"#,
+        list!(boo!(true), num!(2), string!("Paul"))
+    );
+
+    assert_eval!(
+        r#"{ one: "one", two: "two" }"#,
+        map!(
+            "one" => string!("one"),
+            "two" => string!("two"),
+        )
+    );
+    assert_eval!(
+        r#"{ 0: "oh", 1: "also one" }"#,
+        map!(
+            "0" => string!("oh"),
+            "1" => string!("also one"),
+        )
+    );
+
+    assert_eval!("z := fn(x) return x + 1\nz(2)", num!(3));
+
+    assert_eval!("num := 123\nnum = 456\nnum", num!(456));
+    assert_error!("num := 123\nnum = '456'");
+    assert_error!("num := 123\nnum := 456");
+    assert_error!("rand = 'random'");
+
+    assert_render!(
+        r#"
+def greet(title, name)
+    print("Hiya, {title}. {name}!")
+greet('Mrs', 'Robinson')
+"#,
+        "Hiya, Mrs. Robinson!"
+    );
+
+    assert_error!(
+        r#"
+def greet(title, name)
+    print("Hiya, {title}. {name}!")
+greet('Mrs', 'Robinson', 'Crusoe')
+"#
+    );
+
+    assert_render!(
+        r#"
+def mod(num, by, msg)
+    if num % by == 0
+        return msg
+    else
+        return ""
+
+def fizz-buzz
+    for i in 1..101
+        print(mod(i, 3, 'Fizz') + mod(i, 5, 'Buzz'))
+"#,
+        r#"
+Fizz
+Buzz
+FizzBuzz
+"#
+    );
+
+    macro_rules! ifelse {
+        () => {
+            r#"
+if i > 0
+    print("Positive")
+else if i == 0
+    print("Cero")
+else if i < 0
+    print("Negative")
+else if i > 100_000_000
+    print("Way TOO Positive!")
+"#;
+        };
+    }
+
+    assert_render!(concat!("i := 0", ifelse!()), "Cero\n");
+    assert_render!(concat!("i := 10", ifelse!()), "Positive\n");
+    assert_render!(concat!("i := -10", ifelse!()), "Negative\n");
+    assert_render!(
+        concat!("i := 100_000_001", ifelse!()),
+        "Way TOO Positive!\n"
+    );
+
+    assert_eval!("not true", boo!(false));
+    assert_eval!("not false", boo!(true));
+    assert_eval!("not not true", boo!(true));
+    assert_eval!("true and true", boo!(true));
+    assert_eval!("true and false", boo!(false));
+    assert_eval!("false and true", boo!(false));
+    assert_eval!("false and false", boo!(false));
+    assert_eval!("true or true", boo!(true));
+    assert_eval!("true or false", boo!(true));
+    assert_eval!("false or true", boo!(true));
+    assert_eval!("false or false", boo!(false));
+
+    assert_render!(
+        r#"
+for v in [100, 200, 300]
+    p(v) #=> 100 then 200 then 300
+"#,
+        "100\n200\n300\n"
+    );
+
+    assert_render!(
+        r#"
+for i, v in [100, 200, 300]
+    p(i) #=> 0 then 1 then 2
+    "#,
+        boo!(false)
+    );
+
+    assert_render!(
+        r#"
+for k, v in { first: 1, second: 2 }
+    print("{k} is {v}") #=> `first is 1` then `second is 2`
+    "#,
+        boo!(false)
+    );
+
+    assert_render!(
+        r#"
+while true
+    print("O'DOYLE RULES!")
+    "#,
+        boo!(false)
+    );
+
+    assert_render!(
+        r#"
+for v in 100..500
+    print(v)
+    if v > 300
+        break
+        "#,
+        boo!(false)
+    );
+}

@@ -218,7 +218,7 @@ fn test_nesting() {
 ////
 // Hatter in a Hurry
 
-// #[test]
+#[test]
 fn hatter_in_a_hurry() {
     assert_eval!("false", boo!(false));
     assert_eval!("true", boo!(true));
@@ -295,7 +295,7 @@ def greet(title, name)
     print("Hiya, {title}. {name}!")
 greet('Mrs', 'Robinson')
 "#,
-        "Hiya, Mrs. Robinson!"
+        "Hiya, Mrs. Robinson!\n"
     );
 
     assert_error!(

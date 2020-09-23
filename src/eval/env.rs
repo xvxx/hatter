@@ -210,6 +210,9 @@ impl Env {
             }
             Stmt::Call(name, args) => {
                 if let Some(Value::Fn { params, body }) = self.lookup(&name) {
+                    if params.len() != args.len() {
+                        return error!("expected {} args, got {}", params.len(), args.len());
+                    }
                     let params = params.clone();
                     let body = body.clone();
                     self.push_scope();
@@ -257,7 +260,17 @@ impl Env {
                 } else if !exists && *is_reassign {
                     return error!("{} is not set", name);
                 }
+
                 let val = self.eval(expr)?;
+                if *is_reassign {
+                    if self
+                        .get(name)
+                        .filter(|v| v.typename() == val.typename())
+                        .is_none()
+                    {
+                        return error!("{} is type {}", name, val.typename());
+                    }
+                }
                 self.set(name, val);
                 Value::None
             }

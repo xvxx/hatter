@@ -620,18 +620,20 @@ impl<'s, 't> Parser<'s, 't> {
         .to_string();
 
         let mut args = vec![];
-        self.expect(Syntax::LParen)?;
-        self.eat(Syntax::Semi);
-        while !self.peek_eof() && !self.peek_is(Syntax::RParen) {
-            args.push(self.expect(Syntax::Word)?.to_string());
-            if self.peek_is(Syntax::Comma) || self.peek_is(Syntax::Semi) {
-                self.next();
-            } else {
-                break;
+        if self.peek_is(Syntax::LParen) {
+            self.skip();
+            self.eat(Syntax::Semi);
+            while !self.peek_eof() && !self.peek_is(Syntax::RParen) {
+                args.push(self.expect(Syntax::Word)?.to_string());
+                if self.peek_is(Syntax::Comma) || self.peek_is(Syntax::Semi) {
+                    self.next();
+                } else {
+                    break;
+                }
             }
+            self.eat(Syntax::Semi);
+            self.expect(Syntax::RParen)?;
         }
-        self.eat(Syntax::Semi);
-        self.expect(Syntax::RParen)?;
 
         let body = self.block()?;
         Ok(Stmt::Assign(name, bx!(Stmt::Fn(args, body)), false))

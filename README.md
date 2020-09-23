@@ -127,10 +127,6 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
   - [ ] pratt parser
   - [ ] int vs float
   - [ ] HTMLized error page
-- [ ] small
-  - [ ] do syntax
-    - [ ] for / do
-    - [ ] if / then
 
 ### future
 

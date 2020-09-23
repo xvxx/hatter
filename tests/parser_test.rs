@@ -298,6 +298,43 @@ parse_test!(
     call!("&&", boo!(true), call!("||", boo!(false), boo!(false)))
 );
 
+parse_test!(
+    basic_if_oneline,
+    r#"if true do "something""#,
+    Stmt::If(vec![(boo!(true), vec![string!("something")])])
+);
+
+parse_test!(
+    basic_if_else_oneline,
+    r#"if true do "something" else do "something else""#,
+    Stmt::If(vec![
+        (boo!(true), vec![string!("something")]),
+        (boo!(true), vec![string!("something else")]),
+    ])
+);
+
+parse_test!(
+    basic_if_else_if_oneline,
+    r#"if true do "something" else if true do "ahh" else do "something else""#,
+    Stmt::If(vec![
+        (boo!(true), vec![string!("something")]),
+        (boo!(true), vec![string!("ahh")]),
+        (boo!(true), vec![string!("something else")]),
+    ])
+);
+
+parse_test!(
+    basic_if_else_if_mixed,
+    r#"if true do "something" else if true
+    "ahh"
+else do "something else""#,
+    Stmt::If(vec![
+        (boo!(true), vec![string!("something")]),
+        (boo!(true), vec![string!("ahh")]),
+        (boo!(true), vec![string!("something else")]),
+    ])
+);
+
 ////
 // for
 

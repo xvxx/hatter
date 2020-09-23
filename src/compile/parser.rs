@@ -39,10 +39,7 @@ impl<'s, 't> Parser<'s, 't> {
         while !self.peek_eof() {
             let stmt = self.stmt()?;
             self.ast.push(stmt);
-            match self.peek_kind() {
-                Syntax::Dedent | Syntax::Semi => self.skip(),
-                _ => {}
-            }
+            self.eat(Syntax::Semi);
         }
         Ok(())
     }
@@ -465,6 +462,12 @@ impl<'s, 't> Parser<'s, 't> {
     /// - to the next ; if the next() char isn't an Indent
     fn block(&mut self) -> Result<Vec<Stmt>> {
         let mut block = vec![];
+
+        // one line block via `do`
+        if self.peek_is(Syntax::Word) && self.peek().filter(|p| p.to_str() == "do").is_some() {
+            self.skip();
+            return Ok(vec![self.stmt()?]);
+        }
 
         self.expect(Syntax::Indent)?;
         while !self.peek_eof() {

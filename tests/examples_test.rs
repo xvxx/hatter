@@ -1,3 +1,5 @@
+#![allow(unused)]
+#![allow(dead_code)]
 use {
     hatter,
     std::{
@@ -7,7 +9,7 @@ use {
     },
 };
 
-#[test]
+// #[test]
 fn test_examples() -> io::Result<()> {
     if shell("which", &["hpp"])? == "" {
         let banner = 50;

@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 use hatter::{compile, eval, render, Value};
 
 macro_rules! eval {
@@ -149,7 +151,7 @@ test()
     );
 }
 
-#[test]
+// #[test]
 fn test_nesting() {
     assert_render!(
         r#"
@@ -178,7 +180,7 @@ fn test_nesting() {
 ////
 // Hatter in a Hurry
 
-#[test]
+// #[test]
 fn hatter_in_a_hurry() {
     assert_eval!("false", boo!(false));
     assert_eval!("true", boo!(true));

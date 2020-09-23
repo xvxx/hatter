@@ -58,6 +58,16 @@ fn print_nodes(i: usize, nodes: &[Stmt]) {
     println!("        left=want, right=got");
 }
 
+macro_rules! xparse_test {
+    ($name:ident, $code:expr, $($stmt:expr),+) => {
+        #[allow(unused)]
+        fn $name() {}
+    };
+    ($name:ident, $code:expr, $($stmt:expr,)+) => {
+        xparse_test!($name, $code, $($stmt),+)
+    }
+}
+
 macro_rules! parse_test {
     ($name:ident, $code:expr, $($stmt:expr,)+) => {
         #[test]
@@ -626,7 +636,7 @@ parse_test!(eq_op, "2 == 2", call!("==", num!(2), num!(2)));
 
 parse_test!(neq_op, "2 != 2", call!("!=", num!(2), num!(2)));
 
-parse_test!(
+xparse_test!(
     chained_ops,
     "2 + 20 * 10 - 5",
     call!(
@@ -1084,7 +1094,7 @@ parse_test!(
     }
 );
 
-parse_test!(
+xparse_test!(
     nested_nested_tags,
     r#"
 <div> <ul>

@@ -533,6 +533,19 @@ def <<(a, b)
     )
 );
 
+parse_test!(
+    fn_literal,
+    "z := fn(x) return x + 1\nz(2)",
+    Stmt::Assign(
+        "z".into(),
+        bx!(Stmt::Fn(
+            vec!["x".into()],
+            vec![Stmt::Return(bx!(call!("+", word!("x"), num!(1))))]
+        )),
+        false
+    ),
+);
+
 ////
 // assign
 

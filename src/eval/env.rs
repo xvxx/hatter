@@ -1,8 +1,8 @@
 use {
-    crate::{builtins, Builtin, ErrorKind, Result, Stmt, Tag, Value},
+    crate::{builtins, Args, Builtin, ErrorKind, Result, Stmt, Tag, Value},
     std::{
         collections::{BTreeMap, HashMap},
-        mem, ops,
+        fmt, mem, ops,
         rc::Rc,
     },
 };
@@ -34,6 +34,24 @@ pub struct Env {
     scopes: Vec<Scope>,
     helpers: HashMap<String, Rc<Builtin>>,
     out: String,
+}
+
+impl fmt::Debug for Env {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Env")
+            .field("scopes", &self.scopes)
+            .field("out", &self.out)
+            .field(
+                "helpers",
+                &self
+                    .helpers
+                    .iter()
+                    .map(|(k, _)| k.to_string())
+                    .collect::<Vec<_>>()
+                    .join(", "),
+            )
+            .finish()
+    }
 }
 
 impl ops::Deref for Env {
@@ -110,7 +128,7 @@ impl Env {
     pub fn helper<S, F>(&mut self, key: S, f: F)
     where
         S: AsRef<str>,
-        F: 'static + Fn(&mut Env, &[Value]) -> Value,
+        F: 'static + Fn(Args) -> Result<Value>,
     {
         self.helpers.insert(key.as_ref().to_string(), rc!(f));
     }
@@ -211,7 +229,7 @@ impl Env {
                         .iter()
                         .map(|a| self.eval(&a))
                         .collect::<Result<Vec<_>>>()?;
-                    f(self, &args)
+                    f(Args::new(self, args))?
                 } else {
                     return error!("can't find fn: {}", name);
                 }

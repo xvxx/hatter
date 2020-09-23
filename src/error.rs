@@ -10,6 +10,10 @@ pub enum ErrorKind {
     SyntaxError,
     ParseError,
     RuntimeError,
+
+    ArgNotFound,
+    WrongArgType,
+
     Jump(Jump),
 }
 
@@ -100,6 +104,17 @@ macro_rules! jump {
         use crate::{Error, ErrorKind};
         Err(Error::new(ErrorKind::Jump($jump), "".to_string(), 0, 0))
     }};
+}
+
+/// Convenient way to create an error of ErrorKind.
+macro_rules! error_kind {
+    ($kind:ident, $msg:expr) => {{
+        use crate::{Error, ErrorKind};
+        Error::new(ErrorKind::$kind, $msg.into(), 0, 0)
+    }};
+    ($kind:ident, $msg:expr, $($args:expr),*) => {
+        error_kind!($kind, format!($msg, $($args),*));
+    };
 }
 
 /// Convenient way to create an Err(Error{}).

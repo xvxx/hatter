@@ -1,5 +1,5 @@
 use {
-    crate::{Env, Stmt},
+    crate::{Args, Result, Stmt},
     std::{
         collections::{BTreeMap, HashMap},
         fmt,
@@ -7,7 +7,7 @@ use {
     },
 };
 
-pub type Builtin = dyn Fn(&mut Env, &[Value]) -> Value;
+pub type Builtin = dyn Fn(Args) -> Result<Value>;
 
 #[derive(Clone)]
 pub enum Value {
@@ -107,6 +107,10 @@ impl PartialEq for Value {
 }
 
 impl Value {
+    pub fn ok(self) -> Result<Value> {
+        Ok(self)
+    }
+
     pub fn len(&self) -> usize {
         match self {
             Value::List(list) => list.len(),
@@ -125,6 +129,14 @@ impl Value {
             Value::None => false,
             Value::Bool(b) => *b,
             _ => true,
+        }
+    }
+
+    pub fn to_f64(&self) -> f64 {
+        if let Value::Number(n) = self {
+            *n
+        } else {
+            0.0
         }
     }
 

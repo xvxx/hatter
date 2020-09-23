@@ -1,12 +1,12 @@
 use {
-    crate::{Builtin, Env, Value},
+    crate::{Args, Builtin, Result, Value},
     std::{collections::HashMap, rc::Rc},
 };
 
 pub fn builtins() -> HashMap<String, Rc<Builtin>> {
     let mut map: HashMap<String, Rc<Builtin>> = HashMap::new();
 
-    fn eq(_: &mut Env, args: &[Value]) -> Value {
+    fn eq(args: Args) -> Result<Value> {
         if let Some(val) = args.get(0) {
             match val {
                 Value::None => match args.get(1) {
@@ -31,15 +31,16 @@ pub fn builtins() -> HashMap<String, Rc<Builtin>> {
         } else {
             Value::None
         }
+        .ok()
     }
-    fn neq(vm: &mut Env, args: &[Value]) -> Value {
-        match eq(vm, args) {
+    fn neq(args: Args) -> Result<Value> {
+        Value::Bool(match eq(args)? {
             Value::Bool(b) => !b,
             _ => false,
-        }
-        .into()
+        })
+        .ok()
     }
-    fn not(_: &mut Env, args: &[Value]) -> Value {
+    fn not(args: Args) -> Result<Value> {
         if let Some(val) = args.get(0) {
             match val {
                 Value::None | Value::Bool(false) => Value::Bool(true),
@@ -48,170 +49,123 @@ pub fn builtins() -> HashMap<String, Rc<Builtin>> {
         } else {
             Value::None
         }
+        .ok()
     }
-    fn concat(_: &mut Env, args: &[Value]) -> Value {
+    fn concat(args: Args) -> Result<Value> {
         let mut sum = String::new();
         for arg in args {
             sum.push_str(&arg.to_string());
         }
-        return Value::String(sum);
+        Ok(sum.into())
     }
-    fn when(_: &mut Env, args: &[Value]) -> Value {
-        if matches!(&args[0], Value::None | Value::Bool(false)) {
-            return Value::None;
+    fn when(args: Args) -> Result<Value> {
+        let fst = args.need(0)?;
+        if matches!(fst, Value::None | Value::Bool(false)) {
+            Ok(Value::None)
         } else {
-            return args[1].clone();
+            Ok(args.need(1)?.clone())
         }
     }
-    fn index(_: &mut Env, args: &[Value]) -> Value {
+    fn index(args: Args) -> Result<Value> {
         if args.len() != 2 {
-            return Value::None;
+            return Value::None.ok();
         }
-        let subject = &args[0];
-        let verb = &args[1];
+        let subject = args.need(0)?;
+        let verb = args.need(1)?;
 
         match subject {
             Value::Map(map) => map.get(verb.to_str()).unwrap_or(&Value::None).clone(),
             Value::List(list) => {
-                if let Value::Number(n) = verb {
-                    list.get(*n as usize).unwrap_or(&Value::None).clone()
-                } else {
-                    Value::None
-                }
+                let idx = args.need_number(1)?;
+                list.get(idx as usize).unwrap_or(&Value::None).clone()
             }
             Value::Object(o) => o.get(verb.to_str()).unwrap_or(Value::None),
             _ => Value::None,
         }
+        .ok()
     }
-    fn add(_: &mut Env, args: &[Value]) -> Value {
+    fn add(args: Args) -> Result<Value> {
         if let Some(Value::Number(_)) = args.get(0) {
             let mut sum = 0.0;
             let mut iter = args.iter();
             while let Some(Value::Number(x)) = iter.next() {
                 sum += x;
             }
-            return Value::Number(sum);
+            return Value::Number(sum).ok();
         } else if let Some(Value::String(_)) = args.get(0) {
             let mut sum = String::new();
             let mut iter = args.iter();
             while let Some(Value::String(x)) = iter.next() {
                 sum += x;
             }
-            return Value::String(sum);
+            return Value::String(sum).ok();
         }
-        Value::None
+        Value::None.ok()
     }
-    fn sub(_: &mut Env, args: &[Value]) -> Value {
-        if let Some(Value::Number(a)) = args.get(0) {
-            if let Some(Value::Number(b)) = args.get(1) {
-                return Value::Number(a - b);
-            }
-        }
-        Value::None
+    fn sub(args: Args) -> Result<Value> {
+        let a = args.need_number(0)?;
+        let b = args.need_number(1)?;
+        Value::Number(a - b).ok()
     }
-    fn mul(_: &mut Env, args: &[Value]) -> Value {
-        if let Some(Value::Number(a)) = args.get(0) {
-            if let Some(Value::Number(b)) = args.get(1) {
-                return Value::Number(a * b);
-            }
-        }
-        Value::None
+    fn mul(args: Args) -> Result<Value> {
+        let a = args.need_number(0)?;
+        let b = args.need_number(1)?;
+        Value::Number(a * b).ok()
     }
-    fn div(_: &mut Env, args: &[Value]) -> Value {
-        if let Some(Value::Number(a)) = args.get(0) {
-            if let Some(Value::Number(b)) = args.get(1) {
-                return Value::Number(a / b);
-            }
-        }
-        Value::None
+    fn div(args: Args) -> Result<Value> {
+        let a = args.need_number(0)?;
+        let b = args.need_number(1)?;
+        Value::Number(a / b).ok()
     }
-    fn print(env: &mut Env, args: &[Value]) -> Value {
-        let len = args.len();
-        for (i, arg) in args.iter().enumerate() {
-            if i == len - 1 {
-                env.print(format!("{}", arg));
+    fn print(mut args: Args) -> Result<Value> {
+        while !args.is_empty() {
+            let arg = args.remove(0);
+            if args.is_empty() {
+                args.env.print(format!("{}", arg));
             } else {
-                env.print(format!("{} ", arg));
+                args.env.print(format!("{} ", arg));
             }
         }
-        Value::None
+        Value::None.ok()
     }
-    fn gt(_: &mut Env, args: &[Value]) -> Value {
-        if let Some(Value::Number(a)) = args.get(0) {
-            if let Some(Value::Number(b)) = args.get(1) {
-                return Value::Bool(a > b);
-            }
-        }
-        Value::None
+    fn gt(args: Args) -> Result<Value> {
+        Value::Bool(args.need_number(0)? > args.need_number(1)?).ok()
     }
-    fn gte(_: &mut Env, args: &[Value]) -> Value {
-        if let Some(Value::Number(a)) = args.get(0) {
-            if let Some(Value::Number(b)) = args.get(1) {
-                return Value::Bool(a >= b);
-            }
-        }
-        Value::None
+    fn gte(args: Args) -> Result<Value> {
+        Value::Bool(args.need_number(0)? >= args.need_number(1)?).ok()
     }
-    fn lt(_: &mut Env, args: &[Value]) -> Value {
-        if let Some(Value::Number(a)) = args.get(0) {
-            if let Some(Value::Number(b)) = args.get(1) {
-                return Value::Bool(a < b);
-            }
-        }
-        Value::None
+    fn lt(args: Args) -> Result<Value> {
+        Value::Bool(args.need_number(0)? < args.need_number(1)?).ok()
     }
-    fn lte(_: &mut Env, args: &[Value]) -> Value {
-        if let Some(Value::Number(a)) = args.get(0) {
-            if let Some(Value::Number(b)) = args.get(1) {
-                return Value::Bool(a <= b);
-            }
-        }
-        Value::None
+    fn lte(args: Args) -> Result<Value> {
+        Value::Bool(args.need_number(0)? <= args.need_number(1)?).ok()
     }
-    fn to_uppercase(_: &mut Env, args: &[Value]) -> Value {
-        if let Some(Value::String(s)) = args.get(0) {
-            Value::String(s.to_uppercase())
-        } else {
-            Value::String("Expected String".to_string())
-        }
+    fn to_uppercase(args: Args) -> Result<Value> {
+        Value::String(args.need_string(0)?.to_uppercase()).ok()
     }
-    fn to_lowercase(_: &mut Env, args: &[Value]) -> Value {
-        if let Some(Value::String(s)) = args.get(0) {
-            Value::String(s.to_lowercase())
-        } else {
-            Value::String("Expected String".to_string())
-        }
+    fn to_lowercase(args: Args) -> Result<Value> {
+        Value::String(args.need_string(0)?.to_lowercase()).ok()
     }
-    fn replace(_: &mut Env, args: &[Value]) -> Value {
-        if let (Some(Value::String(s)), Some(Value::String(search)), Some(Value::String(replace))) =
-            (args.get(0), args.get(1), args.get(2))
-        {
-            Value::String(s.replace(search, replace))
-        } else {
-            Value::String("Expected String".to_string())
-        }
+    fn replace(args: Args) -> Result<Value> {
+        let s = args.need_string(0)?;
+        let search = args.need_string(1)?;
+        let replace = args.need_string(2)?;
+        Value::String(s.replace(search, replace)).ok()
     }
-    fn len(_: &mut Env, args: &[Value]) -> Value {
-        match args.get(0) {
-            Some(Value::List(list)) => list.len().into(),
-            Some(Value::Map(map)) => map.len().into(),
-            Some(Value::String(s)) => s.len().into(),
-            _ => 0.into(),
+    fn len(args: Args) -> Result<Value> {
+        match args.need(0)? {
+            Value::List(list) => list.len().into(),
+            Value::Map(map) => map.len().into(),
+            Value::String(s) => s.len().into(),
+            _ => Value::Number(0.0),
         }
+        .ok()
     }
-    fn empty_(vm: &mut Env, args: &[Value]) -> Value {
-        if let Value::Number(n) = len(vm, args) {
-            n == 0.0
-        } else {
-            false
-        }
-        .into()
+    fn empty_(args: Args) -> Result<Value> {
+        Value::Bool(len(args)?.to_f64() == 0.0).ok()
     }
-    fn r#type(_: &mut Env, args: &[Value]) -> Value {
-        if args.is_empty() {
-            return Value::None;
-        }
-        args[0].typename().into()
+    fn r#type(args: Args) -> Result<Value> {
+        Value::String(args.need(0)?.typename().into()).ok()
     }
 
     macro_rules! builtin {

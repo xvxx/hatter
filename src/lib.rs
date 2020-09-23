@@ -34,6 +34,7 @@ pub use {
     },
     error::{print_error, Error, ErrorKind},
     eval::{
+        args::Args,
         builtins::builtins,
         env::{eval, render, Env, Jump, Scope},
         value::{Builtin, Object, Value},

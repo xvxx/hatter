@@ -88,7 +88,7 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
   - `name := 'Bob'`  will error if name **is** already set.
   - `name = 'Bob'`  will error if name **isn't** already set.
 - Dynamic values for regular attributes:
-  - `<div page-num=page.id>`
+  - `<div page-num={page.id}>`
 - Conditionally set attributes or enable shorthand:
   - `<div .logged-in=logged-in?>`
   - `<div data-map=is-map?>`
@@ -103,7 +103,7 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
 - Call functions defined in Rust:
   - `<div.name> to-uppercase(name)`
 - Define your own Hatter functions:
-  - `def greet(name) do print("Hey there, {name}!")
+  - `def greet(name) do print("Hey there, {name}!")`
   - `greet("Lydia")` prints `Hey there, Lydia!`
 - Easy inline JavaScript:
   - `<li> <a onclick=(alert("Oink!"))> 🐷`

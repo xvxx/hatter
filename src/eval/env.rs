@@ -81,6 +81,11 @@ impl Env {
         mem::replace(&mut self.out, String::new())
     }
 
+    /// Create an empty Args struct, to call a helper function.
+    pub fn empty_args(&mut self) -> Args {
+        Args::new(self, vec![])
+    }
+
     /// Nearest (currently active) scope.
     pub fn scope(&self) -> &Scope {
         &self.scopes[self.scopes.len() - 1]

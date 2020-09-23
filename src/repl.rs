@@ -1,11 +1,11 @@
 use {
-    crate::{compile, Env, Value},
+    crate::{compile, Args, Env, Result, Value},
     rustyline::{error::ReadlineError, Editor},
     std::io,
 };
 
 /// Start the REPL.
-pub fn run() -> Result<(), io::Error> {
+pub fn run() -> io::Result<()> {
     banner();
     let mut env = Env::new();
     env.helper("help", help);
@@ -27,7 +27,7 @@ pub fn run() -> Result<(), io::Error> {
             Ok(line) => {
                 rl.add_history_entry(line.as_str());
                 if line == "help" {
-                    help(&mut env, &[]);
+                    help(env.empty_args())?;
                     continue;
                 }
                 match compile(&line).and_then(|ast| env.render(&ast)) {
@@ -98,27 +98,29 @@ fn banner() {
     );
 }
 
-fn help(_: &mut Env, _: &[Value]) -> Value {
+fn help(_: Args) -> Result<Value> {
     println!("REPL commands:\n");
     println!("  - help()");
     println!("  - vars()");
     print!("  - fns()");
-    Value::None
+    Value::None.ok()
 }
 
-fn vars(env: &mut Env, _: &[Value]) -> Value {
-    for scope in env.scopes() {
+fn vars(args: Args) -> Result<Value> {
+    for scope in args.env.scopes() {
         for (k, v) in scope {
             println!("{}: {:?}", k, v);
         }
     }
-    Value::None
+    Value::None.ok()
 }
 
-fn fns(env: &mut Env, _: &[Value]) -> Value {
-    env.helpers()
+fn fns(args: Args) -> Result<Value> {
+    Ok(args
+        .env
+        .helpers()
         .iter()
         .map(|(name, _)| name)
         .collect::<Vec<_>>()
-        .into()
+        .into())
 }

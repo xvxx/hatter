@@ -106,6 +106,16 @@ impl PartialEq for Value {
     }
 }
 
+impl PartialEq<Value> for String {
+    fn eq(&self, other: &Value) -> bool {
+        if let Value::String(s) = other {
+            s == self
+        } else {
+            false
+        }
+    }
+}
+
 impl Value {
     pub fn ok(self) -> Result<Value> {
         Ok(self)

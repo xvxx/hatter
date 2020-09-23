@@ -534,7 +534,7 @@ def <<(a, b)
 );
 
 parse_test!(
-    fn_literal,
+    fn_literal_oneline,
     "z := fn(x) return x + 1\nz(2)",
     Stmt::Assign(
         "z".into(),
@@ -544,6 +544,24 @@ parse_test!(
         )),
         false
     ),
+    call!("z", num!(2))
+);
+
+parse_test!(
+    fn_literal,
+    r#"
+z := fn(x)
+    return x + 1
+z(2)"#,
+    Stmt::Assign(
+        "z".into(),
+        bx!(Stmt::Fn(
+            vec!["x".into()],
+            vec![Stmt::Return(bx!(call!("+", word!("x"), num!(1))))]
+        )),
+        false
+    ),
+    call!("z", num!(2))
 );
 
 ////

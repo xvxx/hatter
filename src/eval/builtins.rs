@@ -127,6 +127,11 @@ pub fn builtins() -> HashMap<String, Rc<Builtin>> {
         let b = args.need_number(1)?;
         Value::Number(a / b).ok()
     }
+    fn r#mod(args: Args) -> Result<Value> {
+        let a = args.need_number(0)?;
+        let b = args.need_number(1)?;
+        Value::Number(a % b).ok()
+    }
     fn print(mut args: Args) -> Result<Value> {
         while !args.is_empty() {
             let arg = args.remove(0);
@@ -198,6 +203,7 @@ pub fn builtins() -> HashMap<String, Rc<Builtin>> {
     builtin!("-" => sub);
     builtin!("*" => mul);
     builtin!("/" => div);
+    builtin!("%" => r#mod);
     builtin!(">" => gt);
     builtin!(">=" => gte);
     builtin!("<" => lt);

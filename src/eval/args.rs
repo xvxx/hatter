@@ -56,7 +56,7 @@ impl<'e> Args<'e> {
             Err(error_kind!(
                 WrongArgType,
                 "Expected Number, got: {:?}",
-                self
+                self.need(idx)?
             ))
         }
     }
@@ -69,7 +69,7 @@ impl<'e> Args<'e> {
             Err(error_kind!(
                 WrongArgType,
                 "Expected String, got: {:?}",
-                self
+                self.need(idx)?
             ))
         }
     }

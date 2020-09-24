@@ -66,6 +66,16 @@ pub fn builtins() -> HashMap<String, Rc<Builtin>> {
             Ok(args.need(1)?.clone())
         }
     }
+    fn range(args: Args) -> Result<Value> {
+        let start = args.need_number(0)? as i32;
+        let end = args.need_number(1)? as i32;
+        Ok((start..end).collect::<Vec<_>>().into())
+    }
+    fn range_inclusive(args: Args) -> Result<Value> {
+        let start = args.need_number(0)? as i32;
+        let end = args.need_number(1)? as i32;
+        Ok((start..=end).collect::<Vec<_>>().into())
+    }
     fn index(args: Args) -> Result<Value> {
         if args.len() != 2 {
             return Value::None.ok();
@@ -182,6 +192,8 @@ pub fn builtins() -> HashMap<String, Rc<Builtin>> {
     builtin!("concat" => concat);
     builtin!("index" => index);
     builtin!("." => index);
+    builtin!(".." => range);
+    builtin!("..=" => range_inclusive);
     builtin!("+" => add);
     builtin!("-" => sub);
     builtin!("*" => mul);

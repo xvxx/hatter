@@ -320,8 +320,16 @@ impl<'s> Lexer<'s> {
             if c.is_numeric() || c == '_' {
                 self.next();
             } else if !saw_dot && c == '.' {
-                saw_dot = true;
-                self.next();
+                let mut iter = self.chars.clone();
+                iter.next();
+                if let Some((_, c)) = iter.next() {
+                    if c.is_numeric() {
+                        saw_dot = true;
+                        self.next();
+                        continue;
+                    }
+                }
+                break;
             } else {
                 break;
             }

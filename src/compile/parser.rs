@@ -283,7 +283,7 @@ impl<'s, 't> Parser<'s, 't> {
             }
             _ => {
                 // check for += and friends
-                if !matches!(lit, "==" | "!=" | ">=" | "<=")
+                if !matches!(lit, "==" | "!=" | ">=" | "<=" | "..=")
                     && matches!(lit.bytes().last(), Some(b'='))
                 {
                     let op = left.to_string();

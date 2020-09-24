@@ -64,6 +64,9 @@ scan_test!(octal_number, "0o755", Number);
 scan_test!(hex_number, "0xdeadbeef", Number);
 scan_test!(float_number, "3.14", Number);
 scan_test!(negative_float_number, "-1230.3552", Number);
+scan_test!(number_range, "1..101", Number, Op, Number);
+scan_test!(number_range_inclusive, "500..=600", Number, Op, Number);
+scan_test!(number_range_spaced, "500 ..= 600", Number, Op, Number);
 
 ////
 // Comments

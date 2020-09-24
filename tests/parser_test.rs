@@ -167,11 +167,25 @@ three
 );
 
 parse_test!(one_word_is_just_a_word, "one", word!("one"),);
-parse_test!(two_words_are_a_string, "one two", string!("one two"),);
 parse_test!(
-    two_words_with_op_are_a_string,
-    "One and... two!",
-    string!("One and... two!")
+    two_words_are_two_words,
+    "one two",
+    word!("one"),
+    word!("two")
+);
+parse_test!(two_words_in_tag_are_a_string, "<b> one two", {
+    let mut tag = tag!("b");
+    tag.set_body(vec![Stmt::String("one two".into())]);
+    Stmt::Tag(tag)
+});
+parse_test!(
+    two_words_with_op_in_tag_are_a_string,
+    "<b> One and... two!",
+    {
+        let mut tag = tag!("b");
+        tag.set_body(vec![Stmt::String("One and... two!".into())]);
+        Stmt::Tag(tag)
+    }
 );
 
 ////

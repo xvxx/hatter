@@ -507,8 +507,27 @@ impl<'s, 't> Parser<'s, 't> {
                 // pass these up the food chain
                 Syntax::Dedent | Syntax::Semi => break,
 
-                // Look for </closing> tag and bail if found.
+                // look for </closing> tag and bail if found.
                 Syntax::LCaret if self.peek2_is(Syntax::Slash) => break,
+
+                // two words in a row become a string in tags
+                Syntax::Word
+                    if self
+                        .peek2()
+                        .filter(|p| matches!(p.kind, Syntax::Word | Syntax::Comma | Syntax::Colon))
+                        .is_some() =>
+                {
+                    let mut out = self.next().to_string();
+                    while !self.peek_eof() {
+                        match self.peek_kind() {
+                            Syntax::Word => out.push(' '),
+                            Syntax::Op | Syntax::Comma | Syntax::Colon => {}
+                            _ => break,
+                        }
+                        out.push_str(self.next().to_str())
+                    }
+                    block.push(out.into());
+                }
 
                 // everything else is a stmt
                 _ => block.push(self.stmt()?),
@@ -551,29 +570,7 @@ impl<'s, 't> Parser<'s, 't> {
                         self.expect(Syntax::Semi)?;
                         Ok(ret)
                     }
-                    _ => {
-                        // two words in a row become a string
-                        if self
-                            .peek2()
-                            .filter(|p| {
-                                matches!(p.kind, Syntax::Word | Syntax::Comma | Syntax::Colon)
-                            })
-                            .is_some()
-                        {
-                            let mut out = self.next().to_string();
-                            while !self.peek_eof() {
-                                match self.peek_kind() {
-                                    Syntax::Word => out.push(' '),
-                                    Syntax::Op | Syntax::Comma | Syntax::Colon => {}
-                                    _ => break,
-                                }
-                                out.push_str(self.next().to_str())
-                            }
-                            Ok(out.into())
-                        } else {
-                            self.expr()
-                        }
-                    }
+                    _ => self.expr(),
                 }
             }
 

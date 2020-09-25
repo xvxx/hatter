@@ -260,6 +260,22 @@ impl Env {
                 Value::None
             }
             Stmt::For(..) => self.eval_for(stmt)?,
+            Stmt::While(test, body) => {
+                self.push_scope();
+                while self.eval(&test)?.to_bool() {
+                    match self.block(&body) {
+                        Ok(_) => {}
+                        Err(e) => match e.kind {
+                            ErrorKind::Jump(Jump::Break) => break,
+                            ErrorKind::Jump(Jump::Continue) => continue,
+                            _ => return Err(e),
+                        },
+                    }
+                    self.mut_scope().clear();
+                }
+                self.pop_scope();
+                Value::None
+            }
             Stmt::Assign(name, expr, is_reassign) => {
                 let exists = self.contains_key(name);
                 if exists && !is_reassign {

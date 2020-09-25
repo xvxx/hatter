@@ -572,6 +572,10 @@ impl<'s, 't> Parser<'s, 't> {
                     "if" => self.if_expr(),
                     "for" => self.for_expr(),
                     "def" => self.def_stmt(),
+                    "while" => {
+                        self.skip();
+                        Ok(Stmt::While(bx!(self.expr()?), self.block()?))
+                    }
                     "return" => {
                         self.skip();
                         let ret = if self.peek_is(Syntax::Semi) {

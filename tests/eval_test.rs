@@ -390,14 +390,17 @@ for k, v in { first: 1, second: 2 }
         "first is 1\nsecond is 2\n"
     );
 
-    //     assert_render!(
-    //         r#"
-    // while true
-    //     print("O'DOYLE RULES!")
-    //     break
-    //     "#,
-    //         "O'DOYLE RULES!"
-    //     );
+    assert_render!(
+        r#"
+x := 0
+while true
+    x += 1
+    print("O'DOYLE RULES!")
+    if x > 1
+        break
+    "#,
+        "O'DOYLE RULES!\nO'DOYLE RULES!\n"
+    );
 
     assert_render!(
         r#"

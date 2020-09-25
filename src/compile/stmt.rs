@@ -13,7 +13,8 @@ pub enum Stmt {
     Return(Box<Stmt>),
     If(Vec<(Stmt, Vec<Stmt>)>),
     For(Option<String>, String, Box<Stmt>, Vec<Stmt>), // key, val, iter, body
-    Assign(String, Box<Stmt>, bool),                   // var, val, reassign?
+    While(Box<Stmt>, Vec<Stmt>),
+    Assign(String, Box<Stmt>, bool), // var, val, reassign?
     Tag(Tag),
     Fn(Vec<String>, Vec<Stmt>), // args, body
     Args(Vec<(String, Stmt)>),  // keyword args
@@ -79,6 +80,7 @@ impl Stmt {
             }
             Stmt::If(..) => format!("{}", "IF: Coming Soon™"),
             Stmt::For(..) => format!("{}", "FOR: Coming Soon™"),
+            Stmt::While(test, body) => format!("while({:?}) {:?}", test, body),
             Stmt::Fn(args, body) => format!("fn({:?}) {:?}", args, body),
             Stmt::Call(name, args) => format!(
                 "{}({})",

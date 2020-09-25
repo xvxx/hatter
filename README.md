@@ -161,7 +161,9 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
 
 ## License
 
-Hatter is licensed under the MIT License. Please see[COPYING](COPYING)
-or http://opensource.org/licenses/MIT for details.
+Hatter is licensed under the MIT License. Please see
+[COPYING](COPYING) or http://opensource.org/licenses/MIT for details.
+
+[Imba] is licensed under the MIT License.
 
 [imba]: https://imba.io

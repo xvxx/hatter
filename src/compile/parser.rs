@@ -269,7 +269,7 @@ impl<'s, 't> Parser<'s, 't> {
             .filter(|t| matches!(t.kind, Syntax::Op | Syntax::LParen | Syntax::LStaple))
             .is_some()
         {
-            if let Some((power, ())) = self.peek_postfix_power() {
+            if let Some(power) = self.peek_postfix_power() {
                 if power < min_power {
                     break;
                 }
@@ -289,8 +289,8 @@ impl<'s, 't> Parser<'s, 't> {
                 }
             }
 
-            let (left_power, right_power) = self.peek_op_power();
-            if left_power < min_power {
+            let op_power = self.peek_op_power();
+            if op_power < min_power {
                 break;
             }
             let op = self.next().to_string();
@@ -306,7 +306,7 @@ impl<'s, 't> Parser<'s, 't> {
                 // convert word to str, ex: map.key => .(map, "key")
                 "." => {
                     if self.peek_is(Syntax::Word) {
-                        if let Stmt::Word(word) = self.op_expr(right_power)? {
+                        if let Stmt::Word(word) = self.op_expr(op_power)? {
                             left = Stmt::Call(bx!(Stmt::Word(op)), vec![left, Stmt::String(word)]);
                         }
                         continue;
@@ -327,7 +327,7 @@ impl<'s, 't> Parser<'s, 't> {
                 }
                 _ => {}
             }
-            let right = self.op_expr(right_power)?;
+            let right = self.op_expr(op_power)?;
             left = Stmt::Call(bx!(Stmt::Word(op)), vec![left, right]);
         }
 
@@ -847,30 +847,30 @@ impl<'s, 't> Parser<'s, 't> {
         }
     }
 
-    fn peek_op_power(&mut self) -> (u8, u8) {
+    fn peek_op_power(&mut self) -> u8 {
         if let Some(p) = self.peek() {
             match p.to_str() {
-                ":=" | "=" => (0, 0),
-                "&&" => (1, 2),
-                "||" => (3, 4),
-                "==" | "!=" | "<" | "<=" | ">" | ">=" | "<=>" => (5, 6),
-                "+" | "-" | "|" | "^" => (7, 8),
-                "*" | "/" | "%" | "<<" | ">>" | "&" => (9, 10),
-                ".." | "..=" => (50, 60),
-                "." => (100, 101),
-                _ => (2, 1),
+                ":=" | "=" => 0,
+                "&&" => 1,
+                "||" => 2,
+                "==" | "!=" | "<" | "<=" | ">" | ">=" | "<=>" => 3,
+                "+" | "-" | "|" | "^" => 4,
+                "*" | "/" | "%" | "<<" | ">>" | "&" => 5,
+                ".." | "..=" => 10,
+                "." => 20,
+                _ => 1,
             }
         } else {
-            (0, 0)
+            0
         }
     }
 
-    fn peek_postfix_power(&mut self) -> Option<(u8, ())> {
+    fn peek_postfix_power(&mut self) -> Option<u8> {
         let p = self.peek()?;
         let res = match p.to_str() {
-            "(" => (2, ()),
-            "!" => (7, ()),
-            "[" => (90, ()),
+            "(" => 2,
+            "!" => 7,
+            "[" => 90,
             _ => return None,
         };
         Some(res)

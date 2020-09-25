@@ -720,9 +720,9 @@ parse_test!(
     chained_ops,
     "2 + 20 * 10 - 5",
     call!(
-        "-",
-        call!("+", num!(2), call!("*", num!(20), num!(10))),
-        num!(5)
+        "+",
+        num!(2),
+        call!("-", call!("*", num!(20), num!(10)), num!(5))
     )
 );
 

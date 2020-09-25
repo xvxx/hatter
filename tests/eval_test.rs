@@ -80,6 +80,7 @@ fn it_works() {
     assert_eval!("22", num!(22));
     assert_eval!("2 + 2", num!(4));
     assert_eval!("'Hayay!'", string!("Hayay!"));
+    assert_eval!("(((0)))", num!(0));
 }
 
 #[test]

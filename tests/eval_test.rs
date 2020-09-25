@@ -95,6 +95,31 @@ fn test_list() {
 }
 
 #[test]
+fn test_index() {
+    assert_eval!(
+        r#"
+list := [1,2,3]
+list[1]
+"#,
+        num!(2)
+    );
+    assert_eval!(
+        r#"
+list := [1,2,3]
+list[2]
+"#,
+        num!(3)
+    );
+    assert_eval!(
+        r#"
+list := [1,2,3]
+list[3]
+"#,
+        Value::None
+    );
+}
+
+#[test]
 fn test_if() {
     assert_render!(
         r#"

@@ -264,7 +264,11 @@ impl<'s, 't> Parser<'s, 't> {
     fn op_expr(&mut self, min_power: u8) -> Result<Stmt> {
         let mut left = self.atom()?;
 
-        while self.peek_is(Syntax::Op) || self.peek_is(Syntax::LParen) {
+        while self
+            .peek()
+            .filter(|t| matches!(t.kind, Syntax::Op | Syntax::LParen | Syntax::LStaple))
+            .is_some()
+        {
             if let Some((power, ())) = self.peek_postfix_power() {
                 if power < min_power {
                     break;
@@ -273,6 +277,12 @@ impl<'s, 't> Parser<'s, 't> {
                 match op.as_ref() {
                     "(" => {
                         left = Stmt::Call(bx!(left), self.args()?);
+                        continue;
+                    }
+                    "[" => {
+                        left =
+                            Stmt::Call(bx!(Stmt::Word("index".into())), vec![left, self.expr()?]);
+                        self.expect(Syntax::RStaple)?;
                         continue;
                     }
                     _ => unimplemented!(),

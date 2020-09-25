@@ -72,7 +72,8 @@ impl fmt::Debug for Value {
 impl PartialEq for Value {
     fn eq(&self, other: &Value) -> bool {
         match self {
-            Value::None | Value::Fn { .. } | Value::Object(..) => false,
+            Value::None => matches!(other, Value::None),
+            Value::Fn { .. } | Value::Object(..) => false,
             Value::Bool(true) => matches!(other, Value::Bool(true)),
             Value::Bool(false) => matches!(other, Value::Bool(false)),
             Value::Number(num) => {

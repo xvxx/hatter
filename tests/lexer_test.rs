@@ -109,6 +109,21 @@ three
     String(false)
 );
 
+#[test]
+fn empty_string_test() {
+    let lits = vec![
+        r#""""#,
+        r#"''"#,
+        r#"``"#,
+        r#""""""""#,
+        r#"''''''"#,
+        r#"``````"#,
+    ];
+    for lit in lits {
+        assert_eq!("", scan!(lit)[0].literal());
+    }
+}
+
 ////
 // Words
 

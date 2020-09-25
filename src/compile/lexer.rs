@@ -354,7 +354,9 @@ impl<'s> Lexer<'s> {
                 start += 2;
             } else {
                 // empty string
-                return Ok(Syntax::String(false));
+                self.tokens
+                    .push(Token::new(Syntax::String(false), start - 1, 2, ""));
+                return Ok(Syntax::None);
             }
         }
 
@@ -374,6 +376,12 @@ impl<'s> Lexer<'s> {
                     self.next();
                     if self.peek_is(delimiter) {
                         self.next();
+                        // empty string
+                        if self.pos == start + 2 {
+                            self.tokens
+                                .push(Token::new(Syntax::String(false), start - 3, 6, ""));
+                            return Ok(Syntax::None);
+                        }
                         let len = self.pos - start - 3;
                         self.tokens.push(Token::new(
                             Syntax::String(false),

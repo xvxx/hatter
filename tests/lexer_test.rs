@@ -144,7 +144,7 @@ scan_test!(word_ending_with_question, "word-ending-in?", Word);
 scan_test!(and_is_a_word, "and", Word);
 scan_test!(or_is_a_word, "or", Word);
 scan_test!(not_is_a_word, "not", Word);
-scan_test!(return_is_a_word, "return", Word);
+scan_test!(return_is_a_keyword, "return", Return);
 scan_test!(break_is_a_word, "break", Word);
 scan_test!(continue_is_a_word, "continue", Word);
 
@@ -424,7 +424,7 @@ if 2 > 1
 else
     false
 "#,
-    Word, Number, Op, Number, Indent, Word, Semi, Dedent, Word,
+    If, Number, Op, Number, Indent, Word, Semi, Dedent, Else,
     Indent, Word, Semi, Dedent
 );
 
@@ -443,14 +443,14 @@ def thing()
             print(x)
 done()
 "#,
-    Word, Word, LParen, RParen,                             // def thing()
-        Indent, Word, Word,                                 //   if true
+    Def, Word, LParen, RParen,                             // def thing()
+        Indent, If, Word,                                 //   if true
             Indent, Word, LParen, RParen, Semi,             //     other-thing()
-        Dedent, Word, Word, Word,                           //   else if false
-            Indent, Word, Word,                             //     if true-again?
+        Dedent, Else, If, Word,                           //   else if false
+            Indent, If, Word,                             //     if true-again?
                 Indent, Word, LParen, RParen, Semi,         //       other-other-thing()
-        Dedent, Dedent, Word,                               //   else
-            Indent, Word, Word, Word, Word,                 //     for x in loop
+        Dedent, Dedent, Else,                               //   else
+            Indent, For, Word, In, Word,                 //     for x in loop
                 Indent, Word, LParen, Word, RParen, Semi,   //       print(x)
     Dedent, Dedent, Dedent, Word, LParen, RParen            // done()
 );
@@ -470,7 +470,7 @@ abc()
     Op, Word, LParen, RParen,
     Op, Word, LParen, RParen,
     Op, Number,
-    Indent, Word, Word, Indent, Word, Semi,
+    Indent, If, Word, Indent, Word, Semi,
     Dedent, Dedent,
 );
 
@@ -480,7 +480,7 @@ scan_test!(
 if true
     <b> Something
 "#,
-    Word,
+    If,
     Word,
     Indent,
     LCaret,
@@ -508,9 +508,9 @@ else
                 # yup
 "yup"
 "#,
-    Word, Word,
+    If, Word,
         Indent, String(false), Semi,
-    Dedent, Word,
+    Dedent, Else,
         Indent, String(false), Semi,
     Dedent, String(false), Semi, String(false)
 );
@@ -548,7 +548,7 @@ add(
 if true # this should work
     print("Told ya")
 "#,
-        Word, Word, Indent, Word, LParen, String(false), RParen, Semi, Dedent,
+        If, Word, Indent, Word, LParen, String(false), RParen, Semi, Dedent,
     );
 
     scan_test!(basic_indented_tag, r#"
@@ -582,9 +582,9 @@ if true # this should work
 "#,
         LCaret, Word, RCaret,
         LCaret, Word, RCaret,
-        Word, Word, Word, Word,
+        For, Word, In, Word,
             Indent, LCaret, Word, RCaret, Word, LCaret, Word, RCaret, Word, Semi,
-            LCaret, Word, RCaret, Word, Colon, LCaret, Word, RCaret, Word, Number, Op, Number,
+            LCaret, Word, RCaret, Word, Colon, LCaret, Word, RCaret, If, Number, Op, Number,
                 Indent, LCaret, Word, RCaret, Word, Op, Semi,
             Dedent,
         Dedent

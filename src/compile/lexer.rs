@@ -413,6 +413,7 @@ impl<'s> Lexer<'s> {
     /// Scan a word, which may have {interpolation.with(some, whitespace)}.
     /// Set `in_code` to `true` if the first char of the word is `{`
     fn scan_word(&mut self, mut in_code: bool) -> Result<Syntax> {
+        let start = self.pos;
         let mut curlies = 0;
 
         while let Some(&c) = self.peek() {
@@ -440,7 +441,16 @@ impl<'s> Lexer<'s> {
             self.next();
         }
 
-        Ok(Syntax::Word)
+        Ok(match &self.source[start..=self.pos] {
+            "def" => Syntax::Def,
+            "return" => Syntax::Return,
+            "if" => Syntax::If,
+            "else" => Syntax::Else,
+            "for" => Syntax::For,
+            "while" => Syntax::While,
+            "in" => Syntax::In,
+            _ => Syntax::Word,
+        })
     }
 
     /// Determines if < is opening a tag or just a regular `<` sign

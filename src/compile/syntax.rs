@@ -21,6 +21,15 @@ pub enum Syntax {
     RCaret,       // >
     Slash,        // / (only in <tags>)
     Equal,        // = (only in <tags>)
+
+    // Keywords
+    Def,
+    Return,
+    If,
+    Else,
+    For,
+    While,
+    In,
 }
 
 pub trait SyntaxTrait {

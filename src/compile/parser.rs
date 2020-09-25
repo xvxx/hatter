@@ -557,39 +557,29 @@ impl<'s, 't> Parser<'s, 't> {
             // Literal
             Syntax::String(..)
             | Syntax::Number
+            | Syntax::Word
+            | Syntax::LCaret
             | Syntax::LParen
             | Syntax::LStaple
             | Syntax::LCurly => self.expr(),
 
-            // Tag
-            Syntax::LCaret => {
-                // Otherwise parse as regular tag expression.
-                self.expr()
+            // Keyword
+            Syntax::Def => self.def_stmt(),
+            Syntax::If => self.if_stmt(),
+            Syntax::For => self.for_stmt(),
+            Syntax::While => {
+                self.skip();
+                Ok(Stmt::While(bx!(self.expr()?), self.block()?))
             }
-
-            // Keyword or Stmtession
-            Syntax::Word => {
-                let word = self.peek().unwrap();
-                match word.literal() {
-                    "if" => self.if_expr(),
-                    "for" => self.for_expr(),
-                    "def" => self.def_stmt(),
-                    "while" => {
-                        self.skip();
-                        Ok(Stmt::While(bx!(self.expr()?), self.block()?))
-                    }
-                    "return" => {
-                        self.skip();
-                        let ret = if self.peek_is(Syntax::Semi) {
-                            Stmt::Return(bx!(Stmt::None))
-                        } else {
-                            Stmt::Return(bx!(self.expr()?))
-                        };
-                        self.expect(Syntax::Semi)?;
-                        Ok(ret)
-                    }
-                    _ => self.expr(),
-                }
+            Syntax::Return => {
+                self.skip();
+                let ret = if self.peek_is(Syntax::Semi) {
+                    Stmt::Return(bx!(Stmt::None))
+                } else {
+                    Stmt::Return(bx!(self.expr()?))
+                };
+                self.expect(Syntax::Semi)?;
+                Ok(ret)
             }
 
             // Unexpected
@@ -600,8 +590,8 @@ impl<'s, 't> Parser<'s, 't> {
     /// Parse a `for` statement:
     ///     for v in list
     ///     for k, v in map
-    fn for_expr(&mut self) -> Result<Stmt> {
-        self.expect(Syntax::Word)?; // for
+    fn for_stmt(&mut self) -> Result<Stmt> {
+        self.expect(Syntax::For)?;
         let mut key = None;
         let val;
 
@@ -609,15 +599,12 @@ impl<'s, 't> Parser<'s, 't> {
         if self.peek_is(Syntax::Comma) {
             self.skip();
             key = Some(word);
-            val = self.next().to_string();
+            val = self.expect(Syntax::Word)?.to_string();
         } else {
             val = word;
         }
 
-        let in_word = self.expect(Syntax::Word)?;
-        if in_word.literal() != "in" {
-            return self.error("in");
-        }
+        self.expect(Syntax::In)?;
 
         let iter = self.expr()?;
         let body = self.block()?;
@@ -627,7 +614,7 @@ impl<'s, 't> Parser<'s, 't> {
 
     /// Parse a function definition.
     fn def_stmt(&mut self) -> Result<Stmt> {
-        self.expect(Syntax::Word)?; // def
+        self.expect(Syntax::Def)?;
         let name = match self.peek_kind() {
             Syntax::Word | Syntax::Op => self.next(),
             _ => return self.error("function name"),
@@ -655,24 +642,20 @@ impl<'s, 't> Parser<'s, 't> {
     }
 
     /// Parse an if statement.
-    fn if_expr(&mut self) -> Result<Stmt> {
-        self.expect(Syntax::Word)?; // if
+    fn if_stmt(&mut self) -> Result<Stmt> {
+        self.expect(Syntax::If)?;
         let mut conds = vec![];
         let test = self.expr()?;
         let body = self.block()?;
         conds.push((test, body));
-        while let Some(next) = self.peek() {
-            if next.to_str() != "else" {
-                break;
-            }
+        while self.peek_is(Syntax::Else) {
             self.skip(); // skip else
-            let mut test = Stmt::Bool(true);
-            if let Some(word) = self.peek() {
-                if word.literal() == "if" {
-                    self.skip();
-                    test = self.expr()?;
-                }
-            }
+            let test = if self.peek_is(Syntax::If) {
+                self.skip();
+                self.expr()?
+            } else {
+                Stmt::Bool(true)
+            };
             let body = self.block()?;
             conds.push((test, body));
             continue;

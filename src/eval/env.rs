@@ -2,7 +2,7 @@ use {
     crate::{builtins, Args, Builtin, ErrorKind, Result, Stmt, Tag, Value},
     std::{
         collections::{BTreeMap, HashMap},
-        fmt, mem, ops,
+        fmt, mem,
         rc::Rc,
     },
 };
@@ -51,19 +51,6 @@ impl fmt::Debug for Env {
                     .join(", "),
             )
             .finish()
-    }
-}
-
-impl ops::Deref for Env {
-    type Target = HashMap<String, Value>;
-    fn deref(&self) -> &Self::Target {
-        self.scope()
-    }
-}
-
-impl ops::DerefMut for Env {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        self.mut_scope()
     }
 }
 
@@ -119,7 +106,12 @@ impl Env {
         &self.helpers
     }
 
-    /// Find a value in the nearest scope.
+    /// Does a value exist in this or any parent scopes?
+    pub fn var_exists(&self, key: &str) -> bool {
+        self.lookup(key).is_some()
+    }
+
+    /// Find a value, looking first in the most recently pushed scope.
     pub fn lookup(&self, key: &str) -> Option<&Value> {
         for scope in self.scopes().iter().rev() {
             if let Some(v) = scope.get(key) {
@@ -131,7 +123,7 @@ impl Env {
 
     /// Set a value to the nearest scope.
     pub fn set<V: Into<Value>>(&mut self, key: &str, val: V) {
-        self.insert(key.to_string(), val.into());
+        self.mut_scope().insert(key.to_string(), val.into());
     }
 
     /// Add a Rust function as a helper that can be invoked in templates.
@@ -277,7 +269,7 @@ impl Env {
                 Value::None
             }
             Stmt::Assign(name, expr, is_reassign) => {
-                let exists = self.contains_key(name);
+                let exists = self.var_exists(name);
                 if exists && !is_reassign {
                     return error!("{} already set", name);
                 } else if !exists && *is_reassign {
@@ -286,11 +278,7 @@ impl Env {
 
                 let val = self.eval(expr)?;
                 if *is_reassign {
-                    if self
-                        .get(name)
-                        .filter(|v| v.typename() == val.typename())
-                        .is_none()
-                    {
+                    if self.lookup(name).unwrap().typename() != val.typename() {
                         return error!("{} is type {}", name, val.typename());
                     }
                 }
@@ -432,6 +420,6 @@ impl Env {
 
     /// Is the given string a keyword or existing variable?
     fn is_keyword_or_var(&self, it: &str) -> bool {
-        self.contains_key(it) || matches!(it, "break" | "continue")
+        self.var_exists(it) || matches!(it, "break" | "continue")
     }
 }

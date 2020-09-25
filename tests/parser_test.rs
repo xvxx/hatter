@@ -324,6 +324,12 @@ parse_test!(
 );
 
 parse_test!(
+    or_and_exprs,
+    "true || false && false",
+    call!("&&", call!("||", boo!(true), boo!(false)), boo!(false))
+);
+
+parse_test!(
     basic_if_oneline,
     r#"if true do "something""#,
     Stmt::If(vec![(boo!(true), vec![string!("something")])])

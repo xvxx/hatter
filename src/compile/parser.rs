@@ -299,12 +299,14 @@ impl<'s, 't> Parser<'s, 't> {
                 _ if !matches!(op.as_ref(), "==" | "!=" | ">=" | "<=" | "..=")
                     && matches!(op.bytes().last(), Some(b'=')) =>
                 {
-                    left = Stmt::Assign(
-                        op.clone(),
-                        bx!(Stmt::Call(op, vec![left, self.expr()?])),
+                    return Ok(Stmt::Assign(
+                        left.to_string(),
+                        bx!(Stmt::Call(
+                            op.chars().take(op.chars().count() - 1).collect::<String>(),
+                            vec![left, self.expr()?]
+                        )),
                         true, // reassignment
-                    );
-                    continue;
+                    ));
                 }
                 _ => {}
             }

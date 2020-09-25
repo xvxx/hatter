@@ -102,9 +102,11 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
   - `<i>delicious</>` becomes `<i>delicious</i>`
 - Call functions defined in Rust:
   - `<div.name> to-uppercase(name)`
-- Define your own Hatter functions:
+- Define your own Hatter functions with strict arity:
   - `def greet(name) do print("Hey there, {name}!")`
   - `greet("Lydia")` prints `Hey there, Lydia!`
+- Define your own Hatter operators:
+  - `def !!(a, b) do return concat(to-uppercase(a), ' ', to-uppercase(b))`
 - Easy inline JavaScript:
   - `<li> <a onclick=(alert("Oink!"))> 🐷`
 - Hatter will add a `<!DOCTYPE>` and wrap everything in `<html>` if
@@ -114,10 +116,7 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
 
 - Define your own tags:
   - `def <item(item)> do <li.item data-id={item.id}> item.text`.
-- Define your own operators:
-  - `def !!(a, b) do return concat(to-uppercase(a), ' ', to-uppercase(b))`
-- Arity checking for functions.
-- Optional type checking for functions(?)
+- Optional type checking for functions
 
 ## TODO
 

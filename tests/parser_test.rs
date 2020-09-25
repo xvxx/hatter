@@ -487,15 +487,29 @@ for k, v in { first: 'Bilbo', last: 'Swaggins' }
 ////
 // while
 
-// parse_test!(
-//     basic_while,
-//     r#"
-// while i > 0
-//     do-something()
-//     then-do-something-else()
-// "#,
-//     Stmt::None
-// );
+parse_test!(
+    basic_while,
+    r#"
+while i > 0
+    do-something()
+    then-do-something-else()
+"#,
+    Stmt::While(
+        bx!(call!(word!(">"), word!("i"), num!(0))),
+        vec![call!("do-something"), call!("then-do-something-else")]
+    )
+);
+
+parse_test!(
+    basic_while_oneline,
+    r#"
+while i > 0 do do-something()
+"#,
+    Stmt::While(
+        bx!(call!(word!(">"), word!("i"), num!(0))),
+        vec![call!("do-something")]
+    )
+);
 
 ////
 // def

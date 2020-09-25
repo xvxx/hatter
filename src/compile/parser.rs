@@ -253,16 +253,25 @@ impl<'s, 't> Parser<'s, 't> {
 
     /// Parse a code expression.
     fn expr(&mut self) -> Result<Stmt> {
-        self.expr_op(0)
+        self.op_expr(0)
     }
 
     /// Parse expression w/ operators.
     /// Thanks matklad!
     /// https://matklad.github.io/2020/04/13/simple-but-powerful-pratt-parsing.html
-    fn expr_op(&mut self, min_power: u8) -> Result<Stmt> {
+    fn op_expr(&mut self, min_power: u8) -> Result<Stmt> {
         let mut left = self.atom()?;
 
         while self.peek_is(Syntax::Op) {
+            if let Some((power, ())) = self.peek_postfix_power() {
+                if power < min_power {
+                    break;
+                }
+                let op = self.next().to_string();
+                left = Stmt::Call(op, vec![left]);
+                continue;
+            }
+
             let (left_power, right_power) = self.peek_op_power();
             if left_power < min_power {
                 break;
@@ -280,7 +289,7 @@ impl<'s, 't> Parser<'s, 't> {
                 // convert word to str, ex: map.key => .(map, "key")
                 "." => {
                     if self.peek_is(Syntax::Word) {
-                        if let Stmt::Word(word) = self.expr_op(right_power)? {
+                        if let Stmt::Word(word) = self.op_expr(right_power)? {
                             left = Stmt::Call(op, vec![left, Stmt::String(word)]);
                         }
                         continue;
@@ -299,7 +308,7 @@ impl<'s, 't> Parser<'s, 't> {
                 }
                 _ => {}
             }
-            let right = self.expr_op(right_power)?;
+            let right = self.op_expr(right_power)?;
             left = Stmt::Call(op, vec![left, right]);
         }
 
@@ -851,5 +860,16 @@ impl<'s, 't> Parser<'s, 't> {
         } else {
             (0, 0)
         }
+    }
+
+    fn peek_postfix_power(&mut self) -> Option<(u8, ())> {
+        let p = self.peek()?;
+        let res = match p.to_str() {
+            "!" => (7, ()),
+            "[" => (8, ()),
+            "(" => (10, ()),
+            _ => return None,
+        };
+        Some(res)
     }
 }

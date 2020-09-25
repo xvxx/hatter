@@ -76,7 +76,7 @@ macro_rules! parse_test {
             let mut i = 0;
             $(
                 let node = nodes.get(i).unwrap();
-                if node == &$stmt {
+                if node != &$stmt {
                     print_nodes(i, &nodes);
                 }
                 assert_eq!(&$stmt, node);

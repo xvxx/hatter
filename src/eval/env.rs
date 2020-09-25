@@ -446,6 +446,6 @@ impl Env {
 
     /// Is the given string a keyword or existing variable?
     fn is_keyword_or_var(&self, it: &str) -> bool {
-        self.var_exists(it) || matches!(it, "break" | "continue")
+        self.var_exists(it) || matches!(it, "return" | "break" | "continue")
     }
 }

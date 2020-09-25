@@ -83,6 +83,12 @@ fn it_works() {
 }
 
 #[test]
+fn test_string() {
+    assert_render!(r#"<b> "Hi there""#, "<b>Hi there\n</b>\n");
+    assert_render!(r#"<b> """#, "<b>\n</b>\n");
+}
+
+#[test]
 fn test_list() {
     assert_eval!("[1,2,3]", list![num!(1), num!(2), num!(3)]);
 }
@@ -309,33 +315,32 @@ greet('Mrs', 'Robinson', 'Crusoe')
     assert_render!(
         r#"
 def mod(num, by, msg)
-    if num % by == 0
+    if (num % by) == 0
         return msg
     else
         return ""
 
 def fizz-buzz
-    for i in 1..101
-        print(mod(i, 3, 'Fizz') + mod(i, 5, 'Buzz'))
+    for i in 1..=30
+        word := mod(i, 3, 'Fizz') + mod(i, 5, 'Buzz')
+        if len(word) > 0
+            print(word)
+fizz-buzz()
 "#,
-        r#"
-Fizz
-Buzz
-FizzBuzz
-"#
-    );
+        "Fizz\nBuzz\nFizz\nFizz\nBuzz\nFizz\nFizzBuzz\nFizz\nBuzz\nFizz\nFizz\nBuzz\nFizz\nFizzBuzz\n"
+);
 
     macro_rules! ifelse {
         () => {
             r#"
-if i > 0
-    print("Positive")
-else if i == 0
+if i == 0
     print("Cero")
-else if i < 0
-    print("Negative")
 else if i > 100_000_000
     print("Way TOO Positive!")
+else if i > 0
+    print("Positive")
+else if i < 0
+    print("Negative")
 "#;
         };
     }

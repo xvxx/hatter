@@ -398,6 +398,7 @@ impl Env {
                     _ => return Err(e),
                 },
             }
+            self.mut_scope().clear();
         }
         self.pop_scope();
         Ok(())

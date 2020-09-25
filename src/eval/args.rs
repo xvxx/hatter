@@ -35,8 +35,8 @@ impl<'e> Args<'e> {
         Args { env, args }
     }
 
-    pub fn get(&self, idx: usize) -> Option<Value> {
-        self.args.get(idx).map(Value::clone)
+    pub fn get(&self, idx: usize) -> Option<&Value> {
+        self.args.get(idx)
     }
 
     /// Like `get()` but returns an error.

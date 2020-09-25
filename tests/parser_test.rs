@@ -613,7 +613,7 @@ def <<(a, b)
 
 parse_test!(
     fn_literal_oneline,
-    "z := fn(x) return x + 1\nz(2)",
+    "z := fn(x) do return x + 1\nz(2)",
     Stmt::Assign(
         "z".into(),
         bx!(Stmt::Fn(

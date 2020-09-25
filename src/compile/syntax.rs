@@ -25,6 +25,7 @@ pub enum Syntax {
 
     // Keywords
     Def,
+    Do,
     Return,
     If,
     Else,

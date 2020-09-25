@@ -443,6 +443,7 @@ impl<'s> Lexer<'s> {
 
         Ok(match &self.source[start..=self.pos] {
             "def" => Syntax::Def,
+            "do" => Syntax::Do,
             "return" => Syntax::Return,
             "if" => Syntax::If,
             "else" => Syntax::Else,

@@ -477,7 +477,7 @@ impl<'s, 't> Parser<'s, 't> {
         let mut block = vec![];
 
         // one line block via `do`
-        if self.peek_is(Syntax::Word) && self.peek().filter(|p| p.to_str() == "do").is_some() {
+        if self.peek_is(Syntax::Do) {
             self.skip();
             return Ok(vec![self.stmt()?]);
         }

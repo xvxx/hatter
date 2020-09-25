@@ -26,7 +26,7 @@ impl<'s> Token<'s> {
         match self.kind {
             None | Bool(..) | Number | String(..) | Word | JS | Op | Colon | Comma | LParen
             | RParen | LCurly | RCurly | LStaple | RStaple | LCaret | RCaret | Slash | Equal
-            | Def | Return | If | Else | For | While | In | Fn => true,
+            | Def | Do | Return | If | Else | For | While | In | Fn => true,
             Indent | Dedent | Semi => false,
         }
     }

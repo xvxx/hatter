@@ -250,11 +250,7 @@ impl<'s, 't> Parser<'s, 't> {
             }
         }
         self.expect(Syntax::RParen)?;
-        if self.peek_is(Syntax::Indent) {
-            Ok(Stmt::Fn(args, self.block()?))
-        } else {
-            Ok(Stmt::Fn(args, vec![self.stmt()?]))
-        }
+        Ok(Stmt::Fn(args, self.block()?))
     }
 
     /// Parse a code expression.

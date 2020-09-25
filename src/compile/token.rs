@@ -51,24 +51,17 @@ impl<'s> Token<'s> {
     }
 
     /// Convert into native number or error. No weak typing.
-    pub fn to_isize(&self) -> Result<isize> {
+    pub fn to_f64(&self) -> Result<f64> {
         if self.literal().len() > 2 {
             match &self.literal()[..2] {
-                "0b" => return self.from_bin(),
-                "0o" => return self.from_oct(),
-                "0x" => return self.from_hex(),
+                "0b" => return Ok(self.from_bin()? as f64),
+                "0o" => return Ok(self.from_oct()? as f64),
+                "0x" => return Ok(self.from_hex()? as f64),
                 _ => {}
             }
         }
         self.literal()
             .replace('_', "")
-            .parse::<isize>()
-            .map_err(|e| Error::new(ErrorKind::ParseError, e.to_string(), self.pos, 1))
-    }
-
-    /// Convert into native number or error. No weak typing.
-    pub fn to_f64(&self) -> Result<f64> {
-        self.literal()
             .parse::<f64>()
             .map_err(|e| Error::new(ErrorKind::ParseError, e.to_string(), self.pos, 1))
     }

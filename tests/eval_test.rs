@@ -272,6 +272,13 @@ fn test_nesting() {
     );
 }
 
+#[test]
+fn math() {
+    assert_eval!("1 + 1", num!(2));
+    assert_eval!("20 * 10", num!(200));
+    assert_eval!("2.2 + 3.3", num!(5.5));
+}
+
 ////
 // Hatter in a Hurry
 

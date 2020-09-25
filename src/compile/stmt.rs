@@ -4,7 +4,7 @@ use crate::Tag;
 pub enum Stmt {
     None,
     Bool(bool),
-    Number(isize),
+    Number(f64),
     String(String),
     Word(String),
     List(Vec<Stmt>),

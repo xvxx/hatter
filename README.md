@@ -31,6 +31,25 @@ zero-dependency Rust library in your (web/cli/?) application.
 Here's what it looks like:
 
 ```html
+<ul#list>
+  for i, person in people
+    <li.person.first={i == 0}> person
+```
+
+Which turns into:
+
+```html
+<ul id='list'>
+  <li class='person first'>John</li>
+  <li class='person'>Paul</li>
+  <li class='person'>George</li>
+  <li class='person'>Ringo</li>
+</ul>
+```
+
+Or, a beefier example:
+
+```html
 <nav .webview-app=webview?>
   <a href="/signin"> sign in
   <a href="/signup"> sign up
@@ -47,7 +66,7 @@ Here's what it looks like:
 ```
 
 Which, if we're logged in as `The Mad Hatter` and `webview?` is
-`false`, will generate this:
+`false`, will turn into:
 
 ```html
 <nav>
@@ -120,16 +139,8 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
 
 ## TODO
 
-### next
-
-- [ ] big
-  - [ ] int vs float
-  - [ ] HTMLized error page
-
-### future
-
+- [ ] HTMLized error page
 - [ ] def <tag attr=Type>
-- [ ] convert lexer to bytes ala https://github.com/nathanwhit/minimal-yaml
 - [ ] show error location when compiling
 - [ ] repl: tab completion
 

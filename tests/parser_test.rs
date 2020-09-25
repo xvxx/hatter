@@ -32,7 +32,7 @@ macro_rules! string {
 
 macro_rules! num {
     ($num:expr) => {
-        Stmt::Number($num)
+        Stmt::Number($num.into())
     };
 }
 
@@ -108,9 +108,9 @@ parse_test!(underscore_number, "1_422_200", num!(1_422_200));
 parse_test!(negative_underscore_number, "-1_422_200", num!(-1_422_200));
 parse_test!(binary_number, "0b101", num!(5));
 parse_test!(octal_number, "0o755", num!(493));
-parse_test!(hex_number, "0xdeadbeef", num!(3735928559));
-// parse_test!(float_number, "3.14", num!(3));
-// parse_test!(negative_float_number, "-1230.3552", num!(-1230));
+parse_test!(hex_number, "0xabba", num!(43962));
+parse_test!(float_number, "3.14", num!(3.14));
+parse_test!(negative_float_number, "-1230.3552", num!(-1230.3552));
 parse_test!(number_range, "1..101", call!("..", num!(1), num!(101)));
 parse_test!(
     number_range_inclusive,

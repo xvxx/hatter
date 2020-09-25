@@ -449,6 +449,7 @@ impl<'s> Lexer<'s> {
             "for" => Syntax::For,
             "while" => Syntax::While,
             "in" => Syntax::In,
+            "fn" => Syntax::Fn,
             _ => Syntax::Word,
         })
     }

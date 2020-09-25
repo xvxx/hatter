@@ -30,6 +30,7 @@ pub enum Syntax {
     For,
     While,
     In,
+    Fn,
 }
 
 pub trait SyntaxTrait {

@@ -325,6 +325,8 @@ impl<'s, 't> Parser<'s, 't> {
             Syntax::Number => Ok(self.number()?),
             // Tag
             Syntax::LCaret => self.tag(),
+            // Fn literal
+            Syntax::Fn => self.fn_literal(),
             // Sub-expression
             Syntax::LParen => {
                 self.skip();
@@ -384,14 +386,6 @@ impl<'s, 't> Parser<'s, 't> {
             // Variables and function calls
             Syntax::Word => {
                 let word = self.word()?;
-
-                // check for "fn()" literal
-                if let Stmt::Word(w) = &word {
-                    if w == "fn" {
-                        return self.fn_literal();
-                    }
-                }
-
                 if !self.peek_is(Syntax::LParen) {
                     return Ok(word);
                 } else {

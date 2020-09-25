@@ -450,6 +450,8 @@ impl<'s> Lexer<'s> {
             "while" => Syntax::While,
             "in" => Syntax::In,
             "fn" => Syntax::Fn,
+            "true" => Syntax::Bool(true),
+            "false" => Syntax::Bool(false),
             _ => Syntax::Word,
         })
     }

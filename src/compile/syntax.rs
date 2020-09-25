@@ -3,6 +3,7 @@ pub enum Syntax {
     None,
     Indent,
     Dedent,
+    Bool(bool),   // true false
     Number,       // 123 3.14
     String(bool), // "string", bool is `interpolated?` or not
     Word,         // ident, symbol, etc

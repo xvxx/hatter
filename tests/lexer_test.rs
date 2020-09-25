@@ -236,12 +236,12 @@ mod skipfmt {
 
     scan_test!(angle_interpolated_attr_name_partial,
         "<div my-{name}-name=true/>",
-        LCaret, Word, Word, Equal, Word, Slash, RCaret
+        LCaret, Word, Word, Equal, Bool(true), Slash, RCaret
     );
 
     scan_test!(angle_interpolated_attr_name_full,
         "<div {name}=true/>",
-        LCaret, Word, Word, Equal, Word, Slash, RCaret
+        LCaret, Word, Word, Equal, Bool(true), Slash, RCaret
     );
 
     scan_test!(angle_interpolated_attr_value_partial,
@@ -424,8 +424,8 @@ if 2 > 1
 else
     false
 "#,
-    If, Number, Op, Number, Indent, Word, Semi, Dedent, Else,
-    Indent, Word, Semi, Dedent
+    If, Number, Op, Number, Indent, Bool(true), Semi, Dedent, Else,
+    Indent, Bool(false), Semi, Dedent
 );
 
 #[rustfmt::skip]
@@ -444,15 +444,15 @@ def thing()
 done()
 "#,
     Def, Word, LParen, RParen,                             // def thing()
-        Indent, If, Word,                                 //   if true
-            Indent, Word, LParen, RParen, Semi,             //     other-thing()
-        Dedent, Else, If, Word,                           //   else if false
-            Indent, If, Word,                             //     if true-again?
-                Indent, Word, LParen, RParen, Semi,         //       other-other-thing()
-        Dedent, Dedent, Else,                               //   else
-            Indent, For, Word, In, Word,                 //     for x in loop
-                Indent, Word, LParen, Word, RParen, Semi,   //       print(x)
-    Dedent, Dedent, Dedent, Word, LParen, RParen            // done()
+        Indent, If, Bool(true),                            //   if true
+            Indent, Word, LParen, RParen, Semi,            //     other-thing()
+        Dedent, Else, If, Bool(false),                     //   else if false
+            Indent, If, Word,                              //     if true-again?
+                Indent, Word, LParen, RParen, Semi,        //       other-other-thing()
+        Dedent, Dedent, Else,                              //   else
+            Indent, For, Word, In, Word,                   //     for x in loop
+                Indent, Word, LParen, Word, RParen, Semi,  //       print(x)
+    Dedent, Dedent, Dedent, Word, LParen, RParen           // done()
 );
 
 #[rustfmt::skip]
@@ -470,7 +470,7 @@ abc()
     Op, Word, LParen, RParen,
     Op, Word, LParen, RParen,
     Op, Number,
-    Indent, If, Word, Indent, Word, Semi,
+    Indent, If, Bool(true), Indent, Word, Semi,
     Dedent, Dedent,
 );
 
@@ -481,7 +481,7 @@ if true
     <b> Something
 "#,
     If,
-    Word,
+    Bool(true),
     Indent,
     LCaret,
     Word,
@@ -508,7 +508,7 @@ else
                 # yup
 "yup"
 "#,
-    If, Word,
+    If, Bool(true),
         Indent, String(false), Semi,
     Dedent, Else,
         Indent, String(false), Semi,
@@ -548,7 +548,7 @@ add(
 if true # this should work
     print("Told ya")
 "#,
-        If, Word, Indent, Word, LParen, String(false), RParen, Semi, Dedent,
+        If, Bool(true), Indent, Word, LParen, String(false), RParen, Semi, Dedent,
     );
 
     scan_test!(basic_indented_tag, r#"

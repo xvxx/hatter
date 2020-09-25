@@ -158,6 +158,14 @@ impl<'s, 't> Parser<'s, 't> {
         }
     }
 
+    /// Parse a bool.
+    fn boolean(&mut self) -> Result<Stmt> {
+        match self.next().kind {
+            Syntax::Bool(b) => Ok(Stmt::Bool(b)),
+            _ => self.error("boolean"),
+        }
+    }
+
     /// Parse a number.
     fn number(&mut self) -> Result<Stmt> {
         Ok(Stmt::Number(self.expect(Syntax::Number)?.to_isize()?))
@@ -225,14 +233,12 @@ impl<'s, 't> Parser<'s, 't> {
     /// Parse a word.
     fn word(&mut self) -> Result<Stmt> {
         let word = self.expect(Syntax::Word)?;
-        Ok(match word.literal() {
-            "true" | "false" => Stmt::Bool(word.literal() == "true"),
-            _ => Stmt::Word(word.to_string()),
-        })
+        Ok(Stmt::Word(word.to_string()))
     }
 
     /// Parse a function literal.
     fn fn_literal(&mut self) -> Result<Stmt> {
+        self.expect(Syntax::Fn)?;
         self.expect(Syntax::LParen)?;
         let mut args = vec![];
         while !self.peek_is(Syntax::RParen) {
@@ -321,8 +327,9 @@ impl<'s, 't> Parser<'s, 't> {
     fn atom(&mut self) -> Result<Stmt> {
         match self.peek_kind() {
             // Literal
-            Syntax::String(..) => Ok(self.string()?),
+            Syntax::Bool(..) => Ok(self.boolean()?),
             Syntax::Number => Ok(self.number()?),
+            Syntax::String(..) => Ok(self.string()?),
             // Tag
             Syntax::LCaret => self.tag(),
             // Fn literal
@@ -362,7 +369,7 @@ impl<'s, 't> Parser<'s, 't> {
                 while !self.peek_eof() && !self.peek_is(Syntax::RCurly) {
                     self.eat(Syntax::Semi);
                     let key = match self.peek_kind() {
-                        Syntax::Word | Syntax::String(..) | Syntax::Number => {
+                        Syntax::Word | Syntax::String(..) | Syntax::Number | Syntax::Bool(..) => {
                             self.next().to_string()
                         }
                         _ => return self.error("String key name"),
@@ -421,8 +428,9 @@ impl<'s, 't> Parser<'s, 't> {
                 Syntax::LParen
                 | Syntax::LCurly
                 | Syntax::LStaple
-                | Syntax::String(..)
+                | Syntax::Bool(..)
                 | Syntax::Number
+                | Syntax::String(..)
                 | Syntax::Word => {
                     args.push(self.expr()?);
                 }
@@ -452,8 +460,9 @@ impl<'s, 't> Parser<'s, 't> {
                 Syntax::LParen
                 | Syntax::LCurly
                 | Syntax::LStaple
-                | Syntax::String(..)
+                | Syntax::Bool(..)
                 | Syntax::Number
+                | Syntax::String(..)
                 | Syntax::Word => {
                     args.push((std::mem::replace(&mut keyword, String::new()), self.expr()?));
                     is_kw = true;
@@ -550,6 +559,7 @@ impl<'s, 't> Parser<'s, 't> {
         match self.peek_kind() {
             // Literal
             Syntax::String(..)
+            | Syntax::Bool(..)
             | Syntax::Number
             | Syntax::Word
             | Syntax::LCaret
@@ -780,7 +790,9 @@ impl<'s, 't> Parser<'s, 't> {
                     }
                     self.expect(Syntax::Equal)?;
                     match self.peek_kind() {
-                        Syntax::Number | Syntax::String(..) => tag.add_attr(name, self.atom()?),
+                        Syntax::Bool(..) | Syntax::Number | Syntax::String(..) => {
+                            tag.add_attr(name, self.atom()?)
+                        }
                         Syntax::Word => tag.add_attr(
                             name,
                             if self.peek().filter(|p| p.to_str().contains('{')).is_some() {

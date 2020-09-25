@@ -121,7 +121,7 @@ impl Env {
 
     /// Find a value in the nearest scope.
     pub fn lookup(&self, key: &str) -> Option<&Value> {
-        for scope in self.scopes() {
+        for scope in self.scopes().iter().rev() {
             if let Some(v) = scope.get(key) {
                 return Some(v);
             }

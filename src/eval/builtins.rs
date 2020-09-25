@@ -132,6 +132,11 @@ pub fn builtins() -> HashMap<String, Rc<Builtin>> {
         let b = args.need_number(1)?;
         Value::Number(a % b).ok()
     }
+    fn push(args: Args) -> Result<Value> {
+        let mut list = args.need_list(0)?;
+        list.push(args.need(1)?)?;
+        Value::None.ok()
+    }
     fn print(mut args: Args) -> Result<Value> {
         while !args.is_empty() {
             let arg = args.remove(0);
@@ -196,6 +201,7 @@ pub fn builtins() -> HashMap<String, Rc<Builtin>> {
     builtin!("not" => not);
     builtin!("concat" => concat);
     builtin!("index" => index);
+    builtin!("<<" => push);
     builtin!("." => index);
     builtin!(".." => range);
     builtin!("..=" => range_inclusive);

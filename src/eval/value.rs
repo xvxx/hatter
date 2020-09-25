@@ -134,6 +134,15 @@ impl Value {
         self.len() == 0
     }
 
+    pub fn push<V: Into<Value>>(&mut self, val: V) -> Result<()> {
+        match self {
+            Value::List(list) => list.push(val.into()),
+            Value::String(s) => s.push_str(val.into().to_str()),
+            _ => return error!("can only `push()` to List"),
+        }
+        Ok(())
+    }
+
     pub fn to_bool(&self) -> bool {
         match self {
             Value::None => false,

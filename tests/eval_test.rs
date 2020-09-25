@@ -353,22 +353,22 @@ else if i < 0
         "Way TOO Positive!\n"
     );
 
-    assert_eval!("not true", boo!(false));
-    assert_eval!("not false", boo!(true));
-    assert_eval!("not not true", boo!(true));
-    assert_eval!("true and true", boo!(true));
-    assert_eval!("true and false", boo!(false));
-    assert_eval!("false and true", boo!(false));
-    assert_eval!("false and false", boo!(false));
-    assert_eval!("true or true", boo!(true));
-    assert_eval!("true or false", boo!(true));
-    assert_eval!("false or true", boo!(true));
-    assert_eval!("false or false", boo!(false));
+    // assert_eval!("not true", boo!(false));
+    // assert_eval!("not false", boo!(true));
+    // assert_eval!("not not true", boo!(true));
+    // assert_eval!("true and true", boo!(true));
+    // assert_eval!("true and false", boo!(false));
+    // assert_eval!("false and true", boo!(false));
+    // assert_eval!("false and false", boo!(false));
+    // assert_eval!("true or true", boo!(true));
+    // assert_eval!("true or false", boo!(true));
+    // assert_eval!("false or true", boo!(true));
+    // assert_eval!("false or false", boo!(false));
 
     assert_render!(
         r#"
 for v in [100, 200, 300]
-    p(v) #=> 100 then 200 then 300
+    print(v) #=> 100 then 200 then 300
 "#,
         "100\n200\n300\n"
     );
@@ -376,9 +376,9 @@ for v in [100, 200, 300]
     assert_render!(
         r#"
 for i, v in [100, 200, 300]
-    p(i) #=> 0 then 1 then 2
+    print(i) #=> 0 then 1 then 2
     "#,
-        boo!(false)
+        "0\n1\n2\n"
     );
 
     assert_render!(
@@ -386,25 +386,32 @@ for i, v in [100, 200, 300]
 for k, v in { first: 1, second: 2 }
     print("{k} is {v}") #=> `first is 1` then `second is 2`
     "#,
-        boo!(false)
+        "first is 1\nsecond is 2\n"
     );
+
+    //     assert_render!(
+    //         r#"
+    // while true
+    //     print("O'DOYLE RULES!")
+    //     break
+    //     "#,
+    //         "O'DOYLE RULES!"
+    //     );
 
     assert_render!(
         r#"
-while true
-    print("O'DOYLE RULES!")
-    "#,
-        boo!(false)
-    );
+def hundreds(list)
+    new-list := []
+    for n in list
+        new-list << (n * 100)
+    return new-list
 
-    assert_render!(
-        r#"
-for v in 100..500
+for v in hundreds(1..5)
     print(v)
     if v > 300
         break
         "#,
-        boo!(false)
+        "100\n200\n300\n400\n"
     );
 }
 

@@ -73,4 +73,17 @@ impl<'e> Args<'e> {
             ))
         }
     }
+
+    /// Errors if the arg doesn't exist or isn't a String.
+    pub fn need_list(&self, idx: usize) -> Result<Value> {
+        if let Some(li @ Value::List(..)) = self.args.get(idx) {
+            Ok(li.clone())
+        } else {
+            Err(error_kind!(
+                WrongArgType,
+                "Expected List, got: {:?}",
+                self.need(idx)?
+            ))
+        }
+    }
 }

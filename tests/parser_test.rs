@@ -38,10 +38,10 @@ macro_rules! num {
 
 macro_rules! call {
     ($name:expr, $($arg:expr),+) => {
-        Stmt::Call($name.into(), vec![$($arg),+])
+        Stmt::Call(Box::new(Stmt::Word($name.to_string())), vec![$($arg),+])
     };
     ($name:expr) => {
-        Stmt::Call($name.into(), vec![])
+        Stmt::Call(Box::new(Stmt::Word($name.to_string())), vec![])
     };
 }
 

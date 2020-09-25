@@ -237,8 +237,23 @@ impl Env {
                     return error!("can't find var: {}", word);
                 }
             }
-            Stmt::Call(name, args) => {
-                if let Some(Value::Fn { params, body }) = self.lookup(&name) {
+            Stmt::Call(target, args) => {
+                // check for builtin funtions first
+                if let Stmt::Word(name) = &**target {
+                    if let Some(f) = self.specials.get(name) {
+                        return f.clone()(self, args);
+                    } else if let Some(f) = self.helpers.get(name) {
+                        let f = f.clone();
+                        let args = args
+                            .iter()
+                            .map(|a| self.eval(&a))
+                            .collect::<Result<Vec<_>>>()?;
+                        return f(Args::new(self, args));
+                    }
+                }
+
+                // eval the target and see if it's a Hatter function
+                if let Value::Fn { params, body } = self.eval(&target)? {
                     if params.len() != args.len() {
                         return error!("expected {} args, got {}", params.len(), args.len());
                     }
@@ -260,17 +275,8 @@ impl Env {
                             _ => return Err(e),
                         },
                     }
-                } else if let Some(f) = self.specials.get(name) {
-                    f.clone()(self, args)?
-                } else if let Some(f) = self.helpers.get(name) {
-                    let f = f.clone();
-                    let args = args
-                        .iter()
-                        .map(|a| self.eval(&a))
-                        .collect::<Result<Vec<_>>>()?;
-                    f(Args::new(self, args))?
                 } else {
-                    return error!("can't find fn: {}", name);
+                    return error!("can't find fn: {}", target.to_string());
                 }
             }
             Stmt::Return(expr) => return jump!(Jump::Return(self.eval(expr)?)),

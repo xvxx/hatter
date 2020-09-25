@@ -9,7 +9,7 @@ pub enum Stmt {
     Word(String),
     List(Vec<Stmt>),
     Map(Vec<(String, Stmt)>),
-    Call(String, Vec<Stmt>),
+    Call(Box<Stmt>, Vec<Stmt>), // fn, args
     Return(Box<Stmt>),
     If(Vec<(Stmt, Vec<Stmt>)>),
     For(Option<String>, String, Box<Stmt>, Vec<Stmt>), // key, val, iter, body
@@ -84,7 +84,7 @@ impl Stmt {
             Stmt::Fn(args, body) => format!("fn({:?}) {:?}", args, body),
             Stmt::Call(name, args) => format!(
                 "{}({})",
-                name,
+                name.to_string(),
                 args.iter()
                     .map(|a| a.to_string())
                     .collect::<Vec<_>>()

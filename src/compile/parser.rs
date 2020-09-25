@@ -223,7 +223,7 @@ impl<'s, 't> Parser<'s, 't> {
             if parts.len() == 1 {
                 Ok(parts.remove(0))
             } else {
-                Ok(Stmt::Call("concat".into(), parts))
+                Ok(Stmt::Call(bx!(Stmt::Word("concat".into())), parts))
             }
         } else {
             Ok(Stmt::String(lit))
@@ -264,14 +264,16 @@ impl<'s, 't> Parser<'s, 't> {
     fn op_expr(&mut self, min_power: u8) -> Result<Stmt> {
         let mut left = self.atom()?;
 
-        while self.peek_is(Syntax::Op) {
+        while self.peek_is(Syntax::Op) || self.peek_is(Syntax::LParen) {
             if let Some((power, ())) = self.peek_postfix_power() {
                 if power < min_power {
                     break;
                 }
                 let op = self.next().to_string();
-                left = Stmt::Call(op, vec![left]);
-                continue;
+                match op.as_ref() {
+                    "(" => return Ok(Stmt::Call(bx!(left), self.args()?)),
+                    _ => unimplemented!(),
+                }
             }
 
             let (left_power, right_power) = self.peek_op_power();
@@ -292,7 +294,7 @@ impl<'s, 't> Parser<'s, 't> {
                 "." => {
                     if self.peek_is(Syntax::Word) {
                         if let Stmt::Word(word) = self.op_expr(right_power)? {
-                            left = Stmt::Call(op, vec![left, Stmt::String(word)]);
+                            left = Stmt::Call(bx!(Stmt::Word(op)), vec![left, Stmt::String(word)]);
                         }
                         continue;
                     }
@@ -304,7 +306,7 @@ impl<'s, 't> Parser<'s, 't> {
                     return Ok(Stmt::Assign(
                         left.to_string(),
                         bx!(Stmt::Call(
-                            op.chars().take(op.chars().count() - 1).collect::<String>(),
+                            bx!(Stmt::Word(op.trim_end_matches('=').to_string())),
                             vec![left, self.expr()?]
                         )),
                         true, // reassignment
@@ -313,7 +315,7 @@ impl<'s, 't> Parser<'s, 't> {
                 _ => {}
             }
             let right = self.op_expr(right_power)?;
-            left = Stmt::Call(op, vec![left, right]);
+            left = Stmt::Call(bx!(Stmt::Word(op)), vec![left, right]);
         }
 
         Ok(left)
@@ -326,6 +328,7 @@ impl<'s, 't> Parser<'s, 't> {
             Syntax::Bool(..) => Ok(self.boolean()?),
             Syntax::Number => Ok(self.number()?),
             Syntax::String(..) => Ok(self.string()?),
+            Syntax::Word => Ok(self.word()?),
             // Tag
             Syntax::LCaret => self.tag(),
             // Fn literal
@@ -386,23 +389,12 @@ impl<'s, 't> Parser<'s, 't> {
                 self.expect(Syntax::RCurly)?;
                 Ok(Stmt::Map(map))
             }
-            // Variables and function calls
-            Syntax::Word => {
-                let word = self.word()?;
-                if !self.peek_is(Syntax::LParen) {
-                    return Ok(word);
-                } else {
-                    let name = word.to_string();
-                    Ok(Stmt::Call(name, self.args()?))
-                }
-            }
             _ => self.error("Atom"),
         }
     }
 
     /// Parse (args) part of a function call.
     fn args(&mut self) -> Result<Vec<Stmt>> {
-        self.expect(Syntax::LParen)?;
         if self.peek_is(Syntax::RParen) {
             self.skip();
             return Ok(vec![]);
@@ -743,7 +735,7 @@ impl<'s, 't> Parser<'s, 't> {
                         if self.peek_is(Syntax::Equal) {
                             self.skip();
                             let cond = self.attr()?;
-                            tag.set_id(Stmt::Call("when".into(), vec![cond, id]));
+                            tag.set_id(Stmt::Call(bx!(Stmt::Word("when".into())), vec![cond, id]));
                         } else {
                             tag.set_id(id);
                         }
@@ -753,7 +745,10 @@ impl<'s, 't> Parser<'s, 't> {
                         if self.peek_is(Syntax::Equal) {
                             self.skip();
                             let cond = self.attr()?;
-                            tag.add_class(Stmt::Call("when".into(), vec![cond, class]));
+                            tag.add_class(Stmt::Call(
+                                bx!(Stmt::Word("when".into())),
+                                vec![cond, class],
+                            ));
                         } else {
                             tag.add_class(class);
                         }
@@ -768,7 +763,10 @@ impl<'s, 't> Parser<'s, 't> {
                         if self.peek_is(Syntax::Equal) {
                             self.skip();
                             let cond = self.attr()?;
-                            tag.add_attr(attr_name, Stmt::Call("when".into(), vec![cond, expr]));
+                            tag.add_attr(
+                                attr_name,
+                                Stmt::Call(bx!(Stmt::Word("when".into())), vec![cond, expr]),
+                            );
                         } else {
                             tag.add_attr(attr_name.into(), expr);
                         }
@@ -839,6 +837,7 @@ impl<'s, 't> Parser<'s, 't> {
     fn peek_op_power(&mut self) -> (u8, u8) {
         if let Some(p) = self.peek() {
             match p.to_str() {
+                ":=" | "=" => (0, 0),
                 "&&" => (1, 2),
                 "||" => (3, 4),
                 "==" | "!=" | "<" | "<=" | ">" | ">=" | "<=>" => (5, 6),
@@ -856,9 +855,9 @@ impl<'s, 't> Parser<'s, 't> {
     fn peek_postfix_power(&mut self) -> Option<(u8, ())> {
         let p = self.peek()?;
         let res = match p.to_str() {
+            "(" => (2, ()),
             "!" => (7, ()),
-            "[" => (8, ()),
-            "(" => (10, ()),
+            "[" => (90, ()),
             _ => return None,
         };
         Some(res)

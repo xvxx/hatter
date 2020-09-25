@@ -271,7 +271,10 @@ impl<'s, 't> Parser<'s, 't> {
                 }
                 let op = self.next().to_string();
                 match op.as_ref() {
-                    "(" => return Ok(Stmt::Call(bx!(left), self.args()?)),
+                    "(" => {
+                        left = Stmt::Call(bx!(left), self.args()?);
+                        continue;
+                    }
                     _ => unimplemented!(),
                 }
             }

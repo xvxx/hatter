@@ -253,54 +253,57 @@ impl<'s, 't> Parser<'s, 't> {
 
     /// Parse a code expression.
     fn expr(&mut self) -> Result<Stmt> {
-        let left = self.atom()?;
+        self.expr_op(0)
+    }
 
-        if !self.peek_is(Syntax::Op) {
-            return Ok(left);
-        }
+    /// Parse expression w/ operators.
+    /// Thanks matklad!
+    /// https://matklad.github.io/2020/04/13/simple-but-powerful-pratt-parsing.html
+    fn expr_op(&mut self, min_power: u8) -> Result<Stmt> {
+        let mut left = self.atom()?;
 
-        let next = self.peek().unwrap();
-        let lit = next.literal();
-        match lit {
-            ":=" | "=" => {
-                let reassign = lit == "=";
-                self.skip(); // skip op
-                if let Stmt::Word(name) = left {
-                    Ok(Stmt::Assign(name, bx!(self.expr()?), reassign))
-                } else {
-                    self.error("Word")
-                }
+        while self.peek_is(Syntax::Op) {
+            let (left_power, right_power) = self.peek_op_power();
+            if left_power < min_power {
+                break;
             }
-            "." => {
+            let op = self.next().to_string();
+            match op.as_ref() {
+                ":=" | "=" => {
+                    let reassign = op == "=";
+                    if let Stmt::Word(name) = left {
+                        return Ok(Stmt::Assign(name, bx!(self.expr()?), reassign));
+                    } else {
+                        return self.error("Word");
+                    }
+                }
                 // convert word to str, ex: map.key => .(map, "key")
-                self.skip();
-                let right = self.expr()?;
-                if let Stmt::Word(word) = right {
-                    Ok(Stmt::Call(".".into(), vec![left, Stmt::String(word)]))
-                } else {
-                    Ok(Stmt::Call(".".into(), vec![left, right]))
+                "." => {
+                    if self.peek_is(Syntax::Word) {
+                        if let Stmt::Word(word) = self.expr_op(right_power)? {
+                            left = Stmt::Call(op, vec![left, Stmt::String(word)]);
+                        }
+                        continue;
+                    }
                 }
-            }
-            _ => {
                 // check for += and friends
-                if !matches!(lit, "==" | "!=" | ">=" | "<=" | "..=")
-                    && matches!(lit.bytes().last(), Some(b'='))
+                _ if !matches!(op.as_ref(), "==" | "!=" | ">=" | "<=" | "..=")
+                    && matches!(op.bytes().last(), Some(b'=')) =>
                 {
-                    let op = left.to_string();
-                    self.skip();
-                    Ok(Stmt::Assign(
+                    left = Stmt::Assign(
                         op.clone(),
                         bx!(Stmt::Call(op, vec![left, self.expr()?])),
                         true, // reassignment
-                    ))
-                } else {
-                    Ok(Stmt::Call(
-                        self.next().to_string(),
-                        vec![left, self.expr()?],
-                    ))
+                    );
+                    continue;
                 }
+                _ => {}
             }
+            let right = self.expr_op(right_power)?;
+            left = Stmt::Call(op, vec![left, right]);
         }
+
+        Ok(left)
     }
 
     /// Parse an indivisible unit, as the Ancient Greeks would say.
@@ -830,6 +833,20 @@ impl<'s, 't> Parser<'s, 't> {
             }
         } else {
             Ok(Stmt::None)
+        }
+    }
+
+    fn peek_op_power(&mut self) -> (u8, u8) {
+        if let Some(p) = self.peek() {
+            match p.to_str() {
+                "=" | ":=" => (1, 2),
+                "+" | "-" => (3, 4),
+                "*" | "/" => (5, 6),
+                "." => (100, 101),
+                _ => (51, 50),
+            }
+        } else {
+            (0, 0)
         }
     }
 }

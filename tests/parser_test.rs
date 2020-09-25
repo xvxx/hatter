@@ -698,7 +698,19 @@ parse_test!(eq_op, "2 == 2", call!("==", num!(2), num!(2)));
 
 parse_test!(neq_op, "2 != 2", call!("!=", num!(2), num!(2)));
 
-xparse_test!(
+parse_test!(
+    basic_chained_ops,
+    "1 + 2 * 3",
+    call!("+", num!(1), call!("*", num!(2), num!(3)))
+);
+
+parse_test!(
+    basic_reverse_chained_ops,
+    "1 * 2 + 3",
+    call!("+", call!("*", num!(1), num!(2)), num!(3))
+);
+
+parse_test!(
     chained_ops,
     "2 + 20 * 10 - 5",
     call!(

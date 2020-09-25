@@ -124,7 +124,6 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
 ### next
 
 - [ ] big
-  - [ ] pratt parser
   - [ ] int vs float
   - [ ] HTMLized error page
 

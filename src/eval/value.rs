@@ -1,5 +1,5 @@
 use {
-    crate::{Args, Result, Stmt},
+    crate::{Args, Env, Result, Stmt},
     std::{
         collections::{BTreeMap, HashMap},
         fmt,
@@ -7,7 +7,8 @@ use {
     },
 };
 
-pub type Builtin = dyn Fn(Args) -> Result<Value>;
+pub type BuiltinFn = dyn Fn(Args) -> Result<Value>;
+pub type SpecialFn = dyn Fn(&mut Env, &[Stmt]) -> Result<Value>;
 
 #[derive(Clone)]
 pub enum Value {

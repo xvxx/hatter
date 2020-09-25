@@ -1,5 +1,5 @@
 use {
-    crate::{builtins, Args, Builtin, ErrorKind, Result, Stmt, Tag, Value},
+    crate::{builtins, specials, Args, BuiltinFn, ErrorKind, Result, SpecialFn, Stmt, Tag, Value},
     std::{
         collections::{BTreeMap, HashMap},
         fmt, mem,
@@ -32,7 +32,8 @@ pub type Scope = HashMap<String, Value>;
 
 pub struct Env {
     scopes: Vec<Scope>,
-    helpers: HashMap<String, Rc<Builtin>>,
+    helpers: HashMap<String, Rc<BuiltinFn>>,
+    specials: HashMap<String, Rc<SpecialFn>>,
     out: String,
 }
 
@@ -59,6 +60,7 @@ impl Env {
         Env {
             scopes: vec![Scope::new()],
             helpers: builtins(),
+            specials: specials(),
             out: String::new(),
         }
     }
@@ -102,8 +104,14 @@ impl Env {
 
     /// Helper functions.
     #[allow(unused)]
-    pub(crate) fn helpers(&self) -> &HashMap<String, Rc<Builtin>> {
+    pub(crate) fn helpers(&self) -> &HashMap<String, Rc<BuiltinFn>> {
         &self.helpers
+    }
+
+    /// Special functions.
+    #[allow(unused)]
+    pub(crate) fn specials(&self) -> &HashMap<String, Rc<SpecialFn>> {
+        &self.specials
     }
 
     /// Does a value exist in this or any parent scopes?
@@ -198,7 +206,7 @@ impl Env {
     }
 
     /// Evaluate one statement, returning its Value.
-    fn eval(&mut self, stmt: &Stmt) -> Result<Value> {
+    pub fn eval(&mut self, stmt: &Stmt) -> Result<Value> {
         Ok(match stmt {
             Stmt::None => Value::None,
             Stmt::Bool(x) => x.into(),
@@ -252,6 +260,8 @@ impl Env {
                             _ => return Err(e),
                         },
                     }
+                } else if let Some(f) = self.specials.get(name) {
+                    f.clone()(self, args)?
                 } else if let Some(f) = self.helpers.get(name) {
                     let f = f.clone();
                     let args = args

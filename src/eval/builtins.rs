@@ -1,10 +1,38 @@
 use {
-    crate::{Args, Builtin, Result, Value},
+    crate::{Args, BuiltinFn, Env, Result, SpecialFn, Stmt, Value},
     std::{collections::HashMap, rc::Rc},
 };
 
-pub fn builtins() -> HashMap<String, Rc<Builtin>> {
-    let mut map: HashMap<String, Rc<Builtin>> = HashMap::new();
+pub fn specials() -> HashMap<String, Rc<SpecialFn>> {
+    let mut map: HashMap<String, Rc<SpecialFn>> = HashMap::new();
+
+    fn and(env: &mut Env, args: &[Stmt]) -> Result<Value> {
+        if args.len() != 2 {
+            return error!("Expected 2 args, got {}", 2);
+        }
+        Ok((env.eval(&args[0])?.to_bool() && env.eval(&args[1])?.to_bool()).into())
+    }
+    fn or(env: &mut Env, args: &[Stmt]) -> Result<Value> {
+        if args.len() != 2 {
+            return error!("Expected 2 args, got {}", 2);
+        }
+        Ok((env.eval(&args[0])?.to_bool() || env.eval(&args[1])?.to_bool()).into())
+    }
+
+    macro_rules! special {
+        ($name:expr => $fn:expr) => {
+            map.insert($name.to_string(), rc!($fn));
+        };
+    }
+
+    special!("&&" => and);
+    special!("||" => or);
+
+    map
+}
+
+pub fn builtins() -> HashMap<String, Rc<BuiltinFn>> {
+    let mut map: HashMap<String, Rc<BuiltinFn>> = HashMap::new();
 
     fn eq(args: Args) -> Result<Value> {
         if let Some(val) = args.get(0) {

@@ -35,9 +35,9 @@ pub use {
     error::{print_error, Error, ErrorKind},
     eval::{
         args::Args,
-        builtins::builtins,
+        builtins::{builtins, specials},
         env::{eval, render, Env, Jump, Scope},
-        value::{Builtin, Object, Value},
+        value::{BuiltinFn, Object, SpecialFn, Value},
     },
     template::Template,
 };

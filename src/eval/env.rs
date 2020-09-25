@@ -251,7 +251,9 @@ impl Env {
             Stmt::If(conds) => {
                 for (test, body) in conds {
                     if self.eval(test)?.to_bool() {
+                        self.push_scope();
                         self.block(body)?;
+                        self.pop_scope();
                         break;
                     }
                 }
@@ -382,6 +384,7 @@ impl Env {
     where
         K: Into<Value>,
     {
+        self.push_scope();
         for (k, v) in iter {
             if let Some(keyvar) = key {
                 self.set(keyvar, k);
@@ -396,6 +399,7 @@ impl Env {
                 },
             }
         }
+        self.pop_scope();
         Ok(())
     }
 

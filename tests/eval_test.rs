@@ -407,3 +407,49 @@ for v in 100..500
         boo!(false)
     );
 }
+
+#[test]
+fn readme_features() {
+    // Auto-closing HTML tags and code blocks based on indentation.
+    assert_render!("<b> Heya", "<b>Heya\n</b>\n");
+    assert_render!("<b> Heya <i> there", "<b>Heya\n<i>there\n</i>\n</b>\n");
+    /*
+    - Shorthand for `id`, `class`, `type`, and `name` attributes:
+      - `<div#id>`
+      - `<div.class1.class2>`
+      - `<input@form-field-name>`
+      - `<input:text>`
+    - Basic types:
+      - `bool`, `int,` `float`, `string`, `list`, `map`, `fn()`
+    - Loop over `list` and `map`:
+      - `<ul> for page in pages do <li id=page-{page.id}> page.name`
+      - `for k, v in some-map do <td> k </> <td> v`
+    - if/else statements
+      - `if logged_in? then <h2> Welcome back!`
+    - Error-checked assignment with `:=` and `=`:
+      - `name := 'Bob'`  will error if name **is** already set.
+      - `name = 'Bob'`  will error if name **isn't** already set.
+    - Dynamic values for regular attributes:
+      - `<div page-num={page.id}>`
+    - Conditionally set attributes or enable shorthand:
+      - `<div .logged-in=logged-in?>`
+      - `<div data-map=is-map?>`
+    - String interpolation:
+      - `<span.greeting> "Hey there {name}. 2 + 2 is {2 + 2}"`
+    - Shorthand interpolation:
+      - `<span #page-{page.id} .is-{page.type}> page.title`
+    - Implicit divs:
+      - `<#main>` becomes `<div id='main'>`
+    - Implicit closing tags:
+      - `<i>delicious</>` becomes `<i>delicious</i>`
+    - Call functions defined in Rust:
+      - `<div.name> to-uppercase(name)`
+    - Define your own Hatter functions:
+      - `def greet(name) do print("Hey there, {name}!")`
+      - `greet("Lydia")` prints `Hey there, Lydia!`
+    - Easy inline JavaScript:
+      - `<li> <a onclick=(alert("Oink!"))> 🐷`
+    - Hatter will add a `<!DOCTYPE>` and wrap everything in `<html>` if
+      the first tag in your template is `<head>`.
+      */
+}

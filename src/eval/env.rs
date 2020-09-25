@@ -113,9 +113,24 @@ impl Env {
 
     /// Find a value, looking first in the most recently pushed scope.
     pub fn lookup(&self, key: &str) -> Option<&Value> {
-        for scope in self.scopes().iter().rev() {
-            if let Some(v) = scope.get(key) {
-                return Some(v);
+        self.find_scope(key).and_then(|scope| scope.get(key))
+    }
+
+    /// Find the `Scope` in which a var exists, if there is one.
+    fn find_scope(&self, key: &str) -> Option<&Scope> {
+        for scope in self.scopes.iter().rev() {
+            if scope.contains_key(key) {
+                return Some(scope);
+            }
+        }
+        None
+    }
+
+    /// Find the `Scope` in which a var exists, if there is one.
+    fn find_mut_scope(&mut self, key: &str) -> Option<&mut Scope> {
+        for (i, scope) in self.scopes.iter().enumerate().rev() {
+            if scope.contains_key(key) {
+                return self.scopes.get_mut(i);
             }
         }
         None
@@ -124,6 +139,15 @@ impl Env {
     /// Set a value to the nearest scope.
     pub fn set<V: Into<Value>>(&mut self, key: &str, val: V) {
         self.mut_scope().insert(key.to_string(), val.into());
+    }
+
+    /// Set a value in a parent scope, or create it in the nearest.
+    pub fn update<V: Into<Value>>(&mut self, key: &str, val: V) {
+        if let Some(scope) = self.find_mut_scope(key) {
+            scope.insert(key.to_string(), val.into());
+        } else {
+            self.mut_scope().insert(key.to_string(), val.into());
+        }
     }
 
     /// Add a Rust function as a helper that can be invoked in templates.
@@ -281,8 +305,10 @@ impl Env {
                     if self.lookup(name).unwrap().typename() != val.typename() {
                         return error!("{} is type {}", name, val.typename());
                     }
+                    self.update(name, val);
+                } else {
+                    self.set(name, val);
                 }
-                self.set(name, val);
                 Value::None
             }
             Stmt::Fn(params, body) => Value::Fn {

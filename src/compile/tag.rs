@@ -1,33 +1,13 @@
-use {
-    crate::Stmt,
-    std::{
-        collections::HashMap,
-        hash::{Hash, Hasher},
-    },
-};
+use crate::Stmt;
 
-#[derive(Debug, Clone, Eq)]
+#[derive(Debug, Clone)]
 pub struct Tag {
-    pub tag: Box<Stmt>,             // tag name
-    pub id: Box<Stmt>,              // tag id
-    pub classes: Vec<Stmt>,         // classes
-    pub attrs: HashMap<Stmt, Stmt>, // other attributes
-    pub body: Vec<Stmt>,            // Bunch o' expressions
-    pub closed: bool,               // <self-closing/> ?
-}
-
-impl Hash for Tag {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        self.tag.hash(state);
-        self.id.hash(state);
-        self.classes.hash(state);
-        self.body.hash(state);
-        self.closed.hash(state);
-        for (k, v) in &self.attrs {
-            k.hash(state);
-            v.hash(state);
-        }
-    }
+    pub tag: Box<Stmt>,           // tag name
+    pub id: Box<Stmt>,            // tag id
+    pub classes: Vec<Stmt>,       // classes
+    pub attrs: Vec<(Stmt, Stmt)>, // other attributes
+    pub body: Vec<Stmt>,          // Bunch o' expressions
+    pub closed: bool,             // <self-closing/> ?
 }
 
 impl PartialEq for Tag {
@@ -38,7 +18,7 @@ impl PartialEq for Tag {
             && self.body == other.body
             && self.closed == other.closed
             && self.attrs.iter().all(|(k, v)| {
-                if let Some(o) = other.attrs.get(k) {
+                if let Some((_, o)) = other.attrs.iter().find(|(ok, _)| k == ok) {
                     o == v
                 } else {
                     false
@@ -53,7 +33,7 @@ impl Tag {
             tag: bx!(tag),
             id: bx!(Stmt::None),
             classes: vec![],
-            attrs: HashMap::new(),
+            attrs: vec![],
             closed: false,
             body: vec![],
         }
@@ -80,6 +60,6 @@ impl Tag {
     }
 
     pub fn add_attr(&mut self, name: Stmt, val: Stmt) {
-        self.attrs.insert(name, val);
+        self.attrs.push((name, val));
     }
 }

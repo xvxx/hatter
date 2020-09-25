@@ -1,6 +1,6 @@
 use crate::Tag;
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Stmt {
     None,
     Bool(bool),

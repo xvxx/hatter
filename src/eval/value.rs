@@ -18,13 +18,15 @@ pub enum Value {
     String(String),
     List(Vec<Value>),
     Map(BTreeMap<String, Value>),
-    Fn {
-        params: Vec<String>,
-        body: Vec<Stmt>,
-    },
-    NativeFn(Rc<NativeFn>),
-    SpecialFn(Rc<SpecialFn>),
+    Fn(FnType),
     Object(Rc<dyn Object>),
+}
+
+#[derive(Clone)]
+pub enum FnType {
+    Fn(Vec<String>, Vec<Stmt>),
+    Native(Rc<NativeFn>),
+    Special(Rc<SpecialFn>),
 }
 
 #[allow(unused_variables)]
@@ -55,9 +57,7 @@ impl fmt::Debug for Value {
             Bool(b) => write!(f, "{}", b),
             Number(num) => write!(f, "{}", num),
             String(s) => write!(f, r#""{}""#, s),
-            Fn { .. } => f.debug_struct("Function").field("val", &"?").finish(),
-            NativeFn(..) => f.debug_struct("NativeFn").field("val", &"?").finish(),
-            SpecialFn(..) => f.debug_struct("SpecialFn").field("val", &"?").finish(),
+            Fn(..) => f.debug_struct("Function").field("val", &"?").finish(),
             List(list) => write!(
                 f,
                 "[{}]",
@@ -77,9 +77,7 @@ impl PartialEq for Value {
     fn eq(&self, other: &Value) -> bool {
         match self {
             Value::None => matches!(other, Value::None),
-            Value::Fn { .. } | Value::Object(..) | Value::NativeFn(..) | Value::SpecialFn(..) => {
-                false
-            }
+            Value::Fn(..) | Value::Object(..) => false,
             Value::Bool(true) => matches!(other, Value::Bool(true)),
             Value::Bool(false) => matches!(other, Value::Bool(false)),
             Value::Number(num) => {
@@ -173,9 +171,7 @@ impl Value {
             None => "",
             String(s) => &s,
             Number(..) => "(number)",
-            Fn { .. } => "{function}",
-            NativeFn(..) => "{native}",
-            SpecialFn(..) => "{special}",
+            Fn(..) => "{function}",
             List(..) => "(list)",
             Map(..) => "(map)",
             Object(..) => "(object)",
@@ -196,9 +192,7 @@ impl Value {
             Bool(..) => "Bool",
             Number(..) => "Number",
             String(..) => "String",
-            Fn { .. } => "Fn",
-            NativeFn(..) => "Native",
-            SpecialFn(..) => "Special",
+            Fn(..) => "Fn",
             List(..) => "List",
             Map(..) => "Map",
             Object(..) => "Object",

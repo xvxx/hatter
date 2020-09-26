@@ -1,11 +1,8 @@
 use {
-    crate::{
-        compile, natives, specials, Args, ErrorKind, NativeFn, Result, SpecialFn, Stmt, Tag, Value,
-    },
+    crate::{compile, natives, specials, Args, ErrorKind, FnType, Result, Stmt, Tag, Value},
     std::{
         collections::{BTreeMap, HashMap},
-        fmt, mem,
-        rc::Rc,
+        mem,
     },
 };
 
@@ -32,37 +29,23 @@ pub enum Jump {
 /// Name -> Val map
 pub type Scope = HashMap<String, Value>;
 
+#[derive(Debug)]
 pub struct Env {
     scopes: Vec<Scope>,
-    helpers: HashMap<String, Rc<NativeFn>>,
-    specials: HashMap<String, Rc<SpecialFn>>,
     out: String,
-}
-
-impl fmt::Debug for Env {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("Env")
-            .field("scopes", &self.scopes)
-            .field("out", &self.out)
-            .field(
-                "helpers",
-                &self
-                    .helpers
-                    .iter()
-                    .map(|(k, _)| k.to_string())
-                    .collect::<Vec<_>>()
-                    .join(", "),
-            )
-            .finish()
-    }
 }
 
 impl Env {
     pub fn new() -> Env {
+        let mut scope = Scope::new();
+        for (name, fun) in specials() {
+            scope.insert(name, Value::Fn(FnType::Special(fun)));
+        }
+        for (name, fun) in natives() {
+            scope.insert(name, Value::Fn(FnType::Native(fun)));
+        }
         Env {
-            scopes: vec![Scope::new()],
-            helpers: natives(),
-            specials: specials(),
+            scopes: vec![scope],
             out: String::new(),
         }
     }
@@ -102,18 +85,6 @@ impl Env {
     #[allow(unused)]
     pub(crate) fn scopes(&self) -> &[Scope] {
         &self.scopes
-    }
-
-    /// Helper functions.
-    #[allow(unused)]
-    pub(crate) fn helpers(&self) -> &HashMap<String, Rc<NativeFn>> {
-        &self.helpers
-    }
-
-    /// Special functions.
-    #[allow(unused)]
-    pub(crate) fn specials(&self) -> &HashMap<String, Rc<SpecialFn>> {
-        &self.specials
     }
 
     /// Does a value exist in this or any parent scopes?
@@ -158,15 +129,6 @@ impl Env {
         } else {
             self.mut_scope().insert(key.to_string(), val.into());
         }
-    }
-
-    /// Add a Rust function as a helper that can be invoked in templates.
-    pub fn helper<S, F>(&mut self, key: S, f: F)
-    where
-        S: AsRef<str>,
-        F: 'static + Fn(Args) -> Result<Value>,
-    {
-        self.helpers.insert(key.as_ref().to_string(), rc!(f));
     }
 
     /// Print something. Includes trailing newline.
@@ -241,42 +203,45 @@ impl Env {
                 }
             }
             Stmt::Call(target, args) => {
-                // check for native funtions first
-                if let Stmt::Word(name) = &**target {
-                    if let Some(f) = self.specials.get(name) {
-                        return f.clone()(self, args);
-                    } else if let Some(f) = self.helpers.get(name) {
-                        let f = f.clone();
-                        let args = args
-                            .iter()
-                            .map(|a| self.eval(&a))
-                            .collect::<Result<Vec<_>>>()?;
-                        return f(Args::new(self, args));
-                    }
-                }
-
                 // eval the target and see if it's a Hatter function
-                if let Value::Fn { params, body } = self.eval(&target)? {
-                    if params.len() != args.len() {
-                        return error!("expected {} args, got {}", params.len(), args.len());
-                    }
-                    let params = params.clone();
-                    let body = body.clone();
-                    self.push_scope();
-                    for (i, a) in args.iter().enumerate() {
-                        if let Some(name) = params.get(i) {
-                            let val = self.eval(&a)?;
-                            self.set(name, val);
+                if let Value::Fn(inner_fn) = self.eval(&target)? {
+                    match inner_fn {
+                        FnType::Special(f) => f.clone()(self, args)?,
+                        FnType::Native(f) => {
+                            let f = f.clone();
+                            let args = args
+                                .iter()
+                                .map(|a| self.eval(&a))
+                                .collect::<Result<Vec<_>>>()?;
+                            f(Args::new(self, args))?
                         }
-                    }
-                    let out = self.block(&body);
-                    self.pop_scope();
-                    match out {
-                        Ok(v) => v,
-                        Err(e) => match e.kind {
-                            ErrorKind::Jump(Jump::Return(v)) => v,
-                            _ => return Err(e),
-                        },
+                        FnType::Fn(params, body) => {
+                            if params.len() != args.len() {
+                                return error!(
+                                    "expected {} args, got {}",
+                                    params.len(),
+                                    args.len()
+                                );
+                            }
+                            let params = params.clone();
+                            let body = body.clone();
+                            self.push_scope();
+                            for (i, a) in args.iter().enumerate() {
+                                if let Some(name) = params.get(i) {
+                                    let val = self.eval(&a)?;
+                                    self.set(name, val);
+                                }
+                            }
+                            let out = self.block(&body);
+                            self.pop_scope();
+                            match out {
+                                Ok(v) => v,
+                                Err(e) => match e.kind {
+                                    ErrorKind::Jump(Jump::Return(v)) => v,
+                                    _ => return Err(e),
+                                },
+                            }
+                        }
                     }
                 } else {
                     return error!("can't find fn: {}", target.to_string());
@@ -330,10 +295,7 @@ impl Env {
                 }
                 Value::None
             }
-            Stmt::Fn(params, body) => Value::Fn {
-                params: params.clone(),
-                body: body.clone(),
-            },
+            Stmt::Fn(params, body) => Value::Fn(FnType::Fn(params.clone(), body.clone())),
             Stmt::Args(..) => unimplemented!(),
         })
     }

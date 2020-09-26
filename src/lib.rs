@@ -37,7 +37,7 @@ pub use {
         args::Args,
         env::{eval, render, Env, Jump, Scope},
         natives::{natives, specials},
-        value::{NativeFn, Object, SpecialFn, Value},
+        value::{FnType, NativeFn, Object, SpecialFn, Value},
     },
     template::Template,
 };

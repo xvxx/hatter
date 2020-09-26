@@ -1,5 +1,5 @@
 use {
-    crate::{compile, Args, Env, Result, Value},
+    crate::{Args, Env, Result, Value},
     rustyline::{error::ReadlineError, Editor},
     std::io,
 };
@@ -8,9 +8,9 @@ use {
 pub fn run() -> io::Result<()> {
     banner();
     let mut env = Env::new();
-    env.helper("help", help);
-    env.helper("vars", vars);
-    env.helper("fns", fns);
+    env.set("help", help);
+    env.set("vars", vars);
+    env.set("fns", fns);
     let history_file = ".hatter_history";
     let (red, clear) = if std::env::var("NO_COLOR").is_ok() {
         ("", "")
@@ -30,7 +30,7 @@ pub fn run() -> io::Result<()> {
                     help(env.empty_args())?;
                     continue;
                 }
-                match compile(&line).and_then(|ast| env.render(&ast)) {
+                match env.render(&line) {
                     Ok(out) => {
                         if !out.trim().is_empty() {
                             print!("{}", out);
@@ -109,6 +109,9 @@ fn help(_: Args) -> Result<Value> {
 fn vars(args: Args) -> Result<Value> {
     for scope in args.env.scopes() {
         for (k, v) in scope {
+            if matches!(v, Value::Fn(..)) {
+                continue;
+            }
             println!("{}: {:?}", k, v);
         }
     }
@@ -116,11 +119,13 @@ fn vars(args: Args) -> Result<Value> {
 }
 
 fn fns(args: Args) -> Result<Value> {
-    Ok(args
-        .env
-        .helpers()
-        .iter()
-        .map(|(name, _)| name)
-        .collect::<Vec<_>>()
-        .into())
+    let mut out = vec![];
+    for scope in args.env.scopes() {
+        for (name, v) in scope {
+            if matches!(v, Value::Fn(..)) {
+                out.push(Value::String(name.into()));
+            }
+        }
+    }
+    Value::List(out.into()).ok()
 }

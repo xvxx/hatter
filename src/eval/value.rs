@@ -349,3 +349,12 @@ impl From<Stmt> for Value {
         }
     }
 }
+
+impl<F> From<F> for Value
+where
+    F: 'static + Fn(Args) -> Result<Value>,
+{
+    fn from(f: F) -> Value {
+        Value::Fn(FnType::Native(rc!(f)))
+    }
+}

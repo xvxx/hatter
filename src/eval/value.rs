@@ -1,6 +1,7 @@
 use {
     crate::{Args, Env, Result, Stmt},
     std::{
+        cell::RefCell,
         collections::{BTreeMap, HashMap},
         fmt,
         rc::Rc,
@@ -16,7 +17,7 @@ pub enum Value {
     Bool(bool),
     Number(f64),
     String(Rc<String>),
-    List(Vec<Value>),
+    List(Rc<RefCell<Vec<Value>>>),
     Map(BTreeMap<String, Value>),
     Fn(FnType),
     Object(Rc<dyn Object>),
@@ -62,6 +63,7 @@ impl fmt::Debug for Value {
                 f,
                 "[{}]",
                 &list
+                    .borrow()
                     .iter()
                     .map(|i| format!("{:?}", i))
                     .collect::<Vec<_>>()
@@ -123,13 +125,17 @@ impl PartialEq<Value> for String {
 }
 
 impl Value {
+    pub fn new_list(list: Vec<Value>) -> Value {
+        Value::List(cell!(list))
+    }
+
     pub fn ok(self) -> Result<Value> {
         Ok(self)
     }
 
     pub fn len(&self) -> usize {
         match self {
-            Value::List(list) => list.len(),
+            Value::List(list) => list.borrow().len(),
             Value::Map(map) => map.len(),
             Value::String(s) => s.len(),
             _ => 0,
@@ -142,7 +148,7 @@ impl Value {
 
     pub fn push<V: Into<Value>>(&mut self, val: V) -> Result<()> {
         match self {
-            Value::List(list) => list.push(val.into()),
+            Value::List(list) => list.borrow_mut().push(val.into()),
             Value::String(s) => {
                 if let Some(s) = Rc::get_mut(s) {
                     s.push_str(val.into().to_str());
@@ -274,19 +280,19 @@ impl From<&Value> for Value {
 
 impl<T: Into<Value>> From<Vec<T>> for Value {
     fn from(vec: Vec<T>) -> Self {
-        Value::List(vec.into_iter().map(val).collect())
+        Value::new_list(vec.into_iter().map(val).collect())
     }
 }
 
 impl<T: Copy + Into<Value>> From<&Vec<T>> for Value {
     fn from(vec: &Vec<T>) -> Self {
-        Value::List(vec.iter().map(|v| (*v).into()).collect())
+        Value::new_list(vec.iter().map(|v| (*v).into()).collect())
     }
 }
 
 impl<T: Copy + Into<Value>> From<&[T]> for Value {
     fn from(vec: &[T]) -> Self {
-        Value::List(vec.iter().map(|v| (*v).into()).collect())
+        Value::new_list(vec.iter().map(|v| (*v).into()).collect())
     }
 }
 

@@ -123,9 +123,9 @@ fn fns(args: Args) -> Result<Value> {
     for scope in args.env.scopes() {
         for (name, v) in scope {
             if matches!(v, Value::Fn(..)) {
-                out.push(Value::String(name.into()));
+                out.push(name.into());
             }
         }
     }
-    Value::List(out.into()).ok()
+    Value::new_list(out).ok()
 }

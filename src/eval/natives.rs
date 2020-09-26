@@ -115,7 +115,10 @@ pub fn natives() -> HashMap<String, Rc<NativeFn>> {
             Value::Map(map) => map.get(verb.to_str()).unwrap_or(&Value::None).clone(),
             Value::List(list) => {
                 let idx = args.need_number(1)?;
-                list.get(idx as usize).unwrap_or(&Value::None).clone()
+                list.borrow()
+                    .get(idx as usize)
+                    .unwrap_or(&Value::None)
+                    .clone()
             }
             Value::Object(o) => o.get(verb.to_str()).unwrap_or(Value::None),
             _ => Value::None,
@@ -202,7 +205,7 @@ pub fn natives() -> HashMap<String, Rc<NativeFn>> {
     }
     fn len(args: Args) -> Result<Value> {
         match args.need(0)? {
-            Value::List(list) => list.len().into(),
+            Value::List(list) => list.borrow().len().into(),
             Value::Map(map) => map.len().into(),
             Value::String(s) => s.len().into(),
             _ => Value::Number(0.0),

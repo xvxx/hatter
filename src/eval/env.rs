@@ -381,7 +381,9 @@ impl Env {
     fn eval_for(&mut self, stmt: &Stmt) -> Result<Value> {
         if let Stmt::For(key, val, expr, body) = stmt {
             match self.eval(&expr)? {
-                Value::List(list) => self.inner_for(key, val, list.iter().enumerate(), body)?,
+                Value::List(list) => {
+                    self.inner_for(key, val, list.borrow().iter().enumerate(), body)?
+                }
                 Value::Map(map) => self.inner_for(key, val, map.iter(), body)?,
                 v => return error!("expected List or Map, got {:?}", v),
             }

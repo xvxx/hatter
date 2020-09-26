@@ -1,5 +1,5 @@
 use {
-    crate::{Args, BuiltinFn, Env, Result, SpecialFn, Stmt, Value},
+    crate::{Args, Env, NativeFn, Result, SpecialFn, Stmt, Value},
     std::{collections::HashMap, rc::Rc},
 };
 
@@ -31,8 +31,8 @@ pub fn specials() -> HashMap<String, Rc<SpecialFn>> {
     map
 }
 
-pub fn builtins() -> HashMap<String, Rc<BuiltinFn>> {
-    let mut map: HashMap<String, Rc<BuiltinFn>> = HashMap::new();
+pub fn natives() -> HashMap<String, Rc<NativeFn>> {
+    let mut map: HashMap<String, Rc<NativeFn>> = HashMap::new();
 
     fn eq(args: Args) -> Result<Value> {
         if let Some(val) = args.get(0) {
@@ -216,38 +216,38 @@ pub fn builtins() -> HashMap<String, Rc<BuiltinFn>> {
         Value::String(args.need(0)?.typename().into()).ok()
     }
 
-    macro_rules! builtin {
+    macro_rules! native {
         ($name:expr => $fn:expr) => {
             map.insert($name.to_string(), rc!($fn));
         };
     }
 
-    builtin!("type" => r#type);
-    builtin!("when" => when);
-    builtin!("==" => eq);
-    builtin!("!=" => neq);
-    builtin!("not" => not);
-    builtin!("concat" => concat);
-    builtin!("index" => index);
-    builtin!("<<" => push);
-    builtin!("." => index);
-    builtin!(".." => range);
-    builtin!("..=" => range_inclusive);
-    builtin!("+" => add);
-    builtin!("-" => sub);
-    builtin!("*" => mul);
-    builtin!("/" => div);
-    builtin!("%" => r#mod);
-    builtin!(">" => gt);
-    builtin!(">=" => gte);
-    builtin!("<" => lt);
-    builtin!("<=" => lte);
-    builtin!("print" => print);
-    builtin!("to-uppercase" => to_uppercase);
-    builtin!("to-lowercase" => to_lowercase);
-    builtin!("replace" => replace);
-    builtin!("len" => len);
-    builtin!("empty?" => empty_);
+    native!("type" => r#type);
+    native!("when" => when);
+    native!("==" => eq);
+    native!("!=" => neq);
+    native!("not" => not);
+    native!("concat" => concat);
+    native!("index" => index);
+    native!("<<" => push);
+    native!("." => index);
+    native!(".." => range);
+    native!("..=" => range_inclusive);
+    native!("+" => add);
+    native!("-" => sub);
+    native!("*" => mul);
+    native!("/" => div);
+    native!("%" => r#mod);
+    native!(">" => gt);
+    native!(">=" => gte);
+    native!("<" => lt);
+    native!("<=" => lte);
+    native!("print" => print);
+    native!("to-uppercase" => to_uppercase);
+    native!("to-lowercase" => to_lowercase);
+    native!("replace" => replace);
+    native!("len" => len);
+    native!("empty?" => empty_);
 
     map
 }

@@ -7,7 +7,7 @@ use {
     },
 };
 
-pub type BuiltinFn = dyn Fn(Args) -> Result<Value>;
+pub type NativeFn = dyn Fn(Args) -> Result<Value>;
 pub type SpecialFn = dyn Fn(&mut Env, &[Stmt]) -> Result<Value>;
 
 #[derive(Clone)]
@@ -22,6 +22,8 @@ pub enum Value {
         params: Vec<String>,
         body: Vec<Stmt>,
     },
+    NativeFn(Rc<NativeFn>),
+    SpecialFn(Rc<SpecialFn>),
     Object(Rc<dyn Object>),
 }
 
@@ -54,6 +56,8 @@ impl fmt::Debug for Value {
             Number(num) => write!(f, "{}", num),
             String(s) => write!(f, r#""{}""#, s),
             Fn { .. } => f.debug_struct("Function").field("val", &"?").finish(),
+            NativeFn(..) => f.debug_struct("NativeFn").field("val", &"?").finish(),
+            SpecialFn(..) => f.debug_struct("SpecialFn").field("val", &"?").finish(),
             List(list) => write!(
                 f,
                 "[{}]",
@@ -73,7 +77,9 @@ impl PartialEq for Value {
     fn eq(&self, other: &Value) -> bool {
         match self {
             Value::None => matches!(other, Value::None),
-            Value::Fn { .. } | Value::Object(..) => false,
+            Value::Fn { .. } | Value::Object(..) | Value::NativeFn(..) | Value::SpecialFn(..) => {
+                false
+            }
             Value::Bool(true) => matches!(other, Value::Bool(true)),
             Value::Bool(false) => matches!(other, Value::Bool(false)),
             Value::Number(num) => {
@@ -168,6 +174,8 @@ impl Value {
             String(s) => &s,
             Number(..) => "(number)",
             Fn { .. } => "{function}",
+            NativeFn(..) => "{native}",
+            SpecialFn(..) => "{special}",
             List(..) => "(list)",
             Map(..) => "(map)",
             Object(..) => "(object)",
@@ -189,6 +197,8 @@ impl Value {
             Number(..) => "Number",
             String(..) => "String",
             Fn { .. } => "Fn",
+            NativeFn(..) => "Native",
+            SpecialFn(..) => "Special",
             List(..) => "List",
             Map(..) => "Map",
             Object(..) => "Object",

@@ -1,7 +1,6 @@
 use {
     crate::{
-        builtins, compile, specials, Args, BuiltinFn, ErrorKind, Result, SpecialFn, Stmt, Tag,
-        Value,
+        compile, natives, specials, Args, ErrorKind, NativeFn, Result, SpecialFn, Stmt, Tag, Value,
     },
     std::{
         collections::{BTreeMap, HashMap},
@@ -35,7 +34,7 @@ pub type Scope = HashMap<String, Value>;
 
 pub struct Env {
     scopes: Vec<Scope>,
-    helpers: HashMap<String, Rc<BuiltinFn>>,
+    helpers: HashMap<String, Rc<NativeFn>>,
     specials: HashMap<String, Rc<SpecialFn>>,
     out: String,
 }
@@ -62,7 +61,7 @@ impl Env {
     pub fn new() -> Env {
         Env {
             scopes: vec![Scope::new()],
-            helpers: builtins(),
+            helpers: natives(),
             specials: specials(),
             out: String::new(),
         }
@@ -107,7 +106,7 @@ impl Env {
 
     /// Helper functions.
     #[allow(unused)]
-    pub(crate) fn helpers(&self) -> &HashMap<String, Rc<BuiltinFn>> {
+    pub(crate) fn helpers(&self) -> &HashMap<String, Rc<NativeFn>> {
         &self.helpers
     }
 
@@ -242,7 +241,7 @@ impl Env {
                 }
             }
             Stmt::Call(target, args) => {
-                // check for builtin funtions first
+                // check for native funtions first
                 if let Stmt::Word(name) = &**target {
                     if let Some(f) = self.specials.get(name) {
                         return f.clone()(self, args);

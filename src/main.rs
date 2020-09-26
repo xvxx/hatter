@@ -1,7 +1,7 @@
 use {
-    hatter::{render, parse, scan, Stmt, Syntax, Token},
+    hatter::{parse, render, scan, Stmt, Syntax, Token},
     std::{
-        env,
+        env, fs,
         io::{self, Write},
         path,
     },
@@ -53,20 +53,21 @@ fn main() -> io::Result<()> {
         ));
     }
 
-    let source = std::fs::read_to_string(path)?;
+    let source = fs::read_to_string(path)?;
 
-    let tokens = scan(&source)
-        .map_err(|e| print_error(&path, &source, e))
-        .unwrap();
     if command == "scan" {
+        let tokens = scan(&source)
+            .map_err(|e| print_error(&path, &source, e))
+            .unwrap();
         print_tokens(tokens);
         return Ok(());
     }
 
-    let ast = parse(&tokens)
-        .map_err(|e| print_error(&path, &source, e))
-        .unwrap();
     if command == "parse" {
+        let ast = scan(&source)
+            .and_then(|tokens| parse(&tokens))
+            .map_err(|e| print_error(&path, &source, e))
+            .unwrap();
         print_ast(&ast);
         return Ok(());
     }
@@ -74,7 +75,7 @@ fn main() -> io::Result<()> {
     write!(
         io::stdout(),
         "{}",
-        render(&ast)
+        render(&source)
             .map_err(|e| print_error(&path, &source, e))
             .unwrap()
     )

@@ -43,7 +43,3 @@ pub use {
 };
 
 pub type Result<T> = std::result::Result<T, Error>;
-
-pub fn to_html(s: &str) -> Result<String> {
-    compile(s).and_then(|p| render(&p))
-}

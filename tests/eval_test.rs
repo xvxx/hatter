@@ -10,7 +10,7 @@ macro_rules! eval {
 
 macro_rules! render {
     ($code:expr) => {
-        compile(&$code).and_then(|ast| render(&ast)).unwrap()
+        render(&$code).unwrap()
     };
 }
 

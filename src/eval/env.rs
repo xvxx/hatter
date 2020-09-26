@@ -1,5 +1,8 @@
 use {
-    crate::{builtins, specials, Args, BuiltinFn, ErrorKind, Result, SpecialFn, Stmt, Tag, Value},
+    crate::{
+        builtins, compile, specials, Args, BuiltinFn, ErrorKind, Result, SpecialFn, Stmt, Tag,
+        Value,
+    },
     std::{
         collections::{BTreeMap, HashMap},
         fmt, mem,
@@ -13,10 +16,10 @@ pub fn eval(stmts: &[Stmt]) -> Result<Value> {
     env.block(stmts)
 }
 
-/// Render Stmts to a String.
-pub fn render(stmts: &[Stmt]) -> Result<String> {
+/// Render source to a String.
+pub fn render(source: &str) -> Result<String> {
     let mut env = Env::new();
-    env.render(stmts)
+    env.render(source)
 }
 
 /// Error-ish that lets us abort what we're doing.
@@ -174,12 +177,13 @@ impl Env {
     }
 
     /// Render statements into a String.
-    pub fn render(&mut self, stmts: &[Stmt]) -> Result<String> {
-        let autohtml = self.first_is_head(stmts);
+    pub fn render(&mut self, source: &str) -> Result<String> {
+        let stmts = compile(source)?;
+        let autohtml = self.first_is_head(&stmts);
         if autohtml {
             self.print("<!DOCTYPE html>\n<html>");
         }
-        self.block(stmts)?;
+        self.block(&stmts)?;
         if autohtml {
             self.print("\n</html>\n");
         }

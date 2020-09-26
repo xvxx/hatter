@@ -37,7 +37,7 @@ fn test_dir<P: AsRef<path::Path>>(dir: P) -> io::Result<()> {
 
             let tmp_path = "/tmp/hatter.test";
             let mut file = fs::File::create(tmp_path)?;
-            match hatter::to_html(&source) {
+            match hatter::render(&source) {
                 Ok(code) => write!(file, "{}", code).unwrap(),
                 Err(err) => {
                     let msg = err.to_string();

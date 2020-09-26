@@ -349,6 +349,12 @@ impl Env {
         out.push_str(&tagname);
         out.push(' ');
 
+        // <debug>
+        #[cfg(not(debug_assertions))]
+        if tagname == "debug" {
+            return Ok(Value::None);
+        }
+
         // id
         if tag.id.is_some() {
             let val = self.eval(&tag.id)?;

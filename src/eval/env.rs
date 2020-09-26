@@ -38,11 +38,11 @@ pub struct Env {
 impl Env {
     pub fn new() -> Env {
         let mut scope = Scope::new();
-        for (name, fun) in specials() {
-            scope.insert(name, Value::Fn(FnType::Special(fun)));
-        }
         for (name, fun) in natives() {
             scope.insert(name, Value::Fn(FnType::Native(fun)));
+        }
+        for (name, fun) in specials() {
+            scope.insert(name, Value::Fn(FnType::Special(fun)));
         }
         Env {
             scopes: vec![scope],

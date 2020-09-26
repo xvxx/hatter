@@ -518,9 +518,7 @@ impl<'s, 't> Parser<'s, 't> {
         while !self.peek_eof() {
             match self.peek_kind() {
                 // keep going if we're indented
-                Syntax::Semi if indented => {
-                    self.skip();
-                }
+                Syntax::Semi if indented => self.skip(),
 
                 // pass these up the food chain
                 Syntax::Dedent | Syntax::Semi => break,

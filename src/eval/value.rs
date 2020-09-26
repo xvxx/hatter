@@ -15,7 +15,7 @@ pub enum Value {
     None,
     Bool(bool),
     Number(f64),
-    String(String),
+    String(Rc<String>),
     List(Vec<Value>),
     Map(BTreeMap<String, Value>),
     Fn(FnType),
@@ -115,7 +115,7 @@ impl PartialEq for Value {
 impl PartialEq<Value> for String {
     fn eq(&self, other: &Value) -> bool {
         if let Value::String(s) = other {
-            s == self
+            &**s == self
         } else {
             false
         }
@@ -143,7 +143,11 @@ impl Value {
     pub fn push<V: Into<Value>>(&mut self, val: V) -> Result<()> {
         match self {
             Value::List(list) => list.push(val.into()),
-            Value::String(s) => s.push_str(val.into().to_str()),
+            Value::String(s) => {
+                if let Some(s) = Rc::get_mut(s) {
+                    s.push_str(val.into().to_str());
+                }
+            }
             _ => return error!("can only `push()` to List"),
         }
         Ok(())
@@ -218,7 +222,7 @@ macro_rules! into_string {
     ($type:ty) => {
         impl From<$type> for Value {
             fn from(item: $type) -> Self {
-                Value::String(item.to_string())
+                Value::String(rc!(item.to_string()))
             }
         }
     };

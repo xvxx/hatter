@@ -136,7 +136,7 @@ pub fn natives() -> HashMap<String, Rc<NativeFn>> {
             while let Some(Value::String(x)) = iter.next() {
                 sum += x;
             }
-            return Value::String(sum).ok();
+            return Value::String(sum.into()).ok();
         }
         Value::None.ok()
     }
@@ -189,16 +189,16 @@ pub fn natives() -> HashMap<String, Rc<NativeFn>> {
         Value::Bool(args.need_number(0)? <= args.need_number(1)?).ok()
     }
     fn to_uppercase(args: Args) -> Result<Value> {
-        Value::String(args.need_string(0)?.to_uppercase()).ok()
+        Value::String(args.need_string(0)?.to_uppercase().into()).ok()
     }
     fn to_lowercase(args: Args) -> Result<Value> {
-        Value::String(args.need_string(0)?.to_lowercase()).ok()
+        Value::String(args.need_string(0)?.to_lowercase().into()).ok()
     }
     fn replace(args: Args) -> Result<Value> {
         let s = args.need_string(0)?;
         let search = args.need_string(1)?;
         let replace = args.need_string(2)?;
-        Value::String(s.replace(search, replace)).ok()
+        Value::String(s.replace(search, replace).into()).ok()
     }
     fn len(args: Args) -> Result<Value> {
         match args.need(0)? {
@@ -213,7 +213,7 @@ pub fn natives() -> HashMap<String, Rc<NativeFn>> {
         Value::Bool(len(args)?.to_f64() == 0.0).ok()
     }
     fn r#type(args: Args) -> Result<Value> {
-        Value::String(args.need(0)?.typename().into()).ok()
+        Value::String(args.need(0)?.typename().to_string().into()).ok()
     }
 
     macro_rules! native {

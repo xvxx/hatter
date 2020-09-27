@@ -581,7 +581,6 @@ impl<'s, 't> Parser<'s, 't> {
                 } else {
                     Stmt::Return(bx!(self.expr()?))
                 };
-                self.expect(Syntax::Semi)?;
                 Ok(ret)
             }
 

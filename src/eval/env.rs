@@ -310,7 +310,7 @@ impl Env {
         out.push_str(&tagname);
         out.push(' ');
 
-        // <debug>
+        // don't run <debug> code in --release
         #[cfg(not(debug_assertions))]
         if tagname == "debug" {
             return Ok(Value::None);
@@ -374,7 +374,13 @@ impl Env {
 
         // closing tag
         out.push_str(&format!("</{}>", tagname));
-        Ok(out.into())
+
+        // <debug> gets eval'd but not print'd in --debug mode
+        if tagname == "debug" {
+            Ok(Value::None)
+        } else {
+            Ok(out.into())
+        }
     }
 
     /// Evaluate a for loop.

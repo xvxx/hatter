@@ -7,9 +7,6 @@ use {
     },
 };
 
-pub type NativeFn = dyn Fn(Args) -> Result<Value>;
-pub type SpecialFn = dyn Fn(&mut Env, &[Stmt]) -> Result<Value>;
-
 #[derive(Clone)]
 pub enum Value {
     None,
@@ -21,6 +18,9 @@ pub enum Value {
     Fn(FnType),
     Object(Rc<dyn Object>),
 }
+
+pub type NativeFn = dyn Fn(Args) -> Result<Value>;
+pub type SpecialFn = dyn Fn(&mut Env, &[Stmt]) -> Result<Value>;
 
 #[derive(Clone)]
 pub enum FnType {
@@ -125,6 +125,10 @@ impl PartialEq<Value> for String {
 impl Value {
     pub fn ok(self) -> Result<Value> {
         Ok(self)
+    }
+
+    pub fn some(self) -> Option<Value> {
+        Some(self)
     }
 
     pub fn len(&self) -> usize {

@@ -14,11 +14,7 @@ knock off of [Imba], except Hatter produces raw, static HTML - no
 JavaScript in sight.
 
 Hatter can be used to generate static web sites or to render server
-side content in an old fashioned web application.
-
-It's like a less powerful, 90s-era PHP. But we're talking PHP/FI, none
-of that Easy-Bake Oven PHP3 stuff that you could use to build actual
-sites.
+side content in a good ol' fashioned web application.
 
 If you're feeling adventerous, or mad as a hatter, you can use the
 standalone binary to turn templates into HTML files, or include the
@@ -51,27 +47,25 @@ Or, a beefier example:
 
 ```html
 <nav .webview-app=webview?>
-  <a href="/signin"> sign in
-  <a href="/signup"> sign up
+  if not logged-in?
+    <a href="/signin"> sign in </> | <a href="/signup"> sign up
   <ul> for link in nav-links
-    <li.small-link> <a href=link.href> link.text
+    <li.small-link> <a href={link.href}> link.text
   <form GET="/search">
     <input@query:text placeholder="Search..." /> <input:submit/>
 
 <#main.markdown-body>
   if logged-in?
-    <h1> Welcome back, <span.username> name </>!
+    <h1> "Welcome back, {<span.username> name}!"
   else
     <h1> Nice to, uh, see you. <span.aside> Have we met..?
 ```
 
 Which, if we're logged in as `The Mad Hatter` and `webview?` is
-`false`, will turn into:
+`true`, will turn into:
 
 ```html
-<nav>
-  <a href='/signin'> sign in </a>
-  <a href='/signup'> sign up </a>
+<nav class='webview-app'>
   <ul>
     <li class='small-link'> <a href='/hats'> Hats </a> </li>
     <li class='small-link'> <a href='/cards'> Cards </a> </li>
@@ -121,13 +115,19 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
   - `<i>delicious</>` becomes `<i>delicious</i>`
 - Call functions defined in Rust:
   - `<div.name> to-uppercase(name)`
-- Define your own Hatter functions with strict arity:
+- Define your own Hatter functions with strict arity and implicit
+  return values:
   - `def greet(name) do print("Hey there, {name}!")`
   - `greet("Lydia")` prints `Hey there, Lydia!`
 - Define your own Hatter operators:
-  - `def !!(a, b) do return concat(to-uppercase(a), ' ', to-uppercase(b))`
+  - `def !!(a, b) do concat(to-uppercase(a), ' ', to-uppercase(b))`
+  - `"one" !! "two"` returns `ONE TWO`
+- Function literals:
+  - `add := fn(a, b) a + b`
+  - `add(1, 200)` returns `201`
+
 - Easy inline JavaScript:
-  - `<li> <a onclick=(alert("Oink!"))> 🐷`
+  - `<li> <a onclick=(alert("Oink!"))> "🐷"`
 - Hatter will add a `<!DOCTYPE>` and wrap everything in `<html>` if
   the first tag in your template is `<head>`.
 

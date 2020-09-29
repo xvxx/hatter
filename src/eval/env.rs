@@ -1,8 +1,10 @@
 use {
     crate::{compile, natives, specials, Args, ErrorKind, FnType, Result, Stmt, Tag, Value},
     std::{
+        cell::{Ref, RefCell},
         collections::{BTreeMap, HashMap},
         mem,
+        rc::Rc,
     },
 };
 

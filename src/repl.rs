@@ -31,9 +31,13 @@ pub fn run() -> io::Result<()> {
                     continue;
                 }
                 match compile(&line).and_then(|v| env.eval(&v[0])) {
-                    Ok(out) => {
-                        if !matches!(out, Value::None) {
+                    Ok(val) => {
+                        let out = env.out();
+                        if !out.trim().is_empty() {
                             print!("{}", out);
+                        }
+                        if !matches!(val, Value::None) {
+                            print!("{}", val);
                         }
                     }
                     Err(e) => eprintln!("{}{}{}", red, e, clear),

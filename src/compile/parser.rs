@@ -239,18 +239,26 @@ impl<'s, 't> Parser<'s, 't> {
     /// Parse a function literal.
     fn fn_literal(&mut self) -> Result<Stmt> {
         self.expect(Syntax::Fn)?;
-        self.expect(Syntax::LParen)?;
         let mut args = vec![];
-        while !self.peek_is(Syntax::RParen) {
-            args.push(self.expect(Syntax::Word)?.to_string());
-            if self.peek_is(Syntax::Comma) {
-                self.next();
-            } else {
-                break;
+        if self.peek_is(Syntax::LParen) {
+            self.skip();
+            while !self.peek_is(Syntax::RParen) {
+                args.push(self.expect(Syntax::Word)?.to_string());
+                if self.peek_is(Syntax::Comma) {
+                    self.next();
+                } else {
+                    break;
+                }
             }
+            self.expect(Syntax::RParen)?;
         }
-        self.expect(Syntax::RParen)?;
-        Ok(Stmt::Fn(args, self.block()?))
+        // `do` is optional when writing single-line function literals
+        let block = if matches!(self.peek_kind(), Syntax::Indent | Syntax::Do) {
+            self.block()?
+        } else {
+            vec![self.stmt()?]
+        };
+        Ok(Stmt::Fn(args, block))
     }
 
     /// Parse a code expression.

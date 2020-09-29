@@ -84,22 +84,13 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
 
 ## Features
 
-- Auto-closing HTML tags and code blocks based on indentation.
+- Auto-closing HTML tags and code blocks based on indentation:
+  - `<h1> Welcome, <i> Rob` becomes `<h1> Welcome, <i> Rob </i></h1>`
 - Shorthand for `id`, `class`, `type`, and `name` attributes:
   - `<div#id>`
   - `<div.class1.class2>`
   - `<input@form-field-name>`
   - `<input:text>`
-- Basic types:
-  - `bool`, `int,` `float`, `string`, `list`, `map`, `fn()`
-- Loop over `list` and `map`:
-  - `<ul> for page in pages do <li id=page-{page.id}> page.name`
-  - `for k, v in some-map do <td> k </> <td> v`
-- if/else statements
-  - `if logged_in? then <h2> Welcome back!`
-- Error-checked assignment with `:=` and `=`:
-  - `name := 'Bob'`  will error if name **is** already set.
-  - `name = 'Bob'`  will error if name **isn't** already set.
 - Dynamic values for regular attributes:
   - `<div page-num={page.id}>`
 - Conditionally set attributes or enable shorthand:
@@ -113,6 +104,18 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
   - `<#main>` becomes `<div id='main'>`
 - Implicit closing tags:
   - `<i>delicious</>` becomes `<i>delicious</i>`
+- Easy inline JavaScript:
+  - `<li> <a onclick=(alert("Oink!"))> "🐷"`
+- Basic types:
+  - `bool`, `int,` `float`, `string`, `list`, `map`, `fn()`
+- Loop over `list` and `map`:
+  - `<ul> for page in pages do <li id=page-{page.id}> page.name`
+  - `for k, v in some-map do <td> k </> <td> v`
+- if/else statements
+  - `if logged_in? then <h2> Welcome back!`
+- Error-checked assignment with `:=` and `=`:
+  - `name := 'Bob'`  will error if name **is** already set.
+  - `name = 'Bob'`   will error if name **isn't** already set.
 - Call functions defined in Rust:
   - `<div.name> to-uppercase(name)`
 - Define your own Hatter functions with strict arity and implicit
@@ -122,12 +125,12 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
 - Define your own Hatter operators:
   - `def !!(a, b) do concat(to-uppercase(a), ' ', to-uppercase(b))`
   - `"one" !! "two"` returns `ONE TWO`
-- Function literals:
-  - `add := fn(a, b) a + b`
-  - `add(1, 200)` returns `201`
-
-- Easy inline JavaScript:
-  - `<li> <a onclick=(alert("Oink!"))> "🐷"`
+- Closures and function literals:
+  - `adder := fn(x) fn(y) x + y` then `add1 := adder(1)`
+  - `add1(200)` returns `201`
+- `do` keyword for one-line blocks:
+  - `if 2 > 1 \n\tprint("Obviously")` OR `if 2 > 1 do print("Obviously")`
+  - `for x in list\n\tprint(x)` OR `for x in list do print(x)`
 - Hatter will add a `<!DOCTYPE>` and wrap everything in `<html>` if
   the first tag in your template is `<head>`.
 

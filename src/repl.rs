@@ -1,5 +1,5 @@
 use {
-    crate::{Args, Env, Result, Value},
+    crate::{compile, Args, Env, Result, Value},
     rustyline::{error::ReadlineError, Editor},
     std::io,
 };
@@ -30,9 +30,9 @@ pub fn run() -> io::Result<()> {
                     help(env.empty_args())?;
                     continue;
                 }
-                match env.render(&line) {
+                match compile(&line).and_then(|v| env.eval(&v[0])) {
                     Ok(out) => {
-                        if !out.trim().is_empty() {
+                        if !matches!(out, Value::None) {
                             print!("{}", out);
                         }
                     }

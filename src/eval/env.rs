@@ -144,7 +144,7 @@ impl Env {
         if autohtml {
             self.print("<!DOCTYPE html>\n<html>");
         }
-        self.block(&stmts)?;
+        self.printed_block(&stmts)?;
         if autohtml {
             self.print("\n</html>\n");
         }
@@ -155,8 +155,22 @@ impl Env {
     pub fn block(&mut self, stmts: &[Stmt]) -> Result<Value> {
         let mut out = Value::None;
         for stmt in stmts {
-            if let Stmt::Word(w) = stmt {
-                // solo word, not a variable? print it
+            let is_tag = matches!(stmt, Stmt::Tag(..));
+            out = self.eval(&stmt)?;
+            if is_tag {
+                self.print(&out);
+            }
+        }
+        Ok(out)
+    }
+
+    /// Evaluate a block of statements and print what each returns.
+    /// "Outside of a tag, tags are printed.
+    ///  Inside of a tag, everything is printed."
+    pub fn printed_block(&mut self, stmts: &[Stmt]) -> Result<Value> {
+        let mut out = Value::None;
+        for stmt in stmts {
+            if let Stmt::Word(w) = &stmt {
                 if !self.is_keyword_or_var(w) {
                     self.print(w);
                     continue;
@@ -369,7 +383,7 @@ impl Env {
 
         // body
         let old_out = self.out();
-        self.block(&tag.body)?;
+        self.printed_block(&tag.body)?;
         out.push_str(&mem::replace(&mut self.out, old_out));
 
         // closing tag

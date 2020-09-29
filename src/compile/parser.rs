@@ -569,6 +569,7 @@ impl<'s, 't> Parser<'s, 't> {
             | Syntax::Bool(..)
             | Syntax::Number
             | Syntax::Word
+            | Syntax::Fn
             | Syntax::LCaret
             | Syntax::LParen
             | Syntax::LStaple

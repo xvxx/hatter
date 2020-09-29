@@ -293,7 +293,7 @@ impl<'s, 't> Parser<'s, 't> {
                         self.expect(Syntax::RStaple)?;
                         continue;
                     }
-                    _ => unimplemented!(),
+                    _ => unimplemented!("op: {}", op),
                 }
             }
 
@@ -874,7 +874,7 @@ impl<'s, 't> Parser<'s, 't> {
         let p = self.peek()?;
         let res = match p.to_str() {
             "(" => 2,
-            "!" => 7,
+            // "!" => 7,
             "[" => 90,
             _ => return None,
         };

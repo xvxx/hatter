@@ -13,6 +13,18 @@ macro_rules! rc {
     };
 }
 
+macro_rules! cell {
+    ($ex:expr) => {
+        RefCell::new($ex)
+    };
+}
+
+macro_rules! rcell {
+    ($ex:expr) => {
+        rc!(cell!($ex))
+    };
+}
+
 #[macro_use]
 mod error;
 mod compile;

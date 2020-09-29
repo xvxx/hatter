@@ -108,7 +108,7 @@ fn help(_: Args) -> Result<Value> {
 
 fn vars(args: Args) -> Result<Value> {
     for scope in args.env.scopes() {
-        for (k, v) in scope {
+        for (k, v) in scope.borrow().iter() {
             if matches!(v, Value::Fn(..)) {
                 continue;
             }
@@ -121,7 +121,7 @@ fn vars(args: Args) -> Result<Value> {
 fn fns(args: Args) -> Result<Value> {
     let mut out = vec![];
     for scope in args.env.scopes() {
-        for (name, v) in scope {
+        for (name, v) in scope.borrow().iter() {
             if matches!(v, Value::Fn(..)) {
                 out.push(Value::String(name.into()));
             }

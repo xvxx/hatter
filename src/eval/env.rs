@@ -27,7 +27,7 @@ pub enum Jump {
 }
 
 /// Name -> Val map
-pub type Scope = HashMap<String, Value>;
+pub type Scope = Rc<RefCell<HashMap<String, Value>>>;
 
 #[derive(Debug)]
 pub struct Env {
@@ -37,7 +37,7 @@ pub struct Env {
 
 impl Env {
     pub fn new() -> Env {
-        let mut scope = Scope::new();
+        let mut scope = HashMap::new();
         for (name, fun) in natives() {
             scope.insert(name, Value::Fn(FnType::Native(fun)));
         }
@@ -45,7 +45,7 @@ impl Env {
             scope.insert(name, Value::Fn(FnType::Special(fun)));
         }
         Env {
-            scopes: vec![scope],
+            scopes: vec![rcell!(scope)],
             out: String::new(),
         }
     }
@@ -67,7 +67,7 @@ impl Env {
 
     /// Add a new scope to the stack, which becomes active.
     pub fn push_scope(&mut self) {
-        self.scopes.push(Scope::new());
+        self.scopes.push(rcell!(HashMap::new()));
     }
 
     /// Kill the active scope.
@@ -93,42 +93,37 @@ impl Env {
     }
 
     /// Find a value, looking first in the most recently pushed scope.
-    pub fn lookup(&self, key: &str) -> Option<&Value> {
-        self.find_scope(key).and_then(|scope| scope.get(key))
+    pub fn lookup(&self, key: &str) -> Option<Ref<'_, Value>> {
+        self.find_scope(key)
+            .and_then(|scope| Some(Ref::map(scope.borrow(), |v| v.get(key).unwrap())))
     }
 
     /// Find the `Scope` in which a var exists, if there is one.
     fn find_scope(&self, key: &str) -> Option<&Scope> {
         for scope in self.scopes.iter().rev() {
-            if scope.contains_key(key) {
+            if scope.borrow().contains_key(key) {
                 return Some(scope);
             }
         }
         None
     }
 
-    /// Find the `Scope` in which a var exists, if there is one.
-    fn find_mut_scope(&mut self, key: &str) -> Option<&mut Scope> {
-        for (i, scope) in self.scopes.iter().enumerate().rev() {
-            if scope.contains_key(key) {
-                return self.scopes.get_mut(i);
-            }
-        }
-        None
-    }
-
     /// Set a value to the nearest scope.
-    pub fn set<V: Into<Value>>(&mut self, key: &str, val: V) {
-        self.mut_scope().insert(key.to_string(), val.into());
+    pub fn set<V: Into<Value>>(&self, key: &str, val: V) {
+        self.scope()
+            .borrow_mut()
+            .insert(key.to_string(), val.into());
     }
 
     /// Set a value in a parent scope, or create it in the nearest.
-    pub fn update<V: Into<Value>>(&mut self, key: &str, val: V) {
-        if let Some(scope) = self.find_mut_scope(key) {
-            scope.insert(key.to_string(), val.into());
+    pub fn update<V: Into<Value>>(&self, key: &str, val: V) {
+        if let Some(scope) = self.find_scope(key) {
+            scope
         } else {
-            self.mut_scope().insert(key.to_string(), val.into());
+            self.scope()
         }
+        .borrow_mut()
+        .insert(key.to_string(), val.into());
     }
 
     /// Print something. Includes trailing newline.
@@ -229,7 +224,7 @@ impl Env {
                                 .collect::<Result<Vec<_>>>()?;
                             f(Args::new(self, args))?
                         }
-                        FnType::Fn(params, body) => {
+                        FnType::Fn(params, body, scope) => {
                             if params.len() != args.len() {
                                 return error!(
                                     "expected {} args, got {}",
@@ -239,6 +234,7 @@ impl Env {
                             }
                             let params = params.clone();
                             let body = body.clone();
+                            self.scopes.push(scope);
                             self.push_scope();
                             for (i, a) in args.iter().enumerate() {
                                 if let Some(name) = params.get(i) {
@@ -247,6 +243,7 @@ impl Env {
                                 }
                             }
                             let out = self.block(&body);
+                            self.pop_scope();
                             self.pop_scope();
                             match out {
                                 Ok(v) => v,
@@ -285,7 +282,7 @@ impl Env {
                             _ => return Err(e),
                         },
                     }
-                    self.mut_scope().clear();
+                    self.scope().borrow_mut().clear();
                 }
                 self.pop_scope();
                 Value::None
@@ -309,7 +306,11 @@ impl Env {
                 }
                 Value::None
             }
-            Stmt::Fn(params, body) => Value::Fn(FnType::Fn(params.clone(), body.clone())),
+            Stmt::Fn(params, body) => Value::Fn(FnType::Fn(
+                params.clone(),
+                body.clone(),
+                self.scope().clone(),
+            )),
             Stmt::Args(..) => unimplemented!(),
         })
     }
@@ -435,7 +436,7 @@ impl Env {
                     _ => return Err(e),
                 },
             }
-            self.mut_scope().clear();
+            self.scope().borrow_mut().clear();
         }
         self.pop_scope();
         Ok(())

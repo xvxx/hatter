@@ -1,5 +1,5 @@
 use {
-    crate::{Args, Env, Result, Stmt},
+    crate::{Args, Env, Result, Scope, Stmt},
     std::{
         collections::{BTreeMap, HashMap},
         fmt,
@@ -24,7 +24,7 @@ pub type SpecialFn = dyn Fn(&mut Env, &[Stmt]) -> Result<Value>;
 
 #[derive(Clone)]
 pub enum FnType {
-    Fn(Vec<String>, Vec<Stmt>),
+    Fn(Vec<String>, Vec<Stmt>, Scope),
     Native(Rc<NativeFn>),
     Special(Rc<SpecialFn>),
 }

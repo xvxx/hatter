@@ -1,0 +1,17 @@
+<h1> My favorite song...
+
+i := 99
+s := "s"
+
+<#bottles>
+    while i > 0
+        if i == 1 do s = "" else do s = "s"
+        <p> "{i} bottle{s} of beer on the wall,"
+        <p> "{i} bottle{s} of beer!"
+        <p> Take one down, pass it around...
+        i -= 1
+        if i > 0
+            if i == 1 do s = "" else do s = "s"
+            <p> "{i} bottle{s} of beer on the wall!"
+
+    <p> No more bottles of beer on the wall!

@@ -28,38 +28,20 @@ zero-dependency Rust library in your (web/cli/?) application.
 Here are a few basic examples of what Hatter looks like:
 
 ```html
-<!-- Hatter -->
-<#main> Hi there!
+<#main> Hi there!                 <div id='main'>Hi there!</div>
 
-<!-- Output -->
-<div id='main'>Hi there!</div>
+<span.big.bold> Welcome!          <span class='big bold'>Welcome!</span>
 
-<!-- Hatter -->
-<span.big.bold> Welcome!
+<.links> for link in nav-links    <div class='links'>
+  <a href={link.href}> link.text    <a href='/link1'>First Link</a>
+                                    <a href='/link2'>2nd Link</a>
+                                    <a href='/link3'>Final Link</a>
+                                  </div>
 
-<!-- Output -->
-<span class='big bold'>Welcome!</span>
-
-<!-- Hatter -->
-<.links> for link in nav-links
-  <a href={link.href}> link.text
-
-<!-- Output -->
-<div class='links'>
-  <a href='/link1'>First Link</a>
-  <a href='/link2'>2nd Link</a>
-  <a href='/link3'>Final Link</a>
-</div>
-
-<!-- Hatter -->
-<form GET="/search">
-  <input@query:text placeholder="Search..." /> <input:submit/>
-  
-<!-- Output -->
-<form method='GET' action='/search'>
-  <input name='query' type='text' placeholder='Search...' />
-  <input type='submit' />
-</form>
+<form GET="/search">              <form method='GET' action='/search'>
+  <input@query:text                 <input name='query' type='text' placeholder='Search...' />
+    placeholder="Search..." />      <input type='submit' />
+  <input:submit/>                 </form>
 ```
 
 ## Features

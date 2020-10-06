@@ -150,100 +150,49 @@
             <#logo> Hatter
 
         <img#mad-hatter src="./img/rhetoric.png" align="right" width="350"/>
-        <blockquote>
-            <p> """ It is practically impossible to teach good programming to students
-            that have had a prior exposure to <em>Hatter</em>: as potential programmers
-            they are mentally mutilated beyond hope of regeneration. """
-            <p> "-– Edsger W. Dijkstra, certainly"
         """
-<p>Hatter is an HTML templating language that can be used server side to
-produce static HTML. Its syntax is a cheap knock-off of
-<a href="https://imba.io">Imba</a>, without any of the fancy JavaScript parts.</p>
-<p>It's like a less powerful, 90s-era PHP. But we're talking PHP/FI, none
-of that Easy-Bake Oven PHP3 stuff that you could use to build actual
-sites.</p>
+<blockquote>
+<p>It is practically impossible to teach good programming to students
+that have had a prior exposure to <em>Hatter</em>: as potential programmers
+they are mentally mutilated beyond hope of regeneration.</p>
+<p>-– Edsger W. Dijkstra (allegedly)</p>
+</blockquote>
+<p>Hatter is a small, whitespace sensitive templating language with HTML
+support built right in. Its HTML features and syntax are a cheap
+knock off of <a href="https://imba.io">Imba</a>, except Hatter produces raw, static HTML - no
+JavaScript in sight.</p>
+<p>Hatter can be used to generate static web sites or to render server
+side content in a good ol' fashioned web application. Maybe with
+<a href="http://github.com/xvxx/vial">Vial</a>?</p>
 <p>If you're feeling adventerous, or mad as a hatter, you can use the
 standalone binary to turn templates into HTML files, or include the
 zero-dependency Rust library in your (web/cli/?) application.</p>
-"""
-
-        <h2> Examples
-        <.code-cols>
-            <.code-col>
-                <pre.language-html.left>
-                    <code>
-                        "&lt;#main&gt; Hi there!"
-            <.code-col>
-                <pre.language-html.left>
-                    <code>
-                        "&lt;div id='main'&gt;Hi there!&lt;/div&gt;"
-        <.code-cols>
-            <.code-col>
-                <pre.language-html.left>
-                    <code>
-                        "&lt;span.big.bold&gt; Welcome!"
-            <.code-col>
-                <pre.language-html.left>
-                    <code>
-                        "&lt;span class='big bold'&gt;Welcome!&lt;/span&gt;"
-        <.code-cols>
-            <.code-col>
-                <pre.language-html.left>
-                    <code>
-                        "&lt;.links&gt; for link in nav-links"
-                        "  &lt;a href=link.href&gt; link.text"
-            <.code-col>
-                <pre.language-html.left>
-                    <code>
-                        "&lt;div class='links'&gt;"
-                        "  &lt;a href='/link1'&gt;First Link&lt;/a&gt;"
-                        "  &lt;a href='/link2'&gt;2nd Link&lt;/a&gt;"
-                        "  &lt;a href='/link3'&gt;Final Link&lt;/a&gt;"
-                        " &lt;/div&gt;"
-
-        """
+<hr />
 <h2>Hello Hatter</h2>
-<p>Here's what it looks like:</p>
-<pre><code class="language-html">&lt;nav .webview-app=webview?&gt;
-  &lt;a href=&quot;/signin&quot;&gt; sign in
-  &lt;a href=&quot;/signup&quot;&gt; sign up
-  &lt;ul&gt; for link in nav-links
-    &lt;li.small-link&gt; &lt;a href=link.href&gt; link.text
-  &lt;form GET=&quot;/search&quot;&gt;
-    &lt;input@query:text placeholder=&quot;Search...&quot; /&gt; &lt;input:submit/&gt;
+<p>Here are a few basic examples of what Hatter looks like:</p>
+<pre><code class="language-html">&lt;#main&gt; Hi there!                 &lt;div id='main'&gt;Hi there!&lt;/div&gt;
 
-&lt;#main.markdown-body&gt;
-  if logged-in?
-    &lt;h1&gt; Welcome back, &lt;span.username&gt; name &lt;/&gt;!
-  else
-    &lt;h1&gt; Nice to, uh, see you. &lt;span.aside&gt; Have we met..?
-</code></pre>
-<p>Which, if we're logged in as <code>The Mad Hatter</code> and <code>webview?</code> is
-<code>false</code>, will generate this:</p>
-<pre><code class="language-html">&lt;nav&gt;
-  &lt;a href='/signin'&gt; sign in &lt;/a&gt;
-  &lt;a href='/signup'&gt; sign up &lt;/a&gt;
-  &lt;ul&gt;
-    &lt;li class='small-link'&gt; &lt;a href='/hats'&gt; Hats &lt;/a&gt; &lt;/li&gt;
-    &lt;li class='small-link'&gt; &lt;a href='/cards'&gt; Cards &lt;/a&gt; &lt;/li&gt;
-    &lt;li class='small-link'&gt; &lt;a href='/tea'&gt; Tea &lt;/a&gt; &lt;/li&gt;
-  &lt;/ul&gt;
-  &lt;form method='GET' action='/search'&gt;
-    &lt;input name='query' type='text' placeholder='Search...' /&gt;
-    &lt;input type='submit' /&gt;
-  &lt;/form&gt;
-&lt;/nav&gt;
+&lt;span.big.bold&gt; Welcome!          &lt;span class='big bold'&gt;Welcome!&lt;/span&gt;
 
-&lt;div id='main' class='markdown-body'&gt;
-  &lt;h1&gt; Welcome back, &lt;span class='username'&gt; The Mad Hatter &lt;/span&gt; !
-&lt;/div&gt;
+&lt;.links&gt; for link in nav-links    &lt;div class='links'&gt;
+  &lt;a href={link.href}&gt; link.text    &lt;a href='/link1'&gt;First Link&lt;/a&gt;
+                                    &lt;a href='/link2'&gt;2nd Link&lt;/a&gt;
+                                    &lt;a href='/link3'&gt;Final Link&lt;/a&gt;
+                                  &lt;/div&gt;
+
+&lt;form GET=&quot;/search&quot;&gt;              &lt;form method='GET' action='/search'&gt;
+  &lt;input@query:text                 &lt;input name='query' type='text' placeholder='Search...' /&gt;
+    placeholder=&quot;Search...&quot; /&gt;      &lt;input type='submit' /&gt;
+  &lt;input:submit/&gt;                 &lt;/form&gt;
 </code></pre>
 <h2>Features</h2>
 <ul>
-<li><input disabled="" type="checkbox" checked=""/>
-Auto-closing HTML tags and code blocks based on indentation.</li>
-<li><input disabled="" type="checkbox" checked=""/>
-Shorthand for <code>id</code>, <code>class</code>, <code>type</code>, and <code>name</code> attributes:
+<li>Auto-closing HTML tags and code blocks based on indentation:
+<ul>
+<li><code>&lt;h1&gt; Welcome, &lt;i&gt; Rob</code> becomes <code>&lt;h1&gt; Welcome, &lt;i&gt; Rob &lt;/i&gt;&lt;/h1&gt;</code></li>
+</ul>
+</li>
+<li>Shorthand for <code>id</code>, <code>class</code>, <code>type</code>, and <code>name</code> attributes:
 <ul>
 <li><code>&lt;div#id&gt;</code></li>
 <li><code>&lt;div.class1.class2&gt;</code></li>
@@ -251,196 +200,112 @@ Shorthand for <code>id</code>, <code>class</code>, <code>type</code>, and <code>
 <li><code>&lt;input:text&gt;</code></li>
 </ul>
 </li>
-<li><input disabled="" type="checkbox"/>
-Basic types:
+<li>Dynamic values for regular attributes:
 <ul>
-<li><code>bool</code>, <code>float</code>, <code>string</code>, <code>list</code>, <code>map</code>, <code>fn()</code></li>
+<li><code>&lt;div page-num={page.id}&gt;</code></li>
 </ul>
 </li>
-<li><input disabled="" type="checkbox" checked=""/>
-for loops over <code>list</code> and <code>map</code>:
-<ul>
-<li><code>&lt;ul&gt; for page in pages do &lt;li id=page-{page.id}&gt; page.name</code></li>
-<li><code>for k, v in some-map do &lt;td&gt; k &lt;/&gt; &lt;td&gt; v</code></li>
-</ul>
-</li>
-<li><input disabled="" type="checkbox" checked=""/>
-if/else statements
-<ul>
-<li><code>if logged_in? do &lt;h2&gt; Welcome back!</code></li>
-</ul>
-</li>
-<li><input disabled="" type="checkbox" checked=""/>
-Error-checked assignmnent with <code>:=</code> and <code>=</code>:
-<ul>
-<li><code>name := 'Bob'</code>  will error if name <strong>is</strong> already set.</li>
-<li><code>name = 'Bob'</code>  will error if name <strong>isn't</strong> already set.</li>
-</ul>
-</li>
-<li><input disabled="" type="checkbox"/>
-Dynamic values for regular attributes:
-<ul>
-<li><code>&lt;div page-num=page.id&gt;</code></li>
-</ul>
-</li>
-<li><input disabled="" type="checkbox"/>
-Conditionally set attributes or enable shorthand:
+<li>Conditionally set attributes or enable shorthand:
 <ul>
 <li><code>&lt;div .logged-in=logged-in?&gt;</code></li>
 <li><code>&lt;div data-map=is-map?&gt;</code></li>
 </ul>
 </li>
-<li><input disabled="" type="checkbox"/>
-String interpolation:
+<li>String interpolation:
 <ul>
-<li><code>&lt;span.greeting&gt; &quot;Hey there {name}.&quot;</code></li>
+<li><code>&lt;span.greeting&gt; &quot;Hey there {name}. 2 + 2 is {2 + 2}&quot;</code></li>
 </ul>
 </li>
-<li><input disabled="" type="checkbox"/>
-Shorthand interpolation:
+<li>Shorthand interpolation:
 <ul>
 <li><code>&lt;span #page-{page.id} .is-{page.type}&gt; page.title</code></li>
 </ul>
 </li>
-<li><input disabled="" type="checkbox" checked=""/>
-Implicit divs:
+<li>Implicit divs:
 <ul>
 <li><code>&lt;#main&gt;</code> becomes <code>&lt;div id='main'&gt;</code></li>
 </ul>
 </li>
-<li><input disabled="" type="checkbox" checked=""/>
-Implicit closing tags:
+<li>Implicit closing tags:
 <ul>
 <li><code>&lt;i&gt;delicious&lt;/&gt;</code> becomes <code>&lt;i&gt;delicious&lt;/i&gt;</code></li>
 </ul>
 </li>
-<li><input disabled="" type="checkbox" checked=""/>
-Call functions defined in Rust:
+<li>Easy inline JavaScript:
+<ul>
+<li><code>&lt;li&gt; &lt;a onclick=(alert(&quot;Oink!&quot;))&gt; &quot;🐷&quot;</code></li>
+</ul>
+</li>
+<li>Basic types:
+<ul>
+<li><code>bool</code>, <code>int,</code> <code>float</code>, <code>string</code>, <code>list</code>, <code>map</code>, <code>fn()</code></li>
+</ul>
+</li>
+<li>Loop over <code>list</code> and <code>map</code>:
+<ul>
+<li><code>&lt;ul&gt; for page in pages do &lt;li id=page-{page.id}&gt; page.name</code></li>
+<li><code>for k, v in some-map do &lt;td&gt; k &lt;/&gt; &lt;td&gt; v</code></li>
+</ul>
+</li>
+<li>if/else statements
+<ul>
+<li><code>if logged_in? then &lt;h2&gt; Welcome back!</code></li>
+</ul>
+</li>
+<li>Error-checked assignment with <code>:=</code> and <code>=</code>:
+<ul>
+<li><code>name := 'Bob'</code>  will error if name <strong>is</strong> already set.</li>
+<li><code>name = 'Bob'</code>   will error if name <strong>isn't</strong> already set.</li>
+</ul>
+</li>
+<li>Call functions defined in Rust:
 <ul>
 <li><code>&lt;div.name&gt; to-uppercase(name)</code></li>
 </ul>
 </li>
-<li><input disabled="" type="checkbox" checked=""/>
-Easy inline JavaScript:
+<li>Define your own Hatter functions with strict arity and implicit
+return values:
 <ul>
-<li><code>&lt;li&gt; &lt;a onclick=(alert(&quot;Oink!&quot;))&gt; 🐷</code></li>
+<li><code>def greet(name) do print(&quot;Hey there, {name}!&quot;)</code></li>
+<li><code>greet(&quot;Lydia&quot;)</code> prints <code>Hey there, Lydia!</code></li>
 </ul>
 </li>
-<li><input disabled="" type="checkbox" checked=""/>
-Add your own operators:
+<li>Define your own Hatter operators:
 <ul>
-<li><code>op! ++ append</code></li>
+<li><code>def !!(a, b) do concat(to-uppercase(a), ' ', to-uppercase(b))</code></li>
+<li><code>&quot;one&quot; !! &quot;two&quot;</code> returns <code>ONE TWO</code></li>
 </ul>
 </li>
-<li><input disabled="" type="checkbox" checked=""/>
-Hatter will add a <code>&lt;!DOCTYPE&gt;</code> and wrap everything in <code>&lt;html&gt;</code> if
+<li>Closures and function literals:
+<ul>
+<li><code>adder := fn(x) fn(y) x + y</code> then <code>add1 := adder(1)</code></li>
+<li><code>add1(200)</code> returns <code>201</code></li>
+</ul>
+</li>
+<li><code>do</code> keyword for one-line blocks:
+<ul>
+<li><code>if 2 &gt; 1 \n\tprint(&quot;Obviously&quot;)</code> OR <code>if 2 &gt; 1 do print(&quot;Obviously&quot;)</code></li>
+<li><code>for x in list\n\tprint(x)</code> OR <code>for x in list do print(x)</code></li>
+</ul>
+</li>
+<li>Hatter will add a <code>&lt;!DOCTYPE&gt;</code> and wrap everything in <code>&lt;html&gt;</code> if
 the first tag in your template is <code>&lt;head&gt;</code>.</li>
 </ul>
 <h2>Future Features</h2>
 <ul>
-<li>Define your own functions with <code>def name(x Type, b Type)</code>.</li>
-<li>Define your own tags with <code>def &lt;tag arg=Type&gt;</code>.</li>
-<li>Arity checking for functions.</li>
-<li>Type checking for functions.</li>
+<li>Define your own tags:
+<ul>
+<li><code>def &lt;item(item)&gt; do &lt;li.item data-id={item.id}&gt; item.text</code>.</li>
+</ul>
+</li>
+<li>Optional type checking for functions</li>
 </ul>
 <h2>TODO</h2>
 <ul>
 <li><input disabled="" type="checkbox"/>
-<code>do</code> syntax</li>
-<li><input disabled="" type="checkbox"/>
-error when mixing tabs and spaces</li>
-<li><input disabled="" type="checkbox"/>
-<code>if (1 + 15) &gt; 3</code></li>
-<li><input disabled="" type="checkbox"/>
-<!DOCTYPE html>
-</li>
-<li><input disabled="" type="checkbox"/>
-<!-- html comments -->
-</li>
-<li><input disabled="" type="checkbox"/>
-Basic types
-<ul>
-<li><input disabled="" type="checkbox"/>
-list
-<ul>
-<li><input disabled="" type="checkbox"/>
-literal syntax -&gt; bytecode</li>
-</ul>
-</li>
-<li><input disabled="" type="checkbox"/>
-map
-<ul>
-<li><input disabled="" type="checkbox"/>
-literal syntax -&gt; bytecode</li>
-</ul>
-</li>
-<li><input disabled="" type="checkbox"/>
-fn()
-<ul>
-<li><input disabled="" type="checkbox"/>
-literal syntax -&gt; bytecode</li>
-</ul>
-</li>
-<li><input disabled="" type="checkbox"/>
-<tag>
-- [ ] literal syntax -> bytecode
-</li>
-</ul>
-</li>
-<li><input disabled="" type="checkbox"/>
-Dynamic values for regular attributes
-<ul>
-<li><input disabled="" type="checkbox"/>
-attribute=expr</li>
-</ul>
-</li>
-<li><input disabled="" type="checkbox"/>
-Conditionally set attributes or enable shorthand
-<ul>
-<li><input disabled="" type="checkbox"/>
-.class=bool?</li>
-<li><input disabled="" type="checkbox"/>
-#id=bool?</li>
-<li><input disabled="" type="checkbox"/>
-data-id=bool?</li>
-</ul>
-</li>
-<li><input disabled="" type="checkbox"/>
-String interpolation
-<ul>
-<li><input disabled="" type="checkbox"/>
-&quot;hey {friend}&quot;</li>
-<li><input disabled="" type="checkbox"/>
-not for ` or '</li>
-</ul>
-</li>
-<li><input disabled="" type="checkbox"/>
-Shorthand interpolation
-<ul>
-<li><input disabled="" type="checkbox"/>
-.{expr}</li>
-<li><input disabled="" type="checkbox"/>
-.something-{expr}-else</li>
-<li><input disabled="" type="checkbox"/>
-#{expr}</li>
-<li><input disabled="" type="checkbox"/>
-@{expr}</li>
-</ul>
-</li>
-<li><input disabled="" type="checkbox"/>
-:= error checking</li>
-<li><input disabled="" type="checkbox"/>
-= error checking</li>
-<li><input disabled="" type="checkbox"/>
 HTMLized error page</li>
 <li><input disabled="" type="checkbox"/>
-def <tag attr=Type></li>
-<li><input disabled="" type="checkbox"/>
-def fn(arg Type, arg Type) Type</li>
-<li><input disabled="" type="checkbox"/>
-rewrite lexer based on https://github.com/nathanwhit/minimal-yaml</li>
-<li><input disabled="" type="checkbox"/>
-show error location when compiling</li>
+show error location in source text on runtime errors</li>
 </ul>
 <h3>docs</h3>
 <ul>
@@ -451,11 +316,7 @@ layout</li>
 <li><input disabled="" type="checkbox"/>
 generator</li>
 <li><input disabled="" type="checkbox"/>
-outline</li>
-<li><input disabled="" type="checkbox"/>
 content</li>
-<li><input disabled="" type="checkbox"/>
-docs for stdlib</li>
 </ul>
 <h3>project</h3>
 <ul>
@@ -470,5 +331,9 @@ VSCode + luacheck-style LSP</li>
 <li><input disabled="" type="checkbox"/>
 luacheck-style tool</li>
 </ul>
+<h2>License</h2>
+<p>Hatter is licensed under the MIT License. Please see
+<a href="COPYING">COPYING</a> or http://opensource.org/licenses/MIT for details.</p>
+<p><a href="https://imba.io">Imba</a> is licensed under the MIT License.</p>
 
 """

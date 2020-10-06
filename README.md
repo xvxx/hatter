@@ -25,62 +25,41 @@ zero-dependency Rust library in your (web/cli/?) application.
 
 ## Hello Hatter
 
-Here's what it looks like:
+Here are a few basic examples of what Hatter looks like:
 
 ```html
-<ul#list>
-  for i, person in people
-    <li.person.first={i == 0}> person
-```
+<!-- Hatter -->
+<#main> Hi there!
 
-Which turns into:
+<!-- Output -->
+<div id='main'>Hi there!</div>
 
-```html
-<ul id='list'>
-  <li class='person first'>John</li>
-  <li class='person'>Paul</li>
-  <li class='person'>George</li>
-  <li class='person'>Ringo</li>
-</ul>
-```
+<!-- Hatter -->
+<span.big.bold> Welcome!
 
-A beefier example:
+<!-- Output -->
+<span class='big bold'>Welcome!</span>
 
-```html
-<nav .webview-app=webview?>
-  if not logged-in?
-    <a href="/signin"> sign in </> | <a href="/signup"> sign up
-  <ul> for link in nav-links
-    <li.small-link> <a href={link.href}> link.text
-  <form GET="/search">
-    <input@query:text placeholder="Search..." /> <input:submit/>
+<!-- Hatter -->
+<.links> for link in nav-links
+  <a href={link.href}> link.text
 
-<#main.markdown-body>
-  if logged-in?
-    <h1> "Welcome back, {<span.username> name}!"
-  else
-    <h1> Nice to, uh, see you. <span.aside> Have we met..?
-```
-
-Which, if we're logged in as `The Mad Hatter` and `webview?` is
-`true`, will turn into:
-
-```html
-<nav class='webview-app'>
-  <ul>
-    <li class='small-link'> <a href='/hats'> Hats </a> </li>
-    <li class='small-link'> <a href='/cards'> Cards </a> </li>
-    <li class='small-link'> <a href='/tea'> Tea </a> </li>
-  </ul>
-  <form method='GET' action='/search'>
-    <input name='query' type='text' placeholder='Search...' />
-    <input type='submit' />
-  </form>
-</nav>
-
-<div id='main' class='markdown-body'>
-  <h1> Welcome back, <span class='username'> The Mad Hatter </span> !
+<!-- Output -->
+<div class='links'>
+  <a href='/link1'>First Link</a>
+  <a href='/link2'>2nd Link</a>
+  <a href='/link3'>Final Link</a>
 </div>
+
+<!-- Hatter -->
+<form GET="/search">
+  <input@query:text placeholder="Search..." /> <input:submit/>
+  
+<!-- Output -->
+<form method='GET' action='/search'>
+  <input name='query' type='text' placeholder='Search...' />
+  <input type='submit' />
+</form>
 ```
 
 ## Features
@@ -140,6 +119,7 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
 - Define your own tags:
   - `def <item(item)> do <li.item data-id={item.id}> item.text`.
 - Optional type checking for functions
+
 
 ## TODO
 

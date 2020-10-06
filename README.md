@@ -14,8 +14,7 @@ knock off of [Imba], except Hatter produces raw, static HTML - no
 JavaScript in sight.
 
 Hatter can be used to generate static web sites or to render server
-side content in a good ol' fashioned web application. Maybe with
-[Vial]?
+side content in a good ol' fashioned web application. Maybe [Vial]?
 
 If you're feeling adventerous, or mad as a hatter, you can use the
 standalone binary to turn templates into HTML files, or include the
@@ -28,20 +27,43 @@ zero-dependency Rust library in your (web/cli/?) application.
 Here are a few basic examples of what Hatter looks like:
 
 ```html
-<#main> Hi there!                 <div id='main'>Hi there!</div>
+<!-- Hatter -->
+<#main> Hi there!
 
-<span.big.bold> Welcome!          <span class='big bold'>Welcome!</span>
+<!-- Generated HTML -->
+<div id="main">Hi there!</div>
+```
 
-<.links> for link in nav-links    <div class='links'>
-  <a href={link.href}> link.text    <a href='/link1'>First Link</a>
-                                    <a href='/link2'>2nd Link</a>
-                                    <a href='/link3'>Final Link</a>
-                                  </div>
+```html
+<span.big.bold>
+  Welcome!
 
-<form GET="/search">              <form method='GET' action='/search'>
-  <input@query:text                 <input name='query' type='text' placeholder='Search...' />
-    placeholder="Search..." />      <input type='submit' />
-  <input:submit/>                 </form>
+  <span class="big bold">Welcome!</span></span.big.bold
+>
+```
+
+```html
+<.links> for link in nav-links
+<a href="{link.href}">
+  link.text
+
+  <div class="links">
+    <a href="/link1">First Link</a>
+    <a href="/link2">2nd Link</a>
+    <a href="/link3">Final Link</a>
+  </div></a
+>
+```
+
+```html
+<form GET="/search">
+  <input@query:text placeholder="Search..." /> <input:submit />
+
+  <form method="GET" action="/search">
+    <input name="query" type="text" placeholder="Search..." />
+    <input type="submit" />
+  </form>
+</form>
 ```
 
 ## Features
@@ -69,15 +91,15 @@ Here are a few basic examples of what Hatter looks like:
 - Easy inline JavaScript:
   - `<li> <a onclick=(alert("Oink!"))> "🐷"`
 - Basic types:
-  - `bool`, `int,` `float`, `string`, `list`, `map`, `fn()`
+  - `bool, int, float, string, list, map, fn`
 - Loop over `list` and `map`:
   - `<ul> for page in pages do <li id=page-{page.id}> page.name`
   - `for k, v in some-map do <td> k </> <td> v`
 - if/else statements
   - `if logged_in? then <h2> Welcome back!`
 - Error-checked assignment with `:=` and `=`:
-  - `name := 'Bob'`  will error if name **is** already set.
-  - `name = 'Bob'`   will error if name **isn't** already set.
+  - `name := 'Bob'` will error if name **is** already set.
+  - `name = 'Bob'` will error if name **isn't** already set.
 - Call functions defined in Rust:
   - `<div.name> to-uppercase(name)`
 - Define your own Hatter functions with strict arity and implicit
@@ -91,8 +113,8 @@ Here are a few basic examples of what Hatter looks like:
   - `adder := fn(x) fn(y) x + y` then `add1 := adder(1)`
   - `add1(200)` returns `201`
 - `do` keyword for one-line blocks:
-  - `if 2 > 1 \n\tprint("Obviously")` OR `if 2 > 1 do print("Obviously")`
-  - `for x in list\n\tprint(x)` OR `for x in list do print(x)`
+  - `if 2 > 1 do print("Obviously")`
+  - `for x in list do print(x)`
 - Hatter will add a `<!DOCTYPE>` and wrap everything in `<html>` if
   the first tag in your template is `<head>`.
 
@@ -102,6 +124,86 @@ Here are a few basic examples of what Hatter looks like:
   - `def <item(item)> do <li.item data-id={item.id}> item.text`.
 - Optional type checking for functions
 
+## Getting Started
+
+There are two ways to use Hatter:
+
+### 1. As a Standalone Executable
+
+Hatter can be used as a regular command line program to turn `.hat`
+files into HTML.
+
+Just install it using `cargo`:
+
+    cargo install hatter
+
+Then point it at any `.hat` file:
+
+```bash
+$ cat test.hat
+<b.test> "Testing 1 2 3 {2 + 2}"
+
+$ hatter test.hat
+<b class='test'>Testing 1 2 3 4</b>
+```
+
+You can also install Hatter with a REPL:
+
+    cargo install hatter --features repl
+
+To launch it, start `hatter` with no arguments:
+
+```bash
+$ hatter
+Hatter v0.0.1 REPL
+>> 1 + 2
+3
+```
+
+### 2. Inside a Rust Application
+
+Hatter can also be used as a templating language from within your Rust
+programs.
+
+Just add Hatter to `Cargo.toml`:
+
+```toml
+[dependencies]
+hatter = "0.1"
+```
+
+Then create an `Env`, which represents the top-level Hatter scope for
+your template:
+
+```rust
+use hatter::{Args, Env, Value};
+
+let mut env = Env::new();
+env.set("name", "Bobby Boucher");
+env.set("age", 31);
+env.render(r#"
+<p> <b>Name:</> name
+<p> <b>Age:</> age
+"#)
+```
+
+You can also write functions in Rust and make them available to your
+HTML templates:
+
+```rust
+fn quote(_: Args) -> hatter::Result<Value> {
+  let file = std::fs::read_to_string("quotes.txt")?;
+  let list_of_quotes: Vec<_> = file.split('\n').collect();
+
+  Value::from(list_of_quotes.random()).ok()
+}
+
+let mut env = Env::new();
+env.set("quote", quote);
+env.render("<div> quote()").unwrap()
+```
+
+For more infomation see the [API Documentation][api-docs].
 
 ## TODO
 
@@ -126,9 +228,10 @@ Here are a few basic examples of what Hatter looks like:
 ## License
 
 Hatter is licensed under the MIT License. Please see
-[COPYING](COPYING) or http://opensource.org/licenses/MIT for details.
+[COPYING](COPYING) or <http://opensource.org/licenses/MIT> for details.
 
-[Imba] is licensed under the MIT License.
+[Imba] is licensed under the [MIT License](https://github.com/imba/imba/blob/master/LICENSE).
 
 [imba]: https://imba.io
 [vial]: http://github.com/xvxx/vial
+[api-docs]: https://docs.rs/hatter/

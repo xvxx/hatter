@@ -81,7 +81,7 @@ fn main() -> io::Result<()> {
     )
 }
 
-fn print_usage() -> Result<(), io::Error> {
+fn print_usage() -> io::Result<()> {
     print!(
         r#"Usage: hatter [COMMAND] <file.hat>
 
@@ -126,7 +126,7 @@ fn print_error<P: AsRef<std::path::Path>, S: AsRef<str>>(path: P, source: S, err
 }
 
 /// --version
-fn print_version() -> Result<(), io::Error> {
+fn print_version() -> io::Result<()> {
     println!("hatter v{}", env!("CARGO_PKG_VERSION"));
     Ok(())
 }

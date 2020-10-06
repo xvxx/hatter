@@ -11,6 +11,9 @@ fn main() -> io::Result<()> {
     let args = env::args().skip(1).collect::<Vec<_>>();
 
     if args.is_empty() {
+        #[cfg(feature = "repl")]
+        return hatter::repl::run();
+        #[cfg(not(feature = "repl"))]
         return print_usage();
     }
 
@@ -82,6 +85,9 @@ fn main() -> io::Result<()> {
 }
 
 fn print_usage() -> io::Result<()> {
+    let repl = "";
+    #[cfg(feature = "repl")]
+    let repl = "  repl        Start REPL. (default without args)\n";
     print!(
         r#"Usage: hatter [COMMAND] <file.hat>
 
@@ -89,7 +95,8 @@ Commands:
   scan        Print tokens.
   parse       Print AST.
   print       Print HTML. (default)
-"#
+{}"#,
+        repl
     );
     Ok(())
 }

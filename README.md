@@ -35,34 +35,29 @@ Here are a few basic examples of what Hatter looks like:
 ```
 
 ```html
-<span.big.bold>
-  Welcome!
+<span.big.bold> Welcome!
 
-  <span class="big bold">Welcome!</span></span.big.bold
->
+<span class="big bold">Welcome!</span>
 ```
 
 ```html
 <.links> for link in nav-links
-<a href="{link.href}">
-  link.text
+  <a href="{link.href}"> link.text
 
-  <div class="links">
-    <a href="/link1">First Link</a>
-    <a href="/link2">2nd Link</a>
-    <a href="/link3">Final Link</a>
-  </div></a
->
+<div class="links">
+  <a href="/link1">First Link</a>
+  <a href="/link2">2nd Link</a>
+  <a href="/link3">Final Link</a>
+</div>
 ```
 
 ```html
 <form GET="/search">
   <input@query:text placeholder="Search..." /> <input:submit />
 
-  <form method="GET" action="/search">
-    <input name="query" type="text" placeholder="Search..." />
-    <input type="submit" />
-  </form>
+<form method="GET" action="/search">
+  <input name="query" type="text" placeholder="Search..." />
+  <input type="submit" />
 </form>
 ```
 

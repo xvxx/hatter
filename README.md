@@ -8,13 +8,14 @@
 >
 > -– Edsger W. Dijkstra (allegedly)
 
-Hatter is a small, whitespace sensitive scripting language with
-HTML templating built in. Its HTML features and syntax are a cheap
+Hatter is a small, whitespace sensitive templating language with HTML
+support built right in. Its HTML features and syntax are a cheap
 knock off of [Imba], except Hatter produces raw, static HTML - no
 JavaScript in sight.
 
 Hatter can be used to generate static web sites or to render server
-side content in a good ol' fashioned web application.
+side content in a good ol' fashioned web application. Maybe with
+[Vial]?
 
 If you're feeling adventerous, or mad as a hatter, you can use the
 standalone binary to turn templates into HTML files, or include the
@@ -43,7 +44,7 @@ Which turns into:
 </ul>
 ```
 
-Or, a beefier example:
+A beefier example:
 
 ```html
 <nav .webview-app=webview?>
@@ -143,9 +144,7 @@ Which, if we're logged in as `The Mad Hatter` and `webview?` is
 ## TODO
 
 - [ ] HTMLized error page
-- [ ] def <tag attr=Type>
-- [ ] show error location when compiling
-- [ ] repl: tab completion
+- [ ] show error location in source text on runtime errors
 
 ### docs
 
@@ -170,3 +169,4 @@ Hatter is licensed under the MIT License. Please see
 [Imba] is licensed under the MIT License.
 
 [imba]: https://imba.io
+[vial]: http://github.com/xvxx/vial

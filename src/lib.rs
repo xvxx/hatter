@@ -29,6 +29,7 @@ macro_rules! rcell {
 mod error;
 mod compile;
 mod eval;
+pub mod prelude;
 mod template;
 
 #[cfg(feature = "repl")]

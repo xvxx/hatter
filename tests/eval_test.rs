@@ -236,6 +236,17 @@ test()
 }
 
 #[test]
+fn test_call_with_keywords() {
+    assert_render!(
+        r#"
+def greet(title, name) do print("Hiya, {title}. {name}!")
+greet(name: 'Bob', title: 'Dr')
+"#,
+        "Hiya, Dr. Bob!\n"
+    );
+}
+
+#[test]
 fn test_return() {
     assert_eval!(
         r#"

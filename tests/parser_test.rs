@@ -698,7 +698,7 @@ parse_test!(
 );
 
 parse_test!(
-    call_with_named_args,
+    call_with_keyword_args,
     "greet(name: 'Bob', title: 'Dr')",
     call!(
         "greet",

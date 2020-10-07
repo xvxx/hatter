@@ -232,6 +232,27 @@ impl Env {
                             f(Args::new(self, args))?
                         }
                         FnType::Fn(params, body, scope) => {
+                            let mut kw_args = None;
+                            if args.len() == 1 {
+                                if let Stmt::Args(inner) = &args[0] {
+                                    let mut args = vec![];
+                                    for (i, name) in params.iter().enumerate() {
+                                        if let Some(pair) = inner.iter().find(|(kw, _)| kw == name)
+                                        {
+                                            args.push((i, pair.1.clone()));
+                                        }
+                                    }
+                                    kw_args = Some(args);
+                                }
+                            }
+                            let kw_args = if let Some(mut inner) = kw_args {
+                                inner.sort_by(|a, b| a.0.cmp(&b.0));
+                                inner.into_iter().map(|p| p.1).collect::<Vec<_>>()
+                            } else {
+                                vec![]
+                            };
+                            let args = if !kw_args.is_empty() { &kw_args } else { args };
+
                             if params.len() != args.len() {
                                 return error!(
                                     "expected {} args, got {}",

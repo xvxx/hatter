@@ -331,16 +331,6 @@ where
     }
 }
 
-impl From<Vec<(String, Stmt)>> for Value {
-    fn from(pairs: Vec<(String, Stmt)>) -> Value {
-        let mut map: BTreeMap<String, Value> = BTreeMap::new();
-        for (k, v) in pairs {
-            map.insert(k, Value::from(v));
-        }
-        map.into()
-    }
-}
-
 impl From<Stmt> for Value {
     fn from(s: Stmt) -> Value {
         match s {
@@ -360,5 +350,99 @@ where
 {
     fn from(f: F) -> Value {
         Value::Fn(FnType::Native(rc!(f)))
+    }
+}
+
+impl<V> From<(V,)> for Value
+where
+    V: Into<Value>,
+{
+    fn from(f: (V,)) -> Value {
+        Value::List(vec![f.0.into()])
+    }
+}
+
+impl<V1, V2> From<(V1, V2)> for Value
+where
+    V1: Into<Value>,
+    V2: Into<Value>,
+{
+    fn from(f: (V1, V2)) -> Value {
+        Value::List(vec![
+            f.0.into(),
+            f.1.into(),
+        ])
+    }
+}
+
+impl<V1, V2, V3> From<(V1, V2, V3)> for Value
+where
+    V1: Into<Value>,
+    V2: Into<Value>,
+    V3: Into<Value>,
+{
+    fn from(f: (V1, V2, V3)) -> Value {
+        Value::List(vec![
+            f.0.into(),
+            f.1.into(),
+            f.2.into(),
+        ])
+    }
+}
+
+impl<V1, V2, V3, V4> From<(V1, V2, V3, V4)> for Value
+where
+    V1: Into<Value>,
+    V2: Into<Value>,
+    V3: Into<Value>,
+    V4: Into<Value>,
+{
+    fn from(f: (V1, V2, V3, V4)) -> Value {
+        Value::List(vec![
+            f.0.into(),
+            f.1.into(),
+            f.2.into(),
+            f.3.into(),
+        ])
+    }
+}
+
+impl<V1, V2, V3, V4, V5> From<(V1, V2, V3, V4, V5)> for Value
+where
+    V1: Into<Value>,
+    V2: Into<Value>,
+    V3: Into<Value>,
+    V4: Into<Value>,
+    V5: Into<Value>,
+{
+    fn from(f: (V1, V2, V3, V4, V5)) -> Value {
+        Value::List(vec![
+            f.0.into(),
+            f.1.into(),
+            f.2.into(),
+            f.3.into(),
+            f.4.into(),
+        ])
+    }
+}
+
+impl<V1, V2, V3, V4, V5, V6> From<(V1, V2, V3, V4, V5, V6)> for Value
+where
+    V1: Into<Value>,
+    V2: Into<Value>,
+    V3: Into<Value>,
+    V4: Into<Value>,
+    V5: Into<Value>,
+    V6: Into<Value>,
+{
+    fn from(f: (V1, V2, V3, V4, V5, V6)) -> Value {
+        Value::List(vec![
+            f.0.into(),
+            f.1.into(),
+            f.2.into(),
+            f.3.into(),
+            f.4.into(),
+            f.5.into(),
+        ])
     }
 }

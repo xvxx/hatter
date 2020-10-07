@@ -85,6 +85,7 @@ fn main() -> io::Result<()> {
 }
 
 fn print_usage() -> io::Result<()> {
+    #[cfg(not(feature = "repl"))]
     let repl = "";
     #[cfg(feature = "repl")]
     let repl = "  repl        Start REPL. (default without args)\n";

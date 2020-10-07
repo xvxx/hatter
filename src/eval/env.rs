@@ -9,9 +9,9 @@ use {
 };
 
 /// Eval a list of Stmts and return the last's Value.
-pub fn eval(stmts: &[Stmt]) -> Result<Value> {
+pub fn eval(src: &str) -> Result<Value> {
     let mut env = Env::new();
-    env.block(stmts)
+    env.eval_src(src)
 }
 
 /// Render source to a String.
@@ -179,6 +179,11 @@ impl Env {
             }
         }
         Ok(out)
+    }
+
+    /// Evaluate source code, returning its Value.
+    pub fn eval_src(&mut self, src: &str) -> Result<Value> {
+        compile(src).and_then(|c| self.block(&c))
     }
 
     /// Evaluate one statement, returning its Value.

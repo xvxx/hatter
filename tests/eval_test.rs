@@ -4,7 +4,7 @@ use hatter::{compile, eval, render, Value};
 
 macro_rules! eval {
     ($code:expr) => {
-        compile(&$code).and_then(|ast| eval(&ast)).unwrap()
+        eval(&$code).unwrap()
     };
 }
 
@@ -56,7 +56,7 @@ macro_rules! map {
 
 macro_rules! assert_error {
     ($code:expr) => {
-        match compile(&$code).and_then(|ast| eval(&ast)) {
+        match eval(&$code) {
             Ok(v) => assert!(false, "Expected Error, got {:?}", v),
             Err(..) => assert!(true),
         }

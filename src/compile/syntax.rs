@@ -28,6 +28,7 @@ pub enum Syntax {
     Do,
     Return,
     If,
+    Then,
     Else,
     For,
     While,

@@ -643,17 +643,36 @@ impl<'s, 't> Parser<'s, 't> {
         self.expect(Syntax::If)?;
         let mut conds = vec![];
         let test = self.expr()?;
-        let body = self.block()?;
+        let body = if self.peek_is(Syntax::Then) {
+            self.skip();
+            vec![self.expr()?]
+        } else {
+            self.block()?
+        };
         conds.push((test, body));
         while self.peek_is(Syntax::Else) {
             self.skip(); // skip else
-            let test = if self.peek_is(Syntax::If) {
+            let (test, body) = if self.peek_is(Syntax::If) {
                 self.skip();
-                self.expr()?
+                (
+                    self.expr()?,
+                    if self.peek_is(Syntax::Then) {
+                        self.skip();
+                        vec![self.expr()?]
+                    } else {
+                        self.block()?
+                    },
+                )
             } else {
-                Stmt::Bool(true)
+                (
+                    Stmt::Bool(true),
+                    if self.peek_is(Syntax::Indent) || self.peek_is(Syntax::Do) {
+                        self.block()?
+                    } else {
+                        vec![self.expr()?]
+                    },
+                )
             };
-            let body = self.block()?;
             conds.push((test, body));
             continue;
         }

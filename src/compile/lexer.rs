@@ -453,6 +453,7 @@ impl<'s> Lexer<'s> {
             "do" => Syntax::Do,
             "return" => Syntax::Return,
             "if" => Syntax::If,
+            "then" => Syntax::Then,
             "else" => Syntax::Else,
             "for" => Syntax::For,
             "while" => Syntax::While,

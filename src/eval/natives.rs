@@ -227,6 +227,7 @@ pub fn natives() -> HashMap<String, Rc<NativeFn>> {
     native!("==" => eq);
     native!("!=" => neq);
     native!("not" => not);
+    native!("!" => not);
     native!("concat" => concat);
     native!("index" => index);
     native!("<<" => push);

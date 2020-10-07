@@ -147,6 +147,13 @@ impl<'s> Lexer<'s> {
                 ';' => Syntax::Semi,
                 ',' => Syntax::Comma,
                 '"' | '\'' | '`' => self.scan_string(c)?,
+                '!' => {
+                    if self.peek_is('!') {
+                        Syntax::Op
+                    } else {
+                        self.scan_op()?
+                    }
+                }
 
                 ':' => {
                     if self.peek_is('=') || self.in_tag() {

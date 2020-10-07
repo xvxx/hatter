@@ -152,9 +152,6 @@ if true
 
 #[test]
 fn test_and_n_or() {
-    // assert_eval!("not true", boo!(false));
-    // assert_eval!("not false", boo!(true));
-    // assert_eval!("not not true", boo!(true));
     assert_eval!("true && true", boo!(true));
     assert_eval!("true && false", boo!(false));
     assert_eval!("false && true", boo!(false));
@@ -163,6 +160,9 @@ fn test_and_n_or() {
     assert_eval!("true || false", boo!(true));
     assert_eval!("false || true", boo!(true));
     assert_eval!("false || false", boo!(false));
+    assert_eval!("!true", boo!(false));
+    assert_eval!("!false", boo!(true));
+    assert_eval!("!!true", boo!(true));
 
     assert_render!(
         r#"

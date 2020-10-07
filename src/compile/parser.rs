@@ -270,6 +270,14 @@ impl<'s, 't> Parser<'s, 't> {
     /// Thanks matklad!
     /// https://matklad.github.io/2020/04/13/simple-but-powerful-pratt-parsing.html
     fn op_expr(&mut self, min_power: u8) -> Result<Stmt> {
+        // check for unary
+        if self.peek_is(Syntax::Op) {
+            return Ok(Stmt::Call(
+                bx!(Stmt::Word(self.next().to_string())),
+                vec![self.op_expr(min_power)?],
+            ));
+        }
+
         let mut left = self.atom()?;
 
         while self
@@ -434,15 +442,7 @@ impl<'s, 't> Parser<'s, 't> {
                     break;
                 }
                 Syntax::Comma | Syntax::Semi => self.skip(),
-                Syntax::LParen
-                | Syntax::LCurly
-                | Syntax::LStaple
-                | Syntax::Bool(..)
-                | Syntax::Number
-                | Syntax::String(..)
-                | Syntax::Word => {
-                    args.push(self.expr()?);
-                }
+                k if k.starts_expr() => args.push(self.expr()?),
                 _ => return self.error(")"),
             }
         }
@@ -466,13 +466,7 @@ impl<'s, 't> Parser<'s, 't> {
                     self.expect(Syntax::Colon)?;
                     is_kw = false;
                 }
-                Syntax::LParen
-                | Syntax::LCurly
-                | Syntax::LStaple
-                | Syntax::Bool(..)
-                | Syntax::Number
-                | Syntax::String(..)
-                | Syntax::Word => {
+                k if k.starts_expr() => {
                     args.push((std::mem::replace(&mut keyword, String::new()), self.expr()?));
                     is_kw = true;
                 }
@@ -564,17 +558,6 @@ impl<'s, 't> Parser<'s, 't> {
     /// Parse a single statement.
     fn stmt(&mut self) -> Result<Stmt> {
         match self.peek_kind() {
-            // Literal
-            Syntax::String(..)
-            | Syntax::Bool(..)
-            | Syntax::Number
-            | Syntax::Word
-            | Syntax::Fn
-            | Syntax::LCaret
-            | Syntax::LParen
-            | Syntax::LStaple
-            | Syntax::LCurly => self.expr(),
-
             // Keyword
             Syntax::Def => self.def_stmt(),
             Syntax::If => self.if_stmt(),
@@ -592,6 +575,9 @@ impl<'s, 't> Parser<'s, 't> {
                 };
                 Ok(ret)
             }
+
+            // Literal
+            k if k.starts_expr() => self.expr(),
 
             // Unexpected
             _ => self.error("Stmt"),

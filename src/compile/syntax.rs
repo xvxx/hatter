@@ -35,6 +35,17 @@ pub enum Syntax {
     Fn,
 }
 
+impl Syntax {
+    /// Does this syntax start an expression?
+    #[rustfmt::skip]
+    pub fn starts_expr(&self) -> bool {
+        matches!(self,
+            Syntax::String(..) | Syntax::Bool(..) | Syntax::Number | Syntax::Word | Syntax::Fn |
+            Syntax::Op | Syntax::LCaret | Syntax::LParen | Syntax::LStaple | Syntax::LCurly
+        )
+    }
+}
+
 pub trait SyntaxTrait {
     fn is_word_char(&self) -> bool;
     fn is_tag_opener(&self) -> bool;

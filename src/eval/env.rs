@@ -1,5 +1,5 @@
 use {
-    crate::{compile, natives, specials, Args, ErrorKind, FnType, Result, Stmt, Tag, Value},
+    crate::{compile, natives, specials, value, Args, ErrorKind, Fn, Result, Stmt, Tag, Value},
     std::{
         cell::{Ref, RefCell},
         collections::{BTreeMap, HashMap},
@@ -41,10 +41,10 @@ impl Env {
     pub fn new() -> Env {
         let mut scope = HashMap::new();
         for (name, fun) in natives() {
-            scope.insert(name, Value::Fn(FnType::Native(fun)));
+            scope.insert(name, Value::Fn(Fn::Native(fun)));
         }
         for (name, fun) in specials() {
-            scope.insert(name, Value::Fn(FnType::Special(fun)));
+            scope.insert(name, Value::Fn(Fn::Special(fun)));
         }
         Env {
             scopes: vec![rcell!(scope)],
@@ -222,8 +222,8 @@ impl Env {
                 // eval the target and see if it's a Hatter function
                 if let Value::Fn(inner_fn) = self.eval(&target)? {
                     match inner_fn {
-                        FnType::Special(f) => f.clone()(self, args)?,
-                        FnType::Native(f) => {
+                        Fn::Special(f) => f.clone()(self, args)?,
+                        Fn::Native(f) => {
                             let f = f.clone();
                             let args = args
                                 .iter()
@@ -231,7 +231,7 @@ impl Env {
                                 .collect::<Result<Vec<_>>>()?;
                             f(Args::new(self, args))?
                         }
-                        FnType::Fn(params, body, scope) => {
+                        Fn::Fn(params, body, scope) => {
                             let mut kw_args = None;
                             if args.len() == 1 {
                                 if let Stmt::Args(inner) = &args[0] {
@@ -333,8 +333,11 @@ impl Env {
                 }
                 Value::None
             }
-            Stmt::Fn(params, body) => Value::Fn(FnType::Fn(
-                params.clone(),
+            Stmt::Fn(params, body) => Value::Fn(Fn::Fn(
+                params
+                    .iter()
+                    .map(|s| value::String::new(s.into()))
+                    .collect(),
                 body.clone(),
                 self.scope().clone(),
             )),
@@ -434,8 +437,10 @@ impl Env {
     fn eval_for(&mut self, stmt: &Stmt) -> Result<Value> {
         if let Stmt::For(key, val, expr, body) = stmt {
             match self.eval(&expr)? {
-                Value::List(list) => self.inner_for(key, val, list.iter().enumerate(), body)?,
-                Value::Map(map) => self.inner_for(key, val, map.iter(), body)?,
+                Value::List(list) => {
+                    self.inner_for(key, val, list.borrow().iter().enumerate(), body)?
+                }
+                Value::Map(map) => self.inner_for(key, val, map.borrow().iter(), body)?,
                 v => return error!("expected List or Map, got {:?}", v),
             }
         }

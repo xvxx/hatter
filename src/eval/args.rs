@@ -64,7 +64,7 @@ impl<'e> Args<'e> {
     /// Errors if the arg doesn't exist or isn't a String.
     pub fn need_string(&self, idx: usize) -> Result<&str> {
         if let Some(Value::String(s)) = self.args.get(idx) {
-            Ok(s)
+            Ok(s.to_str())
         } else {
             Err(error_kind!(
                 WrongArgType,

@@ -50,7 +50,7 @@ pub use {
         args::Args,
         env::{eval, render, Env, Jump, Scope},
         natives::{natives, specials},
-        value::{FnType, NativeFn, Object, SpecialFn, Value},
+        value::{self, Fn, NativeFn, Object, SpecialFn, Value},
     },
     template::Template,
 };

@@ -112,10 +112,17 @@ pub fn natives() -> HashMap<String, Rc<NativeFn>> {
         let verb = args.need(1)?;
 
         match subject {
-            Value::Map(map) => map.get(verb.to_str()).unwrap_or(&Value::None).clone(),
+            Value::Map(map) => map
+                .borrow()
+                .get(verb.string())
+                .unwrap_or(&Value::None)
+                .clone(),
             Value::List(list) => {
                 let idx = args.need_number(1)?;
-                list.get(idx as usize).unwrap_or(&Value::None).clone()
+                list.borrow()
+                    .get(idx as usize)
+                    .unwrap_or(&Value::None)
+                    .clone()
             }
             Value::Object(o) => o.get(verb.to_str()).unwrap_or(Value::None),
             _ => Value::None,
@@ -136,7 +143,7 @@ pub fn natives() -> HashMap<String, Rc<NativeFn>> {
             while let Some(Value::String(x)) = iter.next() {
                 sum += x;
             }
-            return Value::String(sum).ok();
+            return Value::String(sum.into()).ok();
         }
         Value::None.ok()
     }
@@ -161,8 +168,9 @@ pub fn natives() -> HashMap<String, Rc<NativeFn>> {
         Value::Number(a % b).ok()
     }
     fn push(args: Args) -> Result<Value> {
-        let mut list = args.need_list(0)?;
-        list.push(args.need(1)?)?;
+        if let Value::List(list) = args.need(0)? {
+            list.borrow_mut().push(args.need(1)?);
+        }
         Value::None.ok()
     }
     fn print(mut args: Args) -> Result<Value> {
@@ -189,21 +197,21 @@ pub fn natives() -> HashMap<String, Rc<NativeFn>> {
         Value::Bool(args.need_number(0)? <= args.need_number(1)?).ok()
     }
     fn to_uppercase(args: Args) -> Result<Value> {
-        Value::String(args.need_string(0)?.to_uppercase()).ok()
+        Value::String(args.need_string(0)?.to_uppercase().into()).ok()
     }
     fn to_lowercase(args: Args) -> Result<Value> {
-        Value::String(args.need_string(0)?.to_lowercase()).ok()
+        Value::String(args.need_string(0)?.to_lowercase().into()).ok()
     }
     fn replace(args: Args) -> Result<Value> {
         let s = args.need_string(0)?;
         let search = args.need_string(1)?;
         let replace = args.need_string(2)?;
-        Value::String(s.replace(search, replace)).ok()
+        Value::String(s.replace(search, replace).into()).ok()
     }
     fn len(args: Args) -> Result<Value> {
         match args.need(0)? {
-            Value::List(list) => list.len().into(),
-            Value::Map(map) => map.len().into(),
+            Value::List(list) => list.borrow().len().into(),
+            Value::Map(map) => map.borrow().len().into(),
             Value::String(s) => s.len().into(),
             _ => Value::Number(0.0),
         }

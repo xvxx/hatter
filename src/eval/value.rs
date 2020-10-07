@@ -1,8 +1,10 @@
 use {
     crate::{Args, Env, Result, Scope, Stmt},
     std::{
+        cell::RefCell,
         collections::{BTreeMap, HashMap},
         fmt,
+        ops::Deref,
         rc::Rc,
     },
 };
@@ -13,21 +15,134 @@ pub enum Value {
     Bool(bool),
     Number(f64),
     String(String),
-    List(Vec<Value>),
-    Map(BTreeMap<String, Value>),
-    Fn(FnType),
+    List(List),
+    Map(Map),
+    Fn(Fn),
     Object(Rc<dyn Object>),
 }
 
-pub type NativeFn = dyn Fn(Args) -> Result<Value>;
-pub type SpecialFn = dyn Fn(&mut Env, &[Stmt]) -> Result<Value>;
+/// Rust String
+type RString = std::string::String;
+
+#[derive(Clone, Ord, PartialOrd, Eq)]
+pub struct String(Rc<RString>);
+impl String {
+    pub fn new(s: RString) -> Self {
+        Self(rc!(s))
+    }
+
+    pub fn to_str(&self) -> &str {
+        &self.0
+    }
+}
+impl fmt::Display for String {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+impl Deref for String {
+    type Target = Rc<RString>;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+impl PartialEq for String {
+    fn eq(&self, other: &String) -> bool {
+        self.0 == other.0
+    }
+}
+impl PartialEq<String> for RString {
+    fn eq(&self, other: &String) -> bool {
+        self == &*other.0
+    }
+}
+impl From<String> for Value {
+    fn from(item: String) -> Self {
+        Value::String(item)
+    }
+}
+impl From<&String> for Value {
+    fn from(item: &String) -> Self {
+        Value::String(item.clone())
+    }
+}
+impl From<RString> for String {
+    fn from(s: RString) -> Self {
+        Self::new(s)
+    }
+}
+impl From<&RString> for String {
+    fn from(s: &RString) -> Self {
+        Self::new(s.clone())
+    }
+}
+impl From<&str> for String {
+    fn from(s: &str) -> Self {
+        Self::new(s.to_owned())
+    }
+}
 
 #[derive(Clone)]
-pub enum FnType {
+pub struct List(Rc<RefCell<Vec<Value>>>);
+impl List {
+    pub fn new(s: Vec<Value>) -> Self {
+        Self(rcell!(s))
+    }
+}
+impl Deref for List {
+    type Target = Rc<RefCell<Vec<Value>>>;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+impl PartialEq for List {
+    fn eq(&self, other: &List) -> bool {
+        let me = self.borrow();
+        let you = other.borrow();
+        me.len() == you.len() && me.iter().enumerate().all(|(i, v)| v == &you[i])
+    }
+}
+impl From<Vec<Value>> for List {
+    fn from(v: Vec<Value>) -> Self {
+        Self::new(v)
+    }
+}
+
+#[derive(Clone)]
+pub struct Map(Rc<RefCell<BTreeMap<String, Value>>>);
+impl Map {
+    pub fn new(m: BTreeMap<String, Value>) -> Self {
+        Self(rcell!(m))
+    }
+}
+impl Deref for Map {
+    type Target = Rc<RefCell<BTreeMap<String, Value>>>;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+impl PartialEq for Map {
+    fn eq(&self, other: &Map) -> bool {
+        let me = self.borrow();
+        let you = other.borrow();
+        me.len() == you.len() && me.iter().all(|(i, v)| v == &you[i])
+    }
+}
+impl From<BTreeMap<String, Value>> for Map {
+    fn from(m: BTreeMap<String, Value>) -> Self {
+        Self::new(m)
+    }
+}
+
+#[derive(Clone)]
+pub enum Fn {
     Fn(Vec<String>, Vec<Stmt>, Scope),
     Native(Rc<NativeFn>),
     Special(Rc<SpecialFn>),
 }
+
+pub type NativeFn = dyn std::ops::Fn(Args) -> Result<Value>;
+pub type SpecialFn = dyn std::ops::Fn(&mut Env, &[Stmt]) -> Result<Value>;
 
 #[allow(unused_variables)]
 pub trait Object {
@@ -62,6 +177,7 @@ impl fmt::Debug for Value {
                 f,
                 "[{}]",
                 &list
+                    .borrow()
                     .iter()
                     .map(|i| format!("{:?}", i))
                     .collect::<Vec<_>>()
@@ -123,6 +239,14 @@ impl PartialEq<Value> for String {
 }
 
 impl Value {
+    pub fn string(&self) -> &String {
+        if let Value::String(s) = self {
+            s
+        } else {
+            panic!("{:?} isn't a String", self)
+        }
+    }
+
     pub fn ok(self) -> Result<Value> {
         Ok(self)
     }
@@ -133,8 +257,8 @@ impl Value {
 
     pub fn len(&self) -> usize {
         match self {
-            Value::List(list) => list.len(),
-            Value::Map(map) => map.len(),
+            Value::List(list) => list.borrow().len(),
+            Value::Map(map) => map.borrow().len(),
             Value::String(s) => s.len(),
             _ => 0,
         }
@@ -142,15 +266,6 @@ impl Value {
 
     pub fn is_empty(&self) -> bool {
         self.len() == 0
-    }
-
-    pub fn push<V: Into<Value>>(&mut self, val: V) -> Result<()> {
-        match self {
-            Value::List(list) => list.push(val.into()),
-            Value::String(s) => s.push_str(val.into().to_str()),
-            _ => return error!("can only `push()` to List"),
-        }
-        Ok(())
     }
 
     pub fn to_bool(&self) -> bool {
@@ -173,7 +288,7 @@ impl Value {
         use Value::*;
         match self {
             None => "",
-            String(s) => &s,
+            String(s) => &s.to_str(),
             Number(..) => "(number)",
             Fn(..) => "{function}",
             List(..) => "(list)",
@@ -222,7 +337,7 @@ macro_rules! into_string {
     ($type:ty) => {
         impl From<$type> for Value {
             fn from(item: $type) -> Self {
-                Value::String(item.to_string())
+                Value::String(item.to_string().into())
             }
         }
     };
@@ -250,9 +365,9 @@ macro_rules! into_number_as {
 
 into_string!(&str);
 into_string!(&&str);
-into_string!(String);
-into_string!(&String);
-into_string!(&&String);
+into_string!(RString);
+into_string!(&RString);
+into_string!(&&RString);
 
 into_number!(i32);
 into_number!(&i32);
@@ -274,19 +389,19 @@ impl From<&Value> for Value {
 
 impl<T: Into<Value>> From<Vec<T>> for Value {
     fn from(vec: Vec<T>) -> Self {
-        Value::List(vec.into_iter().map(val).collect())
+        Value::List(vec.into_iter().map(val).collect::<Vec<_>>().into())
     }
 }
 
 impl<T: Copy + Into<Value>> From<&Vec<T>> for Value {
     fn from(vec: &Vec<T>) -> Self {
-        Value::List(vec.iter().map(|v| (*v).into()).collect())
+        Value::List(vec.iter().map(|v| (*v).into()).collect::<Vec<_>>().into())
     }
 }
 
 impl<T: Copy + Into<Value>> From<&[T]> for Value {
     fn from(vec: &[T]) -> Self {
-        Value::List(vec.iter().map(|v| (*v).into()).collect())
+        Value::List(vec.iter().map(|v| (*v).into()).collect::<Vec<_>>().into())
     }
 }
 
@@ -298,9 +413,9 @@ where
     fn from(map: BTreeMap<S, V>) -> Self {
         let mut new = BTreeMap::new();
         for (k, v) in map {
-            new.insert(k.as_ref().to_string(), v.into());
+            new.insert(k.as_ref().into(), v.into());
         }
-        Value::Map(new)
+        Value::Map(new.into())
     }
 }
 
@@ -312,9 +427,9 @@ where
     fn from(map: HashMap<S, V>) -> Self {
         let mut new = BTreeMap::new();
         for (k, v) in map {
-            new.insert(k.as_ref().to_string(), val(v));
+            new.insert(k.as_ref().into(), val(v));
         }
-        Value::Map(new)
+        Value::Map(new.into())
     }
 }
 
@@ -346,10 +461,10 @@ impl From<Stmt> for Value {
 
 impl<F> From<F> for Value
 where
-    F: 'static + Fn(Args) -> Result<Value>,
+    F: 'static + std::ops::Fn(Args) -> Result<Value>,
 {
     fn from(f: F) -> Value {
-        Value::Fn(FnType::Native(rc!(f)))
+        Value::Fn(Fn::Native(rc!(f)))
     }
 }
 
@@ -358,7 +473,7 @@ where
     V: Into<Value>,
 {
     fn from(f: (V,)) -> Value {
-        Value::List(vec![f.0.into()])
+        Value::List(vec![f.0.into()].into())
     }
 }
 
@@ -368,10 +483,7 @@ where
     V2: Into<Value>,
 {
     fn from(f: (V1, V2)) -> Value {
-        Value::List(vec![
-            f.0.into(),
-            f.1.into(),
-        ])
+        Value::List(vec![f.0.into(), f.1.into()].into())
     }
 }
 
@@ -382,11 +494,7 @@ where
     V3: Into<Value>,
 {
     fn from(f: (V1, V2, V3)) -> Value {
-        Value::List(vec![
-            f.0.into(),
-            f.1.into(),
-            f.2.into(),
-        ])
+        Value::List(vec![f.0.into(), f.1.into(), f.2.into()].into())
     }
 }
 
@@ -398,12 +506,7 @@ where
     V4: Into<Value>,
 {
     fn from(f: (V1, V2, V3, V4)) -> Value {
-        Value::List(vec![
-            f.0.into(),
-            f.1.into(),
-            f.2.into(),
-            f.3.into(),
-        ])
+        Value::List(vec![f.0.into(), f.1.into(), f.2.into(), f.3.into()].into())
     }
 }
 
@@ -416,13 +519,7 @@ where
     V5: Into<Value>,
 {
     fn from(f: (V1, V2, V3, V4, V5)) -> Value {
-        Value::List(vec![
-            f.0.into(),
-            f.1.into(),
-            f.2.into(),
-            f.3.into(),
-            f.4.into(),
-        ])
+        Value::List(vec![f.0.into(), f.1.into(), f.2.into(), f.3.into(), f.4.into()].into())
     }
 }
 
@@ -436,13 +533,16 @@ where
     V6: Into<Value>,
 {
     fn from(f: (V1, V2, V3, V4, V5, V6)) -> Value {
-        Value::List(vec![
-            f.0.into(),
-            f.1.into(),
-            f.2.into(),
-            f.3.into(),
-            f.4.into(),
-            f.5.into(),
-        ])
+        Value::List(
+            vec![
+                f.0.into(),
+                f.1.into(),
+                f.2.into(),
+                f.3.into(),
+                f.4.into(),
+                f.5.into(),
+            ]
+            .into(),
+        )
     }
 }

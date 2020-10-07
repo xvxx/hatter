@@ -740,6 +740,12 @@ parse_test!(
     )
 );
 
+parse_test!(
+    ops_with_functions,
+    "mod(1) + mod(2)",
+    call!("+", call!("mod", num!(1)), call!("mod", num!(2)))
+);
+
 ////
 // tag
 

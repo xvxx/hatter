@@ -879,8 +879,7 @@ impl<'s, 't> Parser<'s, 't> {
     fn peek_postfix_power(&mut self) -> Option<u8> {
         let p = self.peek()?;
         let res = match p.to_str() {
-            "(" => 2,
-            // "!" => 7,
+            "(" => 50,
             "[" => 90,
             _ => return None,
         };

@@ -330,8 +330,8 @@ fn hatter_in_a_hurry() {
     assert_eval!("0o123", num!(0o123));
     assert_eval!("0xabba", num!(0xabba));
 
-    // assert_eval!("3.14", num!(3.14));
-    // assert_eval!("-102.123", num!(-102.123));
+    assert_eval!("3.14", num!(3.14));
+    assert_eval!("-102.123", num!(-102.123));
 
     assert_eval!(r#""Heya pal!""#, string!("Heya pal!"));
     assert_eval!(r#"'Also, hi.'"#, string!("Also, hi."));

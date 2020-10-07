@@ -135,6 +135,13 @@ if true
         r#"if false do print("yay") else if 1 > 0 do print("nay") else do print("cray")"#,
         "nay\n"
     );
+
+    assert_render!(r#"if true then print("yay")"#, "yay\n");
+    assert_render!(r#"if false then print("yay") else print("nay")"#, "nay\n");
+    assert_render!(
+        r#"if false then print("yay") else if 1 > 0 then print("nay") else print("cray")"#,
+        "nay\n"
+    );
 }
 
 #[test]

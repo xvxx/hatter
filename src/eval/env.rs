@@ -366,8 +366,10 @@ impl Env {
             let attr_name = self.eval(name)?.to_string();
             if is_form && matches!(attr_name.as_ref(), "GET" | "POST") {
                 out.push_str(&format!("method='{}' action='{}'", attr_name, val));
+            } else if let Value::String(s) = val {
+                out.push_str(&format!("{}='{}'", attr_name, s));
             } else {
-                out.push_str(&format!("{}='{}'", attr_name, val.to_string()));
+                out.push_str(&format!("{}={}", attr_name, val));
             }
             out.push(' ');
         }

@@ -95,6 +95,12 @@ fn test_list() {
 }
 
 #[test]
+fn test_attributes() {
+    assert_render!(r#"<div data-id='123'/>"#, "<div data-id='123' />\n");
+    assert_render!(r#"<div data-id=123/>"#, "<div data-id=123 />\n");
+}
+
+#[test]
 fn test_index() {
     assert_eval!(
         r#"
@@ -280,7 +286,7 @@ fn test_nesting() {
 }
 
 #[test]
-fn form_shortcuts() {
+fn test_form_shortcuts() {
     assert_render!(
         "<form POST='/update'> <input:submit/>",
         "<form method='POST' action='/update'><input type='submit' />\n</form>\n"
@@ -293,7 +299,7 @@ fn form_shortcuts() {
 }
 
 #[test]
-fn math() {
+fn test_math() {
     assert_eval!("1 + 1", num!(2));
     assert_eval!("20 * 10", num!(200));
     assert_eval!("2.2 + 3.3", num!(5.5));
@@ -430,18 +436,6 @@ else if i < 0
         concat!("i := 100_000_001", ifelse!()),
         "Way TOO Positive!\n"
     );
-
-    // assert_eval!("not true", boo!(false));
-    // assert_eval!("not false", boo!(true));
-    // assert_eval!("not not true", boo!(true));
-    // assert_eval!("true and true", boo!(true));
-    // assert_eval!("true and false", boo!(false));
-    // assert_eval!("false and true", boo!(false));
-    // assert_eval!("false and false", boo!(false));
-    // assert_eval!("true or true", boo!(true));
-    // assert_eval!("true or false", boo!(true));
-    // assert_eval!("false or true", boo!(true));
-    // assert_eval!("false or false", boo!(false));
 
     assert_render!(
         r#"

@@ -102,14 +102,19 @@ Here are a few basic examples of what Hatter looks like:
   - `def greet(name) do print("Hey there, {name}!")`
   - `greet("Lydia")` prints `Hey there, Lydia!`
 - Define your own Hatter operators:
-  - `def !!(a, b) do concat(to-uppercase(a), ' ', to-uppercase(b))`
-  - `"one" !! "two"` returns `ONE TWO`
+  - `def ++(a, b) do concat(to-uppercase(a), ' ', to-uppercase(b))`
+  - `"one" ++ "two"` returns `ONE TWO`
 - Closures and function literals:
   - `adder := fn(x) fn(y) x + y` then `add1 := adder(1)`
   - `add1(200)` returns `201`
+- Call functions with keyword arguments:
+  - `def greet(title, name) do print("Hiya, {title}. {name}!")`
+  - `greet(name: "Marley", title: "Dr")` prints `Hiya, Dr. Marley!`
 - `do` keyword for one-line blocks:
   - `if 2 > 1 do print("Obviously")`
   - `for x in list do print(x)`
+- `then` keyword for one-line `if` statements:
+  - `if 2 > 1 then print("Yup!") else if 2 < 1 then print("Impossible.")`
 - Hatter will add a `<!DOCTYPE>` and wrap everything in `<html>` if
   the first tag in your template is `<head>`.
 

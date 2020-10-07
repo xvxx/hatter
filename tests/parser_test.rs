@@ -45,6 +45,15 @@ macro_rules! call {
     };
 }
 
+macro_rules! call_expr {
+    ($ex:expr, $($arg:expr),+) => {
+        Stmt::Call(Box::new($ex), vec![$($arg),+])
+    };
+    ($ex:expr) => {
+        Stmt::Call(Box::new($ex), vec![])
+    };
+}
+
 fn print_nodes(i: usize, nodes: &[Stmt]) {
     println!("Computed nodes:");
     for (x, stmt) in nodes.iter().enumerate() {
@@ -734,9 +743,9 @@ parse_test!(
     chained_ops,
     "2 + 20 * 10 - 5",
     call!(
-        "+",
-        num!(2),
-        call!("-", call!("*", num!(20), num!(10)), num!(5))
+        "-",
+        call!("+", num!(2), call!("*", num!(20), num!(10))),
+        num!(5)
     )
 );
 
@@ -744,6 +753,28 @@ parse_test!(
     ops_with_functions,
     "mod(1) + mod(2)",
     call!("+", call!("mod", num!(1)), call!("mod", num!(2)))
+);
+
+parse_test!(
+    dotted_attr,
+    "list.len",
+    call!(".", word!("list"), string!("len"))
+);
+
+parse_test!(
+    chained_dotted_attr,
+    "list.len.round",
+    call!(
+        ".",
+        call!(".", word!("list"), string!("len")),
+        string!("round")
+    )
+);
+
+parse_test!(
+    dotted_fn_call,
+    "list.len()",
+    call_expr!(call!(".", word!("list"), string!("len")))
 );
 
 ////

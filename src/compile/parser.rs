@@ -306,7 +306,7 @@ impl<'s, 't> Parser<'s, 't> {
             }
 
             let op_power = self.peek_op_power();
-            if op_power < min_power {
+            if op_power <= min_power {
                 break;
             }
             let op = self.next().to_string();
@@ -320,12 +320,13 @@ impl<'s, 't> Parser<'s, 't> {
                     }
                 }
                 // convert word to str, ex: map.key => .(map, "key")
-                "." => {
-                    if self.peek_is(Syntax::Word) {
-                        if let Stmt::Word(word) = self.op_expr(op_power)? {
+                "." if self.peek_is(Syntax::Word) => {
+                    match self.op_expr(op_power)? {
+                        Stmt::Word(word) => {
                             left = Stmt::Call(bx!(Stmt::Word(op)), vec![left, Stmt::String(word)]);
+                            continue;
                         }
-                        continue;
+                        _ => return self.error("Word"),
                     }
                 }
                 // check for += and friends
@@ -346,7 +347,6 @@ impl<'s, 't> Parser<'s, 't> {
             let right = self.op_expr(op_power)?;
             left = Stmt::Call(bx!(Stmt::Word(op)), vec![left, right]);
         }
-
         Ok(left)
     }
 
@@ -861,15 +861,15 @@ impl<'s, 't> Parser<'s, 't> {
     fn peek_op_power(&mut self) -> u8 {
         if let Some(p) = self.peek() {
             match p.to_str() {
-                ":=" | "=" => 0,
-                "&&" => 1,
-                "||" => 2,
-                "==" | "!=" | "<" | "<=" | ">" | ">=" | "<=>" => 3,
-                "+" | "-" | "|" | "^" => 4,
-                "*" | "/" | "%" | "<<" | ">>" | "&" => 5,
+                ":=" | "=" => 1,
+                "&&" => 2,
+                "||" => 3,
+                "==" | "!=" | "<" | "<=" | ">" | ">=" | "<=>" => 4,
+                "+" | "-" | "|" | "^" => 5,
+                "*" | "/" | "%" | "<<" | ">>" | "&" => 6,
                 ".." | "..=" => 10,
                 "." => 20,
-                _ => 1,
+                _ => 2,
             }
         } else {
             0
@@ -879,8 +879,8 @@ impl<'s, 't> Parser<'s, 't> {
     fn peek_postfix_power(&mut self) -> Option<u8> {
         let p = self.peek()?;
         let res = match p.to_str() {
-            "(" => 50,
-            "[" => 90,
+            "(" => 15,
+            "[" => 15,
             _ => return None,
         };
         Some(res)

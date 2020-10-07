@@ -272,7 +272,6 @@ impl Env {
                             }
                             let out = self.block(&body);
                             self.pop_scope();
-                            self.pop_scope();
                             match out {
                                 Ok(v) => v,
                                 Err(e) => match e.kind {

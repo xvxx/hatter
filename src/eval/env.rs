@@ -141,7 +141,7 @@ impl Env {
         if autohtml {
             self.print("<!DOCTYPE html>\n<html>");
         }
-        self.printed_block(&stmts)?;
+        self.block(&stmts)?;
         if autohtml {
             self.print("\n</html>\n");
         }

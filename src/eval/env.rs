@@ -356,16 +356,19 @@ impl Env {
         }
 
         // attributes
+        let is_form = tagname == "form";
         for (name, val) in &tag.attrs {
             let val = self.eval(val)?;
             if !val.to_bool() {
                 continue;
             }
-            out.push_str(&format!(
-                "{}='{}'",
-                self.eval(name)?.to_string(),
-                val.to_string()
-            ));
+
+            let attr_name = self.eval(name)?.to_string();
+            if is_form && matches!(attr_name.as_ref(), "GET" | "POST") {
+                out.push_str(&format!("method='{}' action='{}'", attr_name, val));
+            } else {
+                out.push_str(&format!("{}='{}'", attr_name, val.to_string()));
+            }
             out.push(' ');
         }
 

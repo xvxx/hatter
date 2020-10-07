@@ -273,6 +273,19 @@ fn test_nesting() {
 }
 
 #[test]
+fn form_shortcuts() {
+    assert_render!(
+        "<form POST='/update'> <input:submit/>",
+        "<form method='POST' action='/update'><input type='submit' />\n</form>\n"
+    );
+
+    assert_render!(
+        "<form GET='/search'> <input@query:text/> <input:submit/>",
+        "<form method='GET' action='/search'><input name='query' type='text' />\n<input type='submit' />\n</form>\n"
+    );
+}
+
+#[test]
 fn math() {
     assert_eval!("1 + 1", num!(2));
     assert_eval!("20 * 10", num!(200));

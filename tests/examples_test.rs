@@ -33,7 +33,11 @@ fn test_dir<P: AsRef<Path>>(dir: P) -> io::Result<()> {
             let source = fs::read_to_string(&path)?;
 
             // some examples are showing off errors
-            if path.ends_with("-error.hat") {
+            if path
+                .file_name()
+                .filter(|f| f.to_str().filter(|x| x.ends_with("-error.hat")).is_some())
+                .is_some()
+            {
                 match hatter::render(&source) {
                     Err(..) => {
                         assert!(true);

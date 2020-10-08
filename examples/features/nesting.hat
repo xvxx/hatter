@@ -2,11 +2,13 @@
 <#code-examples>
     <.code-cols>
         <.code-col>
-            <pre.language-html.left> <code>
-                "&lt;#main&gt; Hi there!"
+            <pre.language-html.left>
+                <code>
+                    "&lt;#main&gt; Hi there!"
         <.code-col>
-            <pre.language-html.left> <code>
-                "&lt;div id='main'&gt;Hi there!&lt;/div&gt;"
+            <pre.language-html.left>
+                <code>
+                    "&lt;div id='main'&gt;Hi there!&lt;/div&gt;"
     <.code-cols>
         <.code-col>
             <pre.language-html.left>

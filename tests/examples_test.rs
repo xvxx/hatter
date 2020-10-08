@@ -9,15 +9,15 @@ use {
     },
 };
 
-// #[test]
+#[test]
 fn test_examples() -> io::Result<()> {
-    if shell("which", &["hpp"])? == "" {
+    if shell("which", &["tidy"])? == "" {
         let banner = 50;
         println!("\n{}", "-".repeat(banner));
-        println!("Please install hpp to run tests:\n");
-        println!("https://github.com/xvxx/hpp-cli");
+        println!("Please install tidy to run tests:\n");
+        println!("$ brew install tidy");
         println!("{}\n", "-".repeat(banner));
-        return Err(io::Error::new(io::ErrorKind::Other, "hpp not found"));
+        return Err(io::Error::new(io::ErrorKind::Other, "tidy not found"));
     }
     test_dir("./examples/")
 }
@@ -59,7 +59,7 @@ fn test_dir<P: AsRef<path::Path>>(dir: P) -> io::Result<()> {
 
 /// Pretty print the HTML file at `path`.
 fn pretty(path: &str) -> io::Result<String> {
-    shell("hpp", &[path])
+    shell("tidy", &["-i", "-q", "--show-body-only", "yes", path])
 }
 
 /// Run a script and return its output.

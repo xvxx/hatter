@@ -5,7 +5,7 @@ use {
     std::{
         fs,
         io::{self, Write},
-        path,
+        path::Path,
     },
 };
 
@@ -22,7 +22,7 @@ fn test_examples() -> io::Result<()> {
     test_dir("./examples/")
 }
 
-fn test_dir<P: AsRef<path::Path>>(dir: P) -> io::Result<()> {
+fn test_dir<P: AsRef<Path>>(dir: P) -> io::Result<()> {
     let dir = dir.as_ref();
     for test in fs::read_dir(dir)? {
         let test = test?;
@@ -31,6 +31,18 @@ fn test_dir<P: AsRef<path::Path>>(dir: P) -> io::Result<()> {
             test_dir(path)?;
         } else {
             let source = fs::read_to_string(&path)?;
+
+            // some examples are showing off errors
+            if path.ends_with("-error.hat") {
+                match hatter::render(&source) {
+                    Err(..) => {
+                        assert!(true);
+                        continue;
+                    }
+                    Ok(..) => assert!(false, "Expected error in {:?} but got OK", path),
+                }
+            }
+
             let test_path = format!("{}", path.clone().into_os_string().into_string().unwrap())
                 .replace("./examples/", "./tests/examples/")
                 .replace(".hat", ".html");

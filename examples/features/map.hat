@@ -1,4 +1,4 @@
-{ first: "Bob", last: "Bobberson", age: 47}
+# { first: "Bob", last: "Bobberson", age: 47}
 
 bilbo := {
     first: "Bilbo"

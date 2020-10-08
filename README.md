@@ -33,23 +33,23 @@ it generates:
 <#main> Hi there!
 
 <!-- Generated HTML -->
-<div id="main">Hi there!</div>
+<div id='main'>Hi there!</div>
 ```
 
 ```html
 <span.big.bold> Welcome!
 
-<span class="big bold">Welcome!</span>
+<span class='big bold'>Welcome!</span>
 ```
 
 ```html
 <.links> for link in nav-links
-  <a href="{link.href}"> link.text
+  <a href={link.href}> link.text
 
-<div class="links">
-  <a href="/link1">First Link</a>
-  <a href="/link2">2nd Link</a>
-  <a href="/link3">Final Link</a>
+<div class='links'>
+  <a href='/link1'>First Link</a>
+  <a href='/link2'>2nd Link</a>
+  <a href='/link3'>Final Link</a>
 </div>
 ```
 
@@ -57,9 +57,9 @@ it generates:
 <form GET="/search">
   <input@query:text placeholder="Search..." /> <input:submit />
 
-<form method="GET" action="/search">
-  <input name="query" type="text" placeholder="Search..." />
-  <input type="submit" />
+<form method='GET' action='/search'>
+  <input name='query' type='text' placeholder='Search...' />
+  <input type='submit' />
 </form>
 ```
 
@@ -124,7 +124,60 @@ it generates:
 
 There are two ways to use Hatter:
 
-### 1. `hatter` Executable
+### 1. In Your Rust Application
+
+Hatter can (primarily) be used as a templating language from within
+your Rust applications.
+
+Simply add Hatter to `Cargo.toml`:
+
+```toml
+[dependencies]
+hatter = "0.1"
+```
+
+Then create a `hatter::Env`, which represents the top-level Hatter
+scope for your template, to set variables and render your template:
+
+```rust
+use hatter::{Args, Env, Value};
+
+let mut env = Env::new();
+env.set("name", "Bobby Boucher");
+env.set("age", 31);
+env.render(r#"
+<p> <b>Name:</> name
+<p> <b>Age:</> age
+"#)
+```
+
+You can also write functions in Rust and make them available to your
+HTML templates:
+
+```rust
+use hatter::prelude::*;
+
+fn quote(args: Args) -> Result<Value> {
+  let file = std::fs::read_to_string("quotes.txt")?;
+  let list_of_quotes: Vec<_> = file.split('\n').collect();
+  let line = match args.need_number(0)? as usize {
+    n if n > list_of_quotes.len() => 0,
+    n => n,
+  };
+
+  Value::from(list_of_quotes[line]).ok()
+}
+
+fn main() {
+    let mut env = Env::new();
+    env.set("quote", quote);
+    println!("{}", env.render("<div> quote(1)").unwrap());
+}
+```
+
+For more infomation see the [API Documentation][api-docs].
+
+### 2. As A Standalone Executable
 
 Hatter can be used as a regular command line program to turn `.hat`
 files into HTML.
@@ -143,7 +196,7 @@ $ hatter test.hat
 <b class='test'>Testing 1 2 3 4 </b>
 ```
 
-You can also install Hatter with a REPL:
+You can also install Hatter with a readline-powered REPL:
 
     cargo install hatter --features repl
 
@@ -155,56 +208,6 @@ Hatter v0.0.1 REPL
 >> 1 + 2
 3
 ```
-
-### 2. Crate
-
-Hatter can (primarily) be used as a templating language from within
-your Rust applications.
-
-Simply add Hatter to `Cargo.toml`:
-
-```toml
-[dependencies]
-hatter = "0.1"
-```
-
-Then create a `hatter::Env`, which represents the top-level Hatter
-scope for your template, and set your variables:
-
-```rust
-use hatter::{Args, Env, Value};
-
-let mut env = Env::new();
-env.set("name", "Bobby Boucher");
-env.set("age", 31);
-env.render(r#"
-<p> <b>Name:</> name
-<p> <b>Age:</> age
-"#)
-```
-
-You can also write functions in Rust and make them available to your
-HTML templates:
-
-```rust
-fn quote(args: Args) -> Result<Value> {
-  let file = std::fs::read_to_string("quotes.txt")?;
-  let list_of_quotes: Vec<_> = file.split('\n').collect();
-  let line = match args.need_number(0)? as usize {
-    n if n > list_of_quotes.len() => 0,
-    n => n,
-  };
-
-  Value::from(list_of_quotes[line]).ok()
-}
-fn main() {
-    let mut env = Env::new();
-    env.set("quote", quote);
-    println!("{}", env.render("<div> quote(1)").unwrap());
-}
-```
-
-For more infomation see the [API Documentation][api-docs].
 
 ## TODO
 

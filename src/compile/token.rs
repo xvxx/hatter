@@ -1,3 +1,5 @@
+//! Tokens represent a `Syntax`'s position in source code.
+
 use crate::{Error, ErrorKind, Result, Symbol, Syntax};
 
 #[derive(Debug, Clone, Copy)]

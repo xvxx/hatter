@@ -219,7 +219,7 @@ For more infomation see the [API Documentation][api-docs].
 - stdlib
 - VSCode Extension
 - luacheck-style tool
-- LSP
+- LSPc
 
 ## License
 

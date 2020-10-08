@@ -1,3 +1,5 @@
+//! The lexer turns a string of source code into Tokens.
+
 use {
     crate::{Result, Syntax, SyntaxTrait, Token},
     std::{iter::Peekable, mem, str::CharIndices},

@@ -1,3 +1,6 @@
+//! The `Args` struct makes it easier to work with arguments when
+//! writing Hatter functions in Rust.
+
 use {
     crate::{Env, Result, Value},
     std::{ops, vec},

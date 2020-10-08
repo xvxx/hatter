@@ -1,3 +1,7 @@
+//! Since HTML tags are a bit more involved than IF statements or
+//! variable assignment, they have their own data structure. This is
+//! still basicall just a Stmt, though.
+
 use crate::Stmt;
 
 #[derive(Debug, Clone)]
@@ -28,6 +32,7 @@ impl PartialEq for Tag {
 }
 
 impl Tag {
+    /// Create a new tag named `tag`.
     pub fn new(tag: Stmt) -> Tag {
         Tag {
             tag: bx!(tag),
@@ -39,26 +44,32 @@ impl Tag {
         }
     }
 
+    /// Is this a <self-closing/> tag?
     pub fn is_closed(&self) -> bool {
         self.closed
     }
 
+    /// Mark this tag as <self-closing/>.
     pub fn close(&mut self) {
         self.closed = true;
     }
 
+    /// Set the id= of this tag.
     pub fn set_id(&mut self, id: Stmt) {
         self.id = bx!(id);
     }
 
+    /// Set the <tag>BODY</tag> of this tag.
     pub fn set_body(&mut self, body: Vec<Stmt>) {
         self.body = body;
     }
 
+    /// Add a css class to this tag.
     pub fn add_class(&mut self, class: Stmt) {
         self.classes.push(class);
     }
 
+    /// Add an HTML attribute to this tag.
     pub fn add_attr(&mut self, name: Stmt, val: Stmt) {
         self.attrs.push((name, val));
     }

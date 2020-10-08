@@ -1,3 +1,6 @@
+//! Env is the top-level environment in which a Hatter template is
+//! evaluated and rendered.
+
 use {
     crate::{compile, natives, specials, Args, ErrorKind, Fn, Result, Stmt, Symbol, Tag, Value},
     std::{

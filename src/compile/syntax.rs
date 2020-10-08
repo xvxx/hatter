@@ -1,3 +1,5 @@
+//! The different types of syntax that our `Lexer` recognizes.
+
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Syntax {
     None,
@@ -47,6 +49,7 @@ impl Syntax {
     }
 }
 
+/// Helper method we add to `char`.
 pub trait SyntaxTrait {
     fn is_word_char(&self) -> bool;
     fn is_tag_opener(&self) -> bool;

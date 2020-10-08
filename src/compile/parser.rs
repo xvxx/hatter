@@ -1,3 +1,5 @@
+//! The parser turns a slice of `Token` into a Vec of `Stmt`.
+
 use {
     crate::{scan, Error, Result, Stmt, Symbol, Syntax, Tag, Token},
     std::mem,
@@ -17,6 +19,7 @@ pub struct Parser<'s, 't> {
     peeked: usize, // infinite loop protection hack
 }
 
+/// Main method. Turn a slice of `Token` into a Vec of `Stmt`.
 pub fn parse<'t>(tokens: &'t [Token]) -> Result<Vec<Stmt>> {
     let mut parser = Parser::from(tokens);
     parser.parse()?;
@@ -24,7 +27,7 @@ pub fn parse<'t>(tokens: &'t [Token]) -> Result<Vec<Stmt>> {
 }
 
 impl<'s, 't> Parser<'s, 't> {
-    /// Create a `Parser` from a `TokenStream`.
+    /// Create a `Parser` from a slice of `Token`.
     pub fn from(tokens: &'t [Token<'s>]) -> Parser<'s, 't> {
         Parser {
             tokens,
@@ -843,7 +846,7 @@ impl<'s, 't> Parser<'s, 't> {
         Ok(tag)
     }
 
-    pub fn attr(&mut self) -> Result<Stmt> {
+    fn attr(&mut self) -> Result<Stmt> {
         if let Some(tok) = self.peek() {
             match tok.kind {
                 Syntax::String(..) => self.string(),

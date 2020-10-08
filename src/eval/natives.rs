@@ -1,8 +1,17 @@
+//! Natives and Specials are Hatter functions written in Rust. Natives
+//! are regular functions that just happen to be written in Rust,
+//! while Specials are more like macros. Specifically, fexprs: their
+//! arguments are not evaluated, but instead passed as syntax to them
+//! along with the calling environment. The Special function can
+//! decide if and when to evaluate the arguments. They're used to
+//! implement short-circuit operators like `&&` and `||`.
+
 use {
     crate::{Args, Env, NativeFn, Result, SpecialFn, Stmt, Value},
     std::{collections::HashMap, rc::Rc},
 };
 
+/// Return the default Special Functions that come standard with Hatter.
 pub fn specials() -> HashMap<String, Rc<SpecialFn>> {
     let mut map: HashMap<String, Rc<SpecialFn>> = HashMap::new();
 
@@ -31,6 +40,7 @@ pub fn specials() -> HashMap<String, Rc<SpecialFn>> {
     map
 }
 
+/// Return the default Native Functions that come standard with Hatter.
 pub fn natives() -> HashMap<String, Rc<NativeFn>> {
     let mut map: HashMap<String, Rc<NativeFn>> = HashMap::new();
 

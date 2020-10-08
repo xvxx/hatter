@@ -1,3 +1,5 @@
+//! Stmt is an AST node.
+
 use crate::{Symbol, Tag};
 
 #[derive(Debug, Clone, PartialEq)]
@@ -39,14 +41,17 @@ impl From<&str> for Stmt {
 }
 
 impl Stmt {
+    /// Is this Stmt an actual statement?
     pub fn is_some(&self) -> bool {
         !self.is_none()
     }
 
+    /// Is this Stmt::None?
     pub fn is_none(&self) -> bool {
         matches!(self, Stmt::None)
     }
 
+    /// If this is a String or a Word, get a &str of its literal value.
     pub fn to_str(&self) -> &str {
         match self {
             Stmt::String(s) => s.to_str(),
@@ -55,6 +60,7 @@ impl Stmt {
         }
     }
 
+    /// Create a String representation, for debug purposes.
     pub fn to_string(&self) -> String {
         match self {
             Stmt::None => "Stmt::None".to_string(),

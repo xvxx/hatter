@@ -1,4 +1,4 @@
-use crate::{Error, ErrorKind, Result, Syntax};
+use crate::{Error, ErrorKind, Result, Symbol, Syntax};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Token<'s> {
@@ -43,6 +43,11 @@ impl<'s> Token<'s> {
     /// Also...
     pub fn to_str(&self) -> &str {
         self.literal()
+    }
+
+    /// Intern string.
+    pub fn to_sym(&self) -> Symbol {
+        Symbol::from(self.to_str())
     }
 
     /// Create a string of the literal value.

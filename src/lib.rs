@@ -1,35 +1,15 @@
 #![deny(unused_must_use)]
 #![deny(unreachable_patterns)]
 
-macro_rules! bx {
-    ($ex:expr) => {
-        Box::new($ex)
-    };
-}
-
-macro_rules! rc {
-    ($ex:expr) => {
-        Rc::new($ex)
-    };
-}
-
-macro_rules! cell {
-    ($ex:expr) => {
-        RefCell::new($ex)
-    };
-}
-
-macro_rules! rcell {
-    ($ex:expr) => {
-        rc!(cell!($ex))
-    };
-}
-
+#[macro_use]
+mod macros;
 #[macro_use]
 mod error;
 mod compile;
 mod eval;
+mod interner;
 pub mod prelude;
+mod symbol;
 mod template;
 
 #[cfg(feature = "repl")]
@@ -52,6 +32,8 @@ pub use {
         natives::{natives, specials},
         value::{self, Fn, NativeFn, Object, SpecialFn, Value},
     },
+    interner::Interner,
+    symbol::Symbol,
     template::Template,
 };
 

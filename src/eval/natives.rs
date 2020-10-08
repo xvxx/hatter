@@ -109,12 +109,11 @@ pub fn natives() -> HashMap<String, Rc<NativeFn>> {
             return Value::None.ok();
         }
         let subject = args.need(0)?;
-        let verb = args.need(1)?;
 
         match subject {
             Value::Map(map) => map
                 .borrow()
-                .get(verb.string())
+                .get(&args.need_string(1)?.into())
                 .unwrap_or(&Value::None)
                 .clone(),
             Value::List(list) => {
@@ -124,7 +123,7 @@ pub fn natives() -> HashMap<String, Rc<NativeFn>> {
                     .unwrap_or(&Value::None)
                     .clone()
             }
-            Value::Object(o) => o.get(verb.to_str()).unwrap_or(Value::None),
+            Value::Object(o) => o.get(args.need_string(1)?).unwrap_or(Value::None),
             _ => Value::None,
         }
         .ok()

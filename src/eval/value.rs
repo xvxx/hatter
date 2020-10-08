@@ -1,5 +1,5 @@
 use {
-    crate::{Args, Env, Result, Scope, Stmt},
+    crate::{Args, Env, Result, Scope, Stmt, Symbol},
     std::{
         cell::RefCell,
         collections::{BTreeMap, HashMap},
@@ -14,72 +14,11 @@ pub enum Value {
     None,
     Bool(bool),
     Number(f64),
-    String(String),
+    String(Symbol),
     List(List),
     Map(Map),
     Fn(Fn),
     Object(Rc<dyn Object>),
-}
-
-/// Rust String
-type RString = std::string::String;
-
-#[derive(Clone, Ord, PartialOrd, Eq)]
-pub struct String(Rc<RString>);
-impl String {
-    pub fn new(s: RString) -> Self {
-        Self(rc!(s))
-    }
-
-    pub fn to_str(&self) -> &str {
-        &self.0
-    }
-}
-impl fmt::Display for String {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
-impl Deref for String {
-    type Target = Rc<RString>;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl PartialEq for String {
-    fn eq(&self, other: &String) -> bool {
-        self.0 == other.0
-    }
-}
-impl PartialEq<String> for RString {
-    fn eq(&self, other: &String) -> bool {
-        self == &*other.0
-    }
-}
-impl From<String> for Value {
-    fn from(item: String) -> Self {
-        Value::String(item)
-    }
-}
-impl From<&String> for Value {
-    fn from(item: &String) -> Self {
-        Value::String(item.clone())
-    }
-}
-impl From<RString> for String {
-    fn from(s: RString) -> Self {
-        Self::new(s)
-    }
-}
-impl From<&RString> for String {
-    fn from(s: &RString) -> Self {
-        Self::new(s.clone())
-    }
-}
-impl From<&str> for String {
-    fn from(s: &str) -> Self {
-        Self::new(s.to_owned())
-    }
 }
 
 #[derive(Clone)]
@@ -109,14 +48,14 @@ impl From<Vec<Value>> for List {
 }
 
 #[derive(Clone)]
-pub struct Map(Rc<RefCell<BTreeMap<String, Value>>>);
+pub struct Map(Rc<RefCell<BTreeMap<Symbol, Value>>>);
 impl Map {
-    pub fn new(m: BTreeMap<String, Value>) -> Self {
+    pub fn new(m: BTreeMap<Symbol, Value>) -> Self {
         Self(rcell!(m))
     }
 }
 impl Deref for Map {
-    type Target = Rc<RefCell<BTreeMap<String, Value>>>;
+    type Target = Rc<RefCell<BTreeMap<Symbol, Value>>>;
     fn deref(&self) -> &Self::Target {
         &self.0
     }
@@ -125,18 +64,18 @@ impl PartialEq for Map {
     fn eq(&self, other: &Map) -> bool {
         let me = self.borrow();
         let you = other.borrow();
-        me.len() == you.len() && me.iter().all(|(i, v)| v == &you[i])
+        me.len() == you.len() && me.iter().all(|(i, v)| Some(v) == you.get(i))
     }
 }
-impl From<BTreeMap<String, Value>> for Map {
-    fn from(m: BTreeMap<String, Value>) -> Self {
+impl From<BTreeMap<Symbol, Value>> for Map {
+    fn from(m: BTreeMap<Symbol, Value>) -> Self {
         Self::new(m)
     }
 }
 
 #[derive(Clone)]
 pub enum Fn {
-    Fn(Vec<String>, Vec<Stmt>, Scope),
+    Fn(Vec<Symbol>, Vec<Stmt>, Scope),
     Native(Rc<NativeFn>),
     Special(Rc<SpecialFn>),
 }
@@ -239,14 +178,6 @@ impl PartialEq<Value> for String {
 }
 
 impl Value {
-    pub fn string(&self) -> &String {
-        if let Value::String(s) = self {
-            s
-        } else {
-            panic!("{:?} isn't a String", self)
-        }
-    }
-
     pub fn ok(self) -> Result<Value> {
         Ok(self)
     }
@@ -363,11 +294,9 @@ macro_rules! into_number_as {
     };
 }
 
-into_string!(&str);
-into_string!(&&str);
-into_string!(RString);
-into_string!(&RString);
-into_string!(&&RString);
+into_string!(String);
+into_string!(&String);
+into_string!(&&String);
 
 into_number!(i32);
 into_number!(&i32);
@@ -402,6 +331,30 @@ impl<T: Copy + Into<Value>> From<&Vec<T>> for Value {
 impl<T: Copy + Into<Value>> From<&[T]> for Value {
     fn from(vec: &[T]) -> Self {
         Value::List(vec.iter().map(|v| (*v).into()).collect::<Vec<_>>().into())
+    }
+}
+
+impl From<Symbol> for Value {
+    fn from(item: Symbol) -> Self {
+        Value::String(item)
+    }
+}
+
+impl From<&Symbol> for Value {
+    fn from(item: &Symbol) -> Self {
+        Value::String(item.clone())
+    }
+}
+
+impl From<&str> for Value {
+    fn from(item: &str) -> Self {
+        Value::String(item.into())
+    }
+}
+
+impl From<&&str> for Value {
+    fn from(item: &&str) -> Self {
+        Value::String(Symbol::from(item))
     }
 }
 

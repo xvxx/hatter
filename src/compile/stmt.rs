@@ -1,23 +1,23 @@
-use crate::Tag;
+use crate::{Symbol, Tag};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Stmt {
     None,
     Bool(bool),
     Number(f64),
-    String(String),
-    Word(String),
+    String(Symbol),
+    Word(Symbol),
     List(Vec<Stmt>),
-    Map(Vec<(String, Stmt)>),
+    Map(Vec<(Symbol, Stmt)>),
     Call(Box<Stmt>, Vec<Stmt>), // fn, args
     Return(Box<Stmt>),
     If(Vec<(Stmt, Vec<Stmt>)>),
-    For(Option<String>, String, Box<Stmt>, Vec<Stmt>), // key, val, iter, body
+    For(Option<Symbol>, Symbol, Box<Stmt>, Vec<Stmt>), // key, val, iter, body
     While(Box<Stmt>, Vec<Stmt>),
-    Assign(String, Box<Stmt>, bool), // var, val, reassign?
+    Assign(Symbol, Box<Stmt>, bool), // var, val, reassign?
     Tag(Tag),
-    Fn(Vec<String>, Vec<Stmt>), // args, body
-    Args(Vec<(String, Stmt)>),  // keyword args
+    Fn(Vec<Symbol>, Vec<Stmt>), // args, body
+    Args(Vec<(Symbol, Stmt)>),  // keyword args
 }
 
 impl From<Tag> for Stmt {
@@ -28,13 +28,13 @@ impl From<Tag> for Stmt {
 
 impl From<String> for Stmt {
     fn from(s: String) -> Stmt {
-        Stmt::String(s)
+        Stmt::String(Symbol::from(s))
     }
 }
 
 impl From<&str> for Stmt {
     fn from(s: &str) -> Stmt {
-        Stmt::String(s.to_string())
+        Stmt::String(s.into())
     }
 }
 
@@ -47,13 +47,21 @@ impl Stmt {
         matches!(self, Stmt::None)
     }
 
+    pub fn to_str(&self) -> &str {
+        match self {
+            Stmt::String(s) => s.to_str(),
+            Stmt::Word(s) => s.to_str(),
+            _ => "",
+        }
+    }
+
     pub fn to_string(&self) -> String {
         match self {
             Stmt::None => "Stmt::None".to_string(),
             Stmt::Bool(b) => format!("{}", b),
             Stmt::Number(n) => format!("{}", n),
             Stmt::String(s) => format!(r#""{}""#, s),
-            Stmt::Word(s) => s.clone(),
+            Stmt::Word(s) => s.to_string(),
             Stmt::Tag(tag) => format!("{:?}", tag),
             Stmt::Return(ex) => format!("return {:?}", ex),
             Stmt::Args(args) => args

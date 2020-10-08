@@ -1,4 +1,14 @@
-use hatter::{compile, Stmt, Tag};
+use hatter::{compile, Stmt, Symbol, Tag};
+
+trait Intern {
+    fn to_sym(&self) -> Symbol;
+}
+
+impl Intern for &str {
+    fn to_sym(&self) -> Symbol {
+        Symbol::from(self)
+    }
+}
 
 macro_rules! bx {
     ($code:expr) => {
@@ -20,7 +30,7 @@ macro_rules! boo {
 
 macro_rules! word {
     ($code:expr) => {
-        Stmt::Word($code.into())
+        Stmt::Word(Symbol::from($code))
     };
 }
 
@@ -38,10 +48,10 @@ macro_rules! num {
 
 macro_rules! call {
     ($name:expr, $($arg:expr),+) => {
-        Stmt::Call(Box::new(Stmt::Word($name.to_string())), vec![$($arg),+])
+        Stmt::Call(Box::new(Stmt::Word(Symbol::from($name))), vec![$($arg),+])
     };
     ($name:expr) => {
-        Stmt::Call(Box::new(Stmt::Word($name.to_string())), vec![])
+        Stmt::Call(Box::new(Stmt::Word(Symbol::from($name))), vec![])
     };
 }
 
@@ -252,9 +262,9 @@ parse_test!(
     basic_map,
     "{ one: 1, two: 2, three: 3 }",
     Stmt::Map(vec![
-        ("one".to_string(), num!(1)),
-        ("two".to_string(), num!(2)),
-        ("three".to_string(), num!(3))
+        ("one".to_sym(), num!(1)),
+        ("two".to_sym(), num!(2)),
+        ("three".to_sym(), num!(3))
     ])
 );
 
@@ -265,9 +275,9 @@ parse_test!(
                 two: 2, three:
         3}",
     Stmt::Map(vec![
-        ("one".to_string(), num!(1)),
-        ("two".to_string(), num!(2)),
-        ("three".to_string(), num!(3))
+        ("one".to_sym(), num!(1)),
+        ("two".to_sym(), num!(2)),
+        ("three".to_sym(), num!(3))
     ])
 );
 
@@ -483,8 +493,8 @@ for k, v in { first: 'Bilbo', last: 'Swaggins' }
         Some("k".into()),
         "v".into(),
         bx!(Stmt::Map(vec![
-            ("first".to_string(), string!("Bilbo")),
-            ("last".to_string(), string!("Swaggins")),
+            ("first".to_sym(), string!("Bilbo")),
+            ("last".to_sym(), string!("Swaggins")),
         ])),
         vec![call!(
             "print",
@@ -504,7 +514,7 @@ while i > 0
     then-do-something-else()
 "#,
     Stmt::While(
-        bx!(call!(word!(">"), word!("i"), num!(0))),
+        bx!(call!(">", word!("i"), num!(0))),
         vec![call!("do-something"), call!("then-do-something-else")]
     )
 );
@@ -515,7 +525,7 @@ parse_test!(
 while i > 0 do do-something()
 "#,
     Stmt::While(
-        bx!(call!(word!(">"), word!("i"), num!(0))),
+        bx!(call!(">", word!("i"), num!(0))),
         vec![call!("do-something")]
     )
 );

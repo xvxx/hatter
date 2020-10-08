@@ -1,5 +1,5 @@
 use {
-    crate::{compile, natives, specials, value, Args, ErrorKind, Fn, Result, Stmt, Tag, Value},
+    crate::{compile, natives, specials, Args, ErrorKind, Fn, Result, Stmt, Symbol, Tag, Value},
     std::{
         cell::{Ref, RefCell},
         collections::{BTreeMap, HashMap},
@@ -202,9 +202,9 @@ impl Env {
             Stmt::Map(pairs) => {
                 let mut map = BTreeMap::new();
                 for (k, v) in pairs {
-                    map.insert(k, self.eval(v)?);
+                    map.insert(k.into(), self.eval(v)?);
                 }
-                Value::from(map)
+                Value::Map(map.into())
             }
             Stmt::Word(word) => {
                 match word.as_ref() {
@@ -333,14 +333,9 @@ impl Env {
                 }
                 Value::None
             }
-            Stmt::Fn(params, body) => Value::Fn(Fn::Fn(
-                params
-                    .iter()
-                    .map(|s| value::String::new(s.into()))
-                    .collect(),
-                body.clone(),
-                self.scope().clone(),
-            )),
+            Stmt::Fn(params, body) => {
+                Value::Fn(Fn::Fn(params.clone(), body.clone(), self.scope().clone()))
+            }
             Stmt::Args(..) => unimplemented!(),
         })
     }
@@ -451,7 +446,7 @@ impl Env {
     /// Shared "inner" for loop, over both maps and lists.
     fn inner_for<'o, K>(
         &mut self,
-        key: &Option<String>,
+        key: &Option<Symbol>,
         var: &str,
         iter: impl Iterator<Item = (K, &'o Value)>,
         body: &[Stmt],
@@ -483,7 +478,7 @@ impl Env {
     fn first_is_head(&self, stmts: &[Stmt]) -> bool {
         if let Some(Stmt::Tag(tag)) = stmts.get(0) {
             if let Stmt::String(tag) = &*tag.tag {
-                return tag == "head";
+                return tag.to_str() == "head";
             }
         }
         false

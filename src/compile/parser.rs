@@ -1,4 +1,7 @@
-use crate::{scan, Error, Result, Stmt, Syntax, Tag, Token};
+use {
+    crate::{scan, Error, Result, Stmt, Symbol, Syntax, Tag, Token},
+    std::mem,
+};
 
 #[cfg(debug_assertions)]
 const STACK_SIZE: usize = 1000; // infinite loop protection
@@ -226,14 +229,14 @@ impl<'s, 't> Parser<'s, 't> {
                 Ok(Stmt::Call(bx!(Stmt::Word("concat".into())), parts))
             }
         } else {
-            Ok(Stmt::String(lit))
+            Ok(Stmt::String(lit.into()))
         }
     }
 
     /// Parse a word.
     fn word(&mut self) -> Result<Stmt> {
         let word = self.expect(Syntax::Word)?;
-        Ok(Stmt::Word(word.to_string()))
+        Ok(Stmt::Word(word.to_str().into()))
     }
 
     /// Parse a function literal.
@@ -243,7 +246,7 @@ impl<'s, 't> Parser<'s, 't> {
         if self.peek_is(Syntax::LParen) {
             self.skip();
             while !self.peek_is(Syntax::RParen) {
-                args.push(self.expect(Syntax::Word)?.to_string());
+                args.push(self.expect(Syntax::Word)?.to_sym());
                 if self.peek_is(Syntax::Comma) {
                     self.next();
                 } else {
@@ -273,7 +276,7 @@ impl<'s, 't> Parser<'s, 't> {
         // check for unary
         if self.peek_is(Syntax::Op) {
             return Ok(Stmt::Call(
-                bx!(Stmt::Word(self.next().to_string())),
+                bx!(Stmt::Word(self.next().to_sym())),
                 vec![self.op_expr(min_power)?],
             ));
         }
@@ -309,7 +312,7 @@ impl<'s, 't> Parser<'s, 't> {
             if op_power <= min_power {
                 break;
             }
-            let op = self.next().to_string();
+            let op = self.next().to_sym();
             match op.as_ref() {
                 ":=" | "=" => {
                     let reassign = op == "=";
@@ -320,23 +323,21 @@ impl<'s, 't> Parser<'s, 't> {
                     }
                 }
                 // convert word to str, ex: map.key => .(map, "key")
-                "." if self.peek_is(Syntax::Word) => {
-                    match self.op_expr(op_power)? {
-                        Stmt::Word(word) => {
-                            left = Stmt::Call(bx!(Stmt::Word(op)), vec![left, Stmt::String(word)]);
-                            continue;
-                        }
-                        _ => return self.error("Word"),
+                "." if self.peek_is(Syntax::Word) => match self.op_expr(op_power)? {
+                    Stmt::Word(word) => {
+                        left = Stmt::Call(bx!(Stmt::Word(op)), vec![left, Stmt::String(word)]);
+                        continue;
                     }
-                }
+                    _ => return self.error("Word"),
+                },
                 // check for += and friends
                 _ if !matches!(op.as_ref(), "==" | "!=" | ">=" | "<=" | "..=")
                     && matches!(op.bytes().last(), Some(b'=')) =>
                 {
                     return Ok(Stmt::Assign(
-                        left.to_string(),
+                        left.to_str().into(),
                         bx!(Stmt::Call(
-                            bx!(Stmt::Word(op.trim_end_matches('=').to_string())),
+                            bx!(Stmt::Word(op.to_str().trim_end_matches('=').into())),
                             vec![left, self.expr()?]
                         )),
                         true, // reassignment
@@ -398,7 +399,7 @@ impl<'s, 't> Parser<'s, 't> {
                     self.eat(Syntax::Semi);
                     let key = match self.peek_kind() {
                         Syntax::Word | Syntax::String(..) | Syntax::Number | Syntax::Bool(..) => {
-                            self.next().to_string()
+                            self.next().to_sym()
                         }
                         _ => return self.error("String key name"),
                     };
@@ -453,7 +454,7 @@ impl<'s, 't> Parser<'s, 't> {
     fn keyword_args(&mut self) -> Result<Stmt> {
         let mut args = vec![];
         let mut is_kw = true;
-        let mut keyword = String::new();
+        let mut keyword = Symbol::empty();
         while let Some(tok) = self.peek() {
             match tok.kind {
                 Syntax::RParen => {
@@ -462,12 +463,12 @@ impl<'s, 't> Parser<'s, 't> {
                 }
                 Syntax::Comma | Syntax::Semi => self.skip(),
                 Syntax::Word if is_kw => {
-                    keyword = self.next().to_string();
+                    keyword = self.next().to_sym();
                     self.expect(Syntax::Colon)?;
                     is_kw = false;
                 }
                 k if k.starts_expr() => {
-                    args.push((std::mem::replace(&mut keyword, String::new()), self.expr()?));
+                    args.push((mem::replace(&mut keyword, Symbol::empty()), self.expr()?));
                     is_kw = true;
                 }
                 _ => return self.error(")"),
@@ -592,11 +593,11 @@ impl<'s, 't> Parser<'s, 't> {
         let mut key = None;
         let val;
 
-        let word = self.expect(Syntax::Word)?.to_string();
+        let word = self.expect(Syntax::Word)?.to_sym();
         if self.peek_is(Syntax::Comma) {
             self.skip();
             key = Some(word);
-            val = self.expect(Syntax::Word)?.to_string();
+            val = self.expect(Syntax::Word)?.to_sym();
         } else {
             val = word;
         }
@@ -616,14 +617,14 @@ impl<'s, 't> Parser<'s, 't> {
             Syntax::Word | Syntax::Op => self.next(),
             _ => return self.error("function name"),
         }
-        .to_string();
+        .to_sym();
 
         let mut args = vec![];
         if self.peek_is(Syntax::LParen) {
             self.skip();
             self.eat(Syntax::Semi);
             while !self.peek_eof() && !self.peek_is(Syntax::RParen) {
-                args.push(self.expect(Syntax::Word)?.to_string());
+                args.push(self.expect(Syntax::Word)?.to_sym());
                 if self.peek_is(Syntax::Comma) || self.peek_is(Syntax::Semi) {
                     self.next();
                 } else {
@@ -738,7 +739,7 @@ impl<'s, 't> Parser<'s, 't> {
         self.expect(Syntax::LCaret)?;
         let mut tag = Tag::new(match self.peek_kind() {
             Syntax::Op => Stmt::String("div".into()),
-            _ => Stmt::String(self.expect(Syntax::Word)?.to_string()),
+            _ => Stmt::String(self.expect(Syntax::Word)?.to_sym()),
         });
 
         // <#shortcuts.only.work.in@the:first-part-of-the-tag gotcha=true/>
@@ -821,10 +822,10 @@ impl<'s, 't> Parser<'s, 't> {
                         ),
                         Syntax::JS => tag.add_attr(
                             name,
-                            Stmt::String(format!(
-                                "(function(e){{ {} }})(event);",
-                                self.next().to_string()
-                            )),
+                            Stmt::String(
+                                format!("(function(e){{ {} }})(event);", self.next().to_str())
+                                    .into(),
+                            ),
                         ),
 
                         _ => return self.error("Word, Number, or String"),

@@ -1,5 +1,0 @@
-- math.md
-- string.md
-- list.md
-- map.md
-- io.md

@@ -14,7 +14,8 @@ knock off of [Imba], except Hatter produces raw, static HTML - no
 JavaScript in sight.
 
 Hatter can be used to generate static web sites or to render server
-side content in a good ol' fashioned web application. Maybe [Vial]?
+side content in a good ol' fashioned web application - either with
+[Vial] or your Rust web framework of choice.
 
 If you're feeling adventerous, or mad as a hatter, you can use the
 standalone binary to turn templates into HTML files, or include the
@@ -24,7 +25,8 @@ zero-dependency Rust library in your (web/cli/?) application.
 
 ## Hello Hatter
 
-Here are a few basic examples of what Hatter looks like:
+Here are a few basic examples of what Hatter looks like and the HTML
+it generates:
 
 ```html
 <!-- Hatter -->
@@ -118,12 +120,6 @@ Here are a few basic examples of what Hatter looks like:
 - Hatter will add a `<!DOCTYPE>` and wrap everything in `<html>` if
   the first tag in your template is `<head>`.
 
-## Future Features
-
-- Define your own tags:
-  - `def <item(item)> do <li.item data-id={item.id}> item.text`.
-- Optional type checking for functions
-
 ## Getting Started
 
 There are two ways to use Hatter:
@@ -215,20 +211,15 @@ For more infomation see the [API Documentation][api-docs].
 - [ ] HTMLized error page
 - [ ] show error location in source text on runtime errors
 
-### docs
+## Future Features
 
-- [ ] design
-- [ ] layout
-- [ ] generator
-- [ ] content
-
-### project
-
-- [ ] bomb-ass test suite
-- [ ] stdlib
-- [ ] VSCode Extension
-- [ ] VSCode + luacheck-style LSP
-- [ ] luacheck-style tool
+- Define your own tags:
+  - `def <item(item)> do <li.item data-id={item.id}> item.text`.
+- Optional type checking for functions
+- stdlib
+- VSCode Extension
+- luacheck-style tool
+- LSP
 
 ## License
 

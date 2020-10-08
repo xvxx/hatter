@@ -171,7 +171,7 @@ def test()
     return false
 test() && test()
 "#,
-        "Tested!\n"
+        "Tested!\nfalse\n"
     );
 }
 

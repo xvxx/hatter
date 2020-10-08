@@ -87,6 +87,12 @@ impl From<String> for Symbol {
     }
 }
 
+impl From<&String> for Symbol {
+    fn from(s: &String) -> Symbol {
+        Symbol::from(s.as_str())
+    }
+}
+
 impl From<&str> for Symbol {
     fn from(s: &str) -> Symbol {
         Symbol::from(s)

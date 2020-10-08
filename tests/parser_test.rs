@@ -178,13 +178,13 @@ parse_test!(
 );
 parse_test!(
     triple_single_string,
-    r#"'''one two three'''"#,
-    string!("one two three")
+    r#"'''one 'two' three'''"#,
+    string!("one 'two' three")
 );
 parse_test!(
     triple_grave_string,
-    r#"```one two three```"#,
-    string!("one two three")
+    r#"```one tw`o` three```"#,
+    string!("one tw`o` three")
 );
 parse_test!(
     triple_string_with_breaks,

@@ -1,3 +1,3 @@
-## v0.0.3-dev
+## v0.0.3
 
 - Alpha alpha alpha pre-release candidate.

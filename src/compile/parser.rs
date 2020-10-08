@@ -820,13 +820,18 @@ impl<'s, 't> Parser<'s, 't> {
                                 self.expr()?
                             },
                         ),
-                        Syntax::JS => tag.add_attr(
-                            name,
-                            Stmt::String(
-                                format!("(function(e){{ {} }})(event);", self.next().to_str())
-                                    .into(),
-                            ),
-                        ),
+                        Syntax::JS => {
+                            let tok = self.next();
+                            let js = tok.to_str();
+
+                            tag.add_attr(
+                                name,
+                                Stmt::String(
+                                    format!("(function(e){{ {} }})(event);", &js[1..js.len() - 1])
+                                        .into(),
+                                ),
+                            )
+                        }
 
                         _ => return self.error("Word, Number, or String"),
                     }

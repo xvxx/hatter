@@ -904,7 +904,7 @@ parse_test!(js_attributes, "<div onclick=(alert('lol'))>Click me", {
     let mut tag = tag!("div");
     tag.add_attr(
         string!("onclick"),
-        string!("(function(e){ (alert('lol')) })(event);"),
+        string!("(function(e){ alert('lol') })(event);"),
     );
     tag.set_body(vec![string!("Click me")]);
     Stmt::Tag(tag)
@@ -1086,7 +1086,7 @@ parse_test!(
         tag.add_class(call!("when", word!("is-it?"), string!("class-2")));
         tag.add_attr(string!("type"), string!("why-not"));
         tag.add_attr(string!("name"), string!("sure"));
-        tag.add_attr(string!("onclick"), string!("(function(e){ (alert(`it's ${2 + 2}`)) })(event);"));
+        tag.add_attr(string!("onclick"), string!("(function(e){ alert(`it's ${2 + 2}`) })(event);"));
         tag.add_attr(string!("data-id"), num!(123));
         tag.add_attr(call!("concat", string!("data-"), word!("value")), call!("compute", word!("value")));
         tag.close();

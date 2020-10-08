@@ -1,6 +1,6 @@
 <h1> My favorite song...
 
-i := 99
+i := 10 # 99
 s := "s"
 
 <#bottles>

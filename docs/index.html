@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html>
+<head><link href='lib/new.css' rel='stylesheet' />
+<link href='lib/prism.css' rel='stylesheet' />
+<title>Hatter
+</title>
+<style>
+        :root {
+            --yellow: #F9F251;
+            --pink: #E9648F;
+            --black: #272925;
+            --blue: #AEE7E8;
+            --cyan: #ABF9E0;
+        }
+        body {
+            background: url(img/memphis.jpg);
+            font-size: 1.2rem;
+        }
+        nav {
+            position: absolute;
+            top: 10px;
+            width: 100%;
+            text-align: center;
+            padding: 0;
+            margin: 0;
+        }
+        nav a {
+            background-color: white;
+            margin: 0 10px;
+            padding: 0 5px 0 10px;
+            color: var(--pink);
+            text-shadow: 3px 3px var(--blue);
+            box-shadow: 3px 3px var(--blue);
+            font-size: 30px;
+            font-family: Impact;
+            text-transform: uppercase;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+        nav a:hover {
+            color: var(--yellow);
+            text-shadow: none;
+            box-shadow: 3px 3px var(--blue);
+        }
+        .nav-space {
+            height: 40px;
+        }
+        #mad-hatter {
+            margin-top: -22px;
+        }
+        main {
+            padding: 20px;
+            background-color: var(--yellow);
+            background-image: url(img/light-memphis.png);
+            background-repeat: repeat-x;
+        }
+        body, nav, p {
+            color: var(--black);
+            max-width: 950px;
+        }
+        code {
+            color: var(--pink);
+            border: none;
+            background-color: transparent;
+        }
+        h1, h2, h3 {
+            color: #272925;
+            border-bottom: 1px solid var(--black);
+            font-family: Impact;
+        }
+        h1 {
+            font-size: 5rem;
+        }
+        h2 {
+            font-size: 4rem;
+        }
+        h3 {
+            font-size: 3rem;
+        }
+        a, a:visited {
+            color: var(--pink);
+            text-decoration: none;
+        }
+        a:hover {
+            background-color: var(--pink);
+            color: var(--yellow);
+        }
+        code[class*="language-"], pre[class*="language-"] {
+            background-color: var(--black);
+            color: white;
+            text-shadow: none;
+        }
+        .token.namespace {
+            opacity: 1;
+        }
+        .token.property, .token.tag, .token.boolean, .token.number,
+        .token.constant, .token.symbol, .token.deleted {
+            color: var(--pink);
+        }
+        .token.selector, .token.attr-name, .token.string, .token.char,
+        .token.builtin, .token.inserted {
+            color: var(--blue);
+        }
+        .token.atrule, .token.attr-value, .token.keyword {
+            color: var(--yellow);
+        }
+        #header, #logo {
+            margin-top: 0;
+            padding-top: 0;
+            height: 300px;
+        }
+        #logo {
+            color: var(--pink);
+            text-shadow: 10px 10px var(--blue);
+            font-size: 200px;
+            font-family: Impact;
+            text-transform: uppercase;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+        #rectangle {
+            width: 800px;
+            height: 200px;
+            background: white;
+            clip-path: polygon(25% 0%, 100% 0%, 75% 100%, 0% 100%);
+            position: absolute;
+            z-index: 1;
+            margin-top: 50px;
+            margin-left: 50px;
+        }
+        .code-col {
+            float: left;
+            width: 50%;
+        }
+    
+</style>
+</head>
+<body><script src='lib/prism.js'></script>
+<nav><a href='/'>Overview
+</a>
+<a href='/language'>Language
+</a>
+<a href='/tags'>Tags
+</a>
+<a href='/functions'>Functions
+</a>
+<a href='/examples'>Examples
+</a>
+<a href='/cheat-sheet'>Cheat Sheet
+</a>
+</nav>
+<div class='nav-space'></div>
+<main><div id='rectangle'></div>
+<div id='header'><div id='logo'>Hatter
+</div>
+</div>
+<img id='mad-hatter' src='./img/rhetoric.png' align='right' width='350' />
+
+<blockquote>
+<p>It is practically impossible to teach good programming to students
+that have had a prior exposure to <em>Hatter</em>: as potential programmers
+they are mentally mutilated beyond hope of regeneration.</p>
+<p>-– Edsger W. Dijkstra (allegedly)</p>
+</blockquote>
+<p>Hatter is a small, whitespace sensitive templating language with HTML
+support built right in. Its HTML features and syntax are a cheap
+knock off of <a href="https://imba.io">Imba</a>, except Hatter produces raw, static HTML - no
+JavaScript in sight.</p>
+<p>Hatter can be used to generate static web sites or to render server
+side content in a good ol' fashioned web application. Maybe with
+<a href="http://github.com/xvxx/vial">Vial</a>?</p>
+<p>If you're feeling adventerous, or mad as a hatter, you can use the
+standalone binary to turn templates into HTML files, or include the
+zero-dependency Rust library in your (web/cli/?) application.</p>
+<hr />
+<h2>Hello Hatter</h2>
+<p>Here are a few basic examples of what Hatter looks like:</p>
+<pre><code class="language-html">&lt;#main&gt; Hi there!                 &lt;div id='main'&gt;Hi there!&lt;/div&gt;
+
+&lt;span.big.bold&gt; Welcome!          &lt;span class='big bold'&gt;Welcome!&lt;/span&gt;
+
+&lt;.links&gt; for link in nav-links    &lt;div class='links'&gt;
+  &lt;a href={link.href}&gt; link.text    &lt;a href='/link1'&gt;First Link&lt;/a&gt;
+                                    &lt;a href='/link2'&gt;2nd Link&lt;/a&gt;
+                                    &lt;a href='/link3'&gt;Final Link&lt;/a&gt;
+                                  &lt;/div&gt;
+
+&lt;form GET=&quot;/search&quot;&gt;              &lt;form method='GET' action='/search'&gt;
+  &lt;input@query:text                 &lt;input name='query' type='text' placeholder='Search...' /&gt;
+    placeholder=&quot;Search...&quot; /&gt;      &lt;input type='submit' /&gt;
+  &lt;input:submit/&gt;                 &lt;/form&gt;
+</code></pre>
+<h2>Features</h2>
+<ul>
+<li>Auto-closing HTML tags and code blocks based on indentation:
+<ul>
+<li><code>&lt;h1&gt; Welcome, &lt;i&gt; Rob</code> becomes <code>&lt;h1&gt; Welcome, &lt;i&gt; Rob &lt;/i&gt;&lt;/h1&gt;</code></li>
+</ul>
+</li>
+<li>Shorthand for <code>id</code>, <code>class</code>, <code>type</code>, and <code>name</code> attributes:
+<ul>
+<li><code>&lt;div#id&gt;</code></li>
+<li><code>&lt;div.class1.class2&gt;</code></li>
+<li><code>&lt;input@form-field-name&gt;</code></li>
+<li><code>&lt;input:text&gt;</code></li>
+</ul>
+</li>
+<li>Dynamic values for regular attributes:
+<ul>
+<li><code>&lt;div page-num={page.id}&gt;</code></li>
+</ul>
+</li>
+<li>Conditionally set attributes or enable shorthand:
+<ul>
+<li><code>&lt;div .logged-in=logged-in?&gt;</code></li>
+<li><code>&lt;div data-map=is-map?&gt;</code></li>
+</ul>
+</li>
+<li>String interpolation:
+<ul>
+<li><code>&lt;span.greeting&gt; &quot;Hey there {name}. 2 + 2 is {2 + 2}&quot;</code></li>
+</ul>
+</li>
+<li>Shorthand interpolation:
+<ul>
+<li><code>&lt;span #page-{page.id} .is-{page.type}&gt; page.title</code></li>
+</ul>
+</li>
+<li>Implicit divs:
+<ul>
+<li><code>&lt;#main&gt;</code> becomes <code>&lt;div id='main'&gt;</code></li>
+</ul>
+</li>
+<li>Implicit closing tags:
+<ul>
+<li><code>&lt;i&gt;delicious&lt;/&gt;</code> becomes <code>&lt;i&gt;delicious&lt;/i&gt;</code></li>
+</ul>
+</li>
+<li>Easy inline JavaScript:
+<ul>
+<li><code>&lt;li&gt; &lt;a onclick=(alert(&quot;Oink!&quot;))&gt; &quot;🐷&quot;</code></li>
+</ul>
+</li>
+<li>Basic types:
+<ul>
+<li><code>bool</code>, <code>int,</code> <code>float</code>, <code>string</code>, <code>list</code>, <code>map</code>, <code>fn()</code></li>
+</ul>
+</li>
+<li>Loop over <code>list</code> and <code>map</code>:
+<ul>
+<li><code>&lt;ul&gt; for page in pages do &lt;li id=page-{page.id}&gt; page.name</code></li>
+<li><code>for k, v in some-map do &lt;td&gt; k &lt;/&gt; &lt;td&gt; v</code></li>
+</ul>
+</li>
+<li>if/else statements
+<ul>
+<li><code>if logged_in? then &lt;h2&gt; Welcome back!</code></li>
+</ul>
+</li>
+<li>Error-checked assignment with <code>:=</code> and <code>=</code>:
+<ul>
+<li><code>name := 'Bob'</code>  will error if name <strong>is</strong> already set.</li>
+<li><code>name = 'Bob'</code>   will error if name <strong>isn't</strong> already set.</li>
+</ul>
+</li>
+<li>Call functions defined in Rust:
+<ul>
+<li><code>&lt;div.name&gt; to-uppercase(name)</code></li>
+</ul>
+</li>
+<li>Define your own Hatter functions with strict arity and implicit
+return values:
+<ul>
+<li><code>def greet(name) do print(&quot;Hey there, {name}!&quot;)</code></li>
+<li><code>greet(&quot;Lydia&quot;)</code> prints <code>Hey there, Lydia!</code></li>
+</ul>
+</li>
+<li>Define your own Hatter operators:
+<ul>
+<li><code>def !!(a, b) do concat(to-uppercase(a), ' ', to-uppercase(b))</code></li>
+<li><code>&quot;one&quot; !! &quot;two&quot;</code> returns <code>ONE TWO</code></li>
+</ul>
+</li>
+<li>Closures and function literals:
+<ul>
+<li><code>adder := fn(x) fn(y) x + y</code> then <code>add1 := adder(1)</code></li>
+<li><code>add1(200)</code> returns <code>201</code></li>
+</ul>
+</li>
+<li><code>do</code> keyword for one-line blocks:
+<ul>
+<li><code>if 2 &gt; 1 \n\tprint(&quot;Obviously&quot;)</code> OR <code>if 2 &gt; 1 do print(&quot;Obviously&quot;)</code></li>
+<li><code>for x in list\n\tprint(x)</code> OR <code>for x in list do print(x)</code></li>
+</ul>
+</li>
+<li>Hatter will add a <code>&lt;!DOCTYPE&gt;</code> and wrap everything in <code>&lt;html&gt;</code> if
+the first tag in your template is <code>&lt;head&gt;</code>.</li>
+</ul>
+<h2>Future Features</h2>
+<ul>
+<li>Define your own tags:
+<ul>
+<li><code>def &lt;item(item)&gt; do &lt;li.item data-id={item.id}&gt; item.text</code>.</li>
+</ul>
+</li>
+<li>Optional type checking for functions</li>
+</ul>
+<h2>TODO</h2>
+<ul>
+<li><input disabled="" type="checkbox"/>
+HTMLized error page</li>
+<li><input disabled="" type="checkbox"/>
+show error location in source text on runtime errors</li>
+</ul>
+<h3>docs</h3>
+<ul>
+<li><input disabled="" type="checkbox"/>
+design</li>
+<li><input disabled="" type="checkbox"/>
+layout</li>
+<li><input disabled="" type="checkbox"/>
+generator</li>
+<li><input disabled="" type="checkbox"/>
+content</li>
+</ul>
+<h3>project</h3>
+<ul>
+<li><input disabled="" type="checkbox"/>
+bomb-ass test suite</li>
+<li><input disabled="" type="checkbox"/>
+stdlib</li>
+<li><input disabled="" type="checkbox"/>
+VSCode Extension</li>
+<li><input disabled="" type="checkbox"/>
+VSCode + luacheck-style LSP</li>
+<li><input disabled="" type="checkbox"/>
+luacheck-style tool</li>
+</ul>
+<h2>License</h2>
+<p>Hatter is licensed under the MIT License. Please see
+<a href="COPYING">COPYING</a> or http://opensource.org/licenses/MIT for details.</p>
+<p><a href="https://imba.io">Imba</a> is licensed under the MIT License.</p>
+
+
+</main>
+</body>
+
+</html>
+

@@ -391,6 +391,8 @@ impl Env {
                 out.push_str(&format!("method='{}' action='{}'", attr_name, val));
             } else if let Value::String(s) = val {
                 out.push_str(&format!("{}='{}'", attr_name, s));
+            } else if let Value::Bool(..) = val {
+                out.push_str(&attr_name);
             } else {
                 out.push_str(&format!("{}={}", attr_name, val));
             }

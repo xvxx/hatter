@@ -503,46 +503,202 @@ for v in hundreds(1..5)
 
 #[test]
 fn readme_features() {
-    // Auto-closing HTML tags and code blocks based on indentation.
+    // Auto-closing HTML tags and code blocks based on indentation
+    assert_render!(
+        "<h1> Welcome, <i> Rob",
+        "<h1>Welcome,\n<i>Rob\n</i>\n</h1>\n"
+    );
     assert_render!("<b> Heya", "<b>Heya\n</b>\n");
     assert_render!("<b> Heya <i> there", "<b>Heya\n<i>there\n</i>\n</b>\n");
-    /*
-    - Shorthand for `id`, `class`, `type`, and `name` attributes:
-      - `<div#id>`
-      - `<div.class1.class2>`
-      - `<input@form-field-name>`
-      - `<input:text>`
-    - Basic types:
-      - `bool`, `int,` `float`, `string`, `list`, `map`, `fn()`
-    - Loop over `list` and `map`:
-      - `<ul> for page in pages do <li id=page-{page.id}> page.name`
-      - `for k, v in some-map do <td> k </> <td> v`
-    - if/else statements
-      - `if logged_in? then <h2> Welcome back!`
-    - Error-checked assignment with `:=` and `=`:
-      - `name := 'Bob'`  will error if name **is** already set.
-      - `name = 'Bob'`  will error if name **isn't** already set.
-    - Dynamic values for regular attributes:
-      - `<div page-num={page.id}>`
-    - Conditionally set attributes or enable shorthand:
-      - `<div .logged-in=logged-in?>`
-      - `<div data-map=is-map?>`
-    - String interpolation:
-      - `<span.greeting> "Hey there {name}. 2 + 2 is {2 + 2}"`
-    - Shorthand interpolation:
-      - `<span #page-{page.id} .is-{page.type}> page.title`
-    - Implicit divs:
-      - `<#main>` becomes `<div id='main'>`
-    - Implicit closing tags:
-      - `<i>delicious</>` becomes `<i>delicious</i>`
-    - Call functions defined in Rust:
-      - `<div.name> to-uppercase(name)`
-    - Define your own Hatter functions:
-      - `def greet(name) do print("Hey there, {name}!")`
-      - `greet("Lydia")` prints `Hey there, Lydia!`
-    - Easy inline JavaScript:
-      - `<li> <a onclick=(alert("Oink!"))> 🐷`
-    - Hatter will add a `<!DOCTYPE>` and wrap everything in `<html>` if
-      the first tag in your template is `<head>`.
-      */
+
+    // Shorthand for `id`, `class`, `type`, and `name` attributes
+    assert_render!("<div#id>", "<div id='id'></div>\n");
+    assert_render!("<div.class1.class2>", "<div class='class1 class2'></div>\n");
+    assert_render!(
+        "<input@form-field-name>",
+        "<input name='form-field-name'></input>\n"
+    );
+    assert_render!("<input:text>", "<input type='text'></input>\n");
+
+    // Dynamic values for regular attributes
+    assert_render!(
+        "page := { id: 33 } <div page-num={page.id}>",
+        "<div page-num=33></div>\n"
+    );
+
+    // Conditionally set attributes or enable shorthand
+    assert_render!(
+        "logged-in? := true
+<div .logged-in=logged-in?>",
+        "<div class='logged-in'></div>\n"
+    );
+    assert_render!(
+        "is-map? := true
+<div data-map=is-map?>",
+        "<div data-map></div>\n"
+    );
+
+    // String interpolation
+    assert_render!(
+        r#"name := 'Bob'
+<span.greeting> "Hey there {name}. 2 + 2 is {2 + 2}""#,
+        "<span class='greeting'>Hey there Bob. 2 + 2 is 4\n</span>\n"
+    );
+
+    // Shorthand interpolation
+    assert_render!(
+        r#"page := { id: 22, type: 'index', title: 'Index' }
+<span #page-{page.id} .is-{page.type}> page.title"#,
+        "<span id='page-22' class='is-index'>Index\n</span>\n"
+    );
+
+    // Implicit divs
+    assert_render!(r#"<#main>"#, "<div id='main'></div>\n");
+
+    // Implicit closing tags
+    assert_render!(r#"<i>delicious</>"#, "<i>delicious\n</i>\n");
+
+    // Easy inline JavaScript
+    assert_render!(
+        r#"<li> <a onclick=(alert("Oink!"))> "🐷""#,
+        r#"<li><a onclick='(function(e){ alert("Oink!") })(event);'>🐷
+</a>
+</li>
+"#
+    );
+
+    // Basic types:
+    // bool, int, float, string, list, map, fn
+    assert_eval!("true", boo!(true));
+    assert_eval!("false", boo!(false));
+    assert_eval!("101", num!(101));
+    assert_eval!("3.14", num!(3.14));
+    assert_eval!("-200.12", num!(-200.12));
+    assert_eval!(r#""hey there""#, string!("hey there"));
+    assert_eval!(r#"'hi friends'"#, string!("hi friends"));
+    assert_eval!(r#"[1,2,3]"#, list![num!(1), num!(2), num!(3)]);
+    assert_eval!(r#"['Bob', 'Rob']"#, list![string!("Bob"), string!("Rob")]);
+    assert_eval!(
+        r#"{one: 1, two: 2}"#,
+        map!(
+            "one" => num!(1),
+            "two" => num!(2),
+        )
+    );
+    assert_eval!(
+        r#"{name: "Ringo", job: "Drums"}"#,
+        map!(
+            "name" => string!("Ringo"),
+            "job" =>  string!("Drums"),
+        )
+    );
+
+    // Loop over `list` and `map`
+    assert_render!(
+        r#"pages := [{id: 1, name: "Page 1"}, {id: 2, name: "2nd"}]
+<ul> for page in pages do <li id=page-{page.id}> page.name"#,
+        "<ul><li id='page-1'>Page 1\n</li>\n<li id='page-2'>2nd\n</li>\n</ul>\n"
+    );
+    assert_render!(
+        r#"some-map := { one: 1, two: 2 }
+for k, v in some-map do <tr> <td> k </> <td> v"#,
+        "<tr><td>one\n</td>\n<td>1\n</td>\n</tr>\n<tr><td>two\n</td>\n<td>2\n</td>\n</tr>\n"
+    );
+
+    // if/else statement
+    assert_render!(
+        r#"logged_in? := false
+if logged_in? then <h2> Welcome back!"#,
+        r#""#
+    );
+    assert_render!(
+        "logged_in? := true
+if logged_in? then <h2> Welcome back!",
+        "<h2>Welcome back!\n</h2>\n"
+    );
+
+    // Error-checked assignment with `:=` and `=`
+    assert_error!(
+        "
+name := 'Bob'
+name := 'Rob'"
+    );
+    assert_error!("name = 'Bob'");
+
+    // Call functions defined in Rust
+    assert_render!(
+        r#"name := "tony"
+<div.name> to-uppercase(name)"#,
+        "<div class='name'>TONY\n</div>\n"
+    );
+
+    // Define your own Hatter functions with strict arity and implici
+    //   return values:
+    assert_render!(
+        r#"def greet(name) do print("Hey there, {name}!")
+greet("Lydia")"#,
+        "Hey there, Lydia!\n"
+    );
+
+    // Define your own Hatter operators
+    assert_render!(
+        r#"
+def ++(a, b) do concat(to-uppercase(a), ' ', to-uppercase(b))
+print("cat" ++ "dog")
+"#,
+        "CAT DOG\n"
+    );
+
+    // Closures and function literals
+    assert_eval!(
+        r#"
+adder := fn(x) fn(y) x + y
+add1 := adder(1)
+add1(200)
+"#,
+        num!(201)
+    );
+
+    // Call functions with keyword arguments
+    assert_render!(
+        r#"
+def greet(title, name) do print("Hiya, {title}. {name}!")
+greet(name: "Marley", title: "Dr")
+"#,
+        "Hiya, Dr. Marley!\n"
+    );
+
+    // `do` keyword for one-line blocks
+    assert_render!(r#"if 2 > 1 do print("Obviously")"#, "Obviously\n");
+    assert_render!(r#"for x in [1,2,3] do print(x)"#, "1\n2\n3\n");
+
+    // `then` keyword for one-line `if` statements
+    assert_render!(
+        r#"if 2 > 1 then print("Yup!") else if 2 < 1 then print("Impossible.")"#,
+        "Yup!\n"
+    );
+
+    // Hatter will add a `<!DOCTYPE>` and wrap everything in `<html>` if
+    // the first tag in your template is `<head>`.
+    assert_render!(
+        "<head>
+    <title> Kewl
+<body>
+    <h1> Heya
+    <p> Hey ya!",
+        "<!DOCTYPE html>
+<html>
+<head><title>Kewl
+</title>
+</head>
+<body><h1>Heya
+</h1>
+<p>Hey ya!
+</p>
+</body>
+
+</html>
+
+"
+    );
 }

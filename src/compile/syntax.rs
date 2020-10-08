@@ -47,6 +47,17 @@ impl Syntax {
             Syntax::Op | Syntax::LCaret | Syntax::LParen | Syntax::LStaple | Syntax::LCurly
         )
     }
+
+    /// Is this a word or a keyword? Used for implicit body text in tags.
+    pub fn is_word_or_keyword(&self) -> bool {
+        use Syntax::*;
+        match self {
+            Word | Def | Do | Return | If | Then | Else | For | While | In | Fn => true,
+            None | Indent | Dedent | Bool(..) | Number | String(..) | JS | Op | Semi | Colon
+            | Comma | LParen | RParen | LCurly | RCurly | LStaple | RStaple | LCaret | RCaret
+            | Slash | Equal => false,
+        }
+    }
 }
 
 /// Helper method we add to `char`.

@@ -532,17 +532,20 @@ impl<'s, 't> Parser<'s, 't> {
                 // look for </closing> tag and bail if found.
                 Syntax::LCaret if self.peek2_is(Syntax::Slash) => break,
 
-                // two words in a row become a string in tags
+                // two words in a row become text in tag bodies
                 Syntax::Word
                     if self
                         .peek2()
-                        .filter(|p| matches!(p.kind, Syntax::Word | Syntax::Comma | Syntax::Colon))
+                        .filter(|p| {
+                            p.kind.is_word_or_keyword()
+                                || matches!(p.kind, Syntax::Comma | Syntax::Colon)
+                        })
                         .is_some() =>
                 {
                     let mut out = self.next().to_string();
                     while !self.peek_eof() {
                         match self.peek_kind() {
-                            Syntax::Word => out.push(' '),
+                            k if k.is_word_or_keyword() => out.push(' '),
                             Syntax::Op | Syntax::Comma | Syntax::Colon => {}
                             _ => break,
                         }

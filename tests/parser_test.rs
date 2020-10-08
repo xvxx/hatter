@@ -209,6 +209,30 @@ parse_test!(two_words_in_tag_are_a_string, "<b> one two", {
     Stmt::Tag(tag)
 });
 parse_test!(
+    word_and_keyword_in_tag_are_a_string,
+    "<a href='/signin'> sign in",
+    {
+        let mut tag = tag!("a");
+        tag.add_attr("href".into(), "/signin".into());
+        tag.set_body(vec![Stmt::String("sign in".into())]);
+        Stmt::Tag(tag)
+    }
+);
+parse_test!(
+    simple_word_and_keyword_in_tag_are_a_string,
+    "<b> sign in",
+    {
+        let mut tag = tag!("b");
+        tag.set_body(vec![Stmt::String("sign in".into())]);
+        Stmt::Tag(tag)
+    }
+);
+parse_test!(word_followed_by_colon_in_tag_body, "<b> name: Bob", {
+    let mut tag = tag!("b");
+    tag.set_body(vec![Stmt::String("name: Bob".into())]);
+    Stmt::Tag(tag)
+});
+parse_test!(
     two_words_with_op_in_tag_are_a_string,
     "<b> One and... two!",
     {

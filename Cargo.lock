@@ -91,7 +91,7 @@ dependencies = [
 
 [[package]]
 name = "hatter"
-version = "0.0.3"
+version = "0.0.4-dev"
 dependencies = [
  "rustyline 6.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]

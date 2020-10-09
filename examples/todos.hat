@@ -1,3 +1,7 @@
+todos := [
+    {id: 1, text: "Clean room"},
+    {id: 2, text: "Practice harmonica"},
+]
 <ul.todos>
     for todo in todos
-        <li.todo data-id=todo.id> todo.text
+        <li.todo data-id={todo.id}> todo.text

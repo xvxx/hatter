@@ -1,6 +1,13 @@
+pages := [
+  {id: 1, path: "/one", name: "First"},
+  {id: 2, path: "/two", name: "Second"},
+  {id: 3, path: "/three", name: "Third"}
+]
+
 <#jump-page>
   <form GET="/jump" autocomplete="off">
     <input@pattern:text#jump-pattern.focused />
   <ul#jump-list>
     for page in pages
-      <li#"jump-{page.id}"> <a href="/{page.path}"> page.name
+      <li#jump-{page.id}>
+        <a href="{page.path}"> page.name

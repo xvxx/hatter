@@ -1,5 +1,5 @@
 <head>
-    <style> "
+    <style> """
         .blue { background-color: blue; }
         .blue:hover { background-color: white; color: blue; }
         .teal { background-color: teal; }
@@ -17,7 +17,8 @@
         .flex {
             display: flex;
             flex-wrap: wrap;
-        } "
+        }
+    """
 
 <body>
     <.flex>

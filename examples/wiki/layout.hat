@@ -1,13 +1,18 @@
 <head>
-  css "simplemde.min"
-  css "github.min"
-  css "font-awesome.min"
-  css "github-markdown"
-  css "style"
-  js "highlight.min"
-  js "simplemde.min"
-  js "fuse-v6.0.0"
-  js "deadwiki"
+  webview? := false
+  current-path := "/"
+  css := fn(url) return <link href="{url}.css" rel='stylesheet' />
+  js := fn(url) return <script src="{url}.js" defer></script>
+
+  css("simplemde.min")
+  css("github.min")
+  css("font-awesome.min")
+  css("github-markdown")
+  css("style")
+  js("highlight.min")
+  js("simplemde.min")
+  js("fuse-v6.0.0")
+  js("deadwiki")
   <title> title
 
 <body>
@@ -19,5 +24,6 @@
               <a#edit-link href="/edit/{current-path}"> edit
       body
 
-  <script>
+  <script> """
     window.WIKI_PAGES = {pages.json}; // for fuzzy finder
+"""

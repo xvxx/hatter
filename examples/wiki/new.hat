@@ -1,8 +1,10 @@
+name := "Title"
+
 <p>
   <a href="/"> home
   <a onclick=(history.back())> back
 
 <form#form POST="/new">
-  <p><input@name:text#focused value=name placeholder="filename">
+  <p><input@name:text#focused value=name placeholder="filename"/>
   <textarea@markdown#markdown> "# {name}"
   <input@submit/>

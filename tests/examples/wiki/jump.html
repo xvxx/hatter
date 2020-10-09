@@ -1,18 +1,17 @@
-<data>
-pages: [
-  {id: 1, path: "/one", name: "First"},
-  {id: 2, path: "/two", name: "Second"},
-  {id: 3, path: "/three", name: "Third"},
-]
-</data>
-
-<div id="jump-page">
-  <form method="GET" action="/jump" autocomplete="off">
-    <input id="jump-pattern" name="pattern" type="text" class="focused" />
+<div id='jump-page'>
+  <form method='get' action='/jump' autocomplete='off'>
+    <input id='jump-pattern' class='focused' name='pattern' type=
+    'text'>
   </form>
-  <ul id="jump-list">
-    <li id="jump-1"><a href="/one">First</a></li>
-    <li id="jump-2"><a href="/two">Second</a></li>
-    <li id="jump-3"><a href="/three">Third</a></li>
+  <ul id='jump-list'>
+    <li id='jump-1'>
+      <a href='/one'>First</a>
+    </li>
+    <li id='jump-2'>
+      <a href='/two'>Second</a>
+    </li>
+    <li id='jump-3'>
+      <a href='/three'>Third</a>
+    </li>
   </ul>
 </div>

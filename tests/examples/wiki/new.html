@@ -1,9 +1,8 @@
-<p>
-  <a href="/">home</a>
-  <a href="#" onclick="javascript:function(e){history.back();}">back</a>
-</p>
-<form id="form" method="POST" action="/new">
-  <p><input id="focused" name="name" type="text" value="" placholder="filename"></p>
-  <textarea id="markdown" name="markdown"># </textarea>
-  <input type="submit" />
+<p><a href='/'>home</a> <a onclick=
+'(function(e){ history.back() })(event);' href='#'>back</a></p>
+<form id='form' method='post' action='/new' name="form">
+  <p><input id='focused' name='name' type='text' value='Title'
+  placeholder='filename'></p>
+  <textarea id='markdown' name='markdown'># Title</textarea>
+  <input name='submit'>
 </form>

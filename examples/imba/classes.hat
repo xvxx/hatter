@@ -1,7 +1,14 @@
+data := { isResolved: true }
+marks := "stop"
+state := "running"
+color := "red"
+user := { theme: "night" }
+app := { loggedIn: false }
+
 <div.note.editorial> "Hello"
 
-<div.note.editorial .resolved=data.isResolved> "Hello"
+<div.note.editorial .resolved={data.isResolved}> "Hello"
 
 <div.item .{marks} .{state} .bg-{color}-200> "Hello"
 
-<div.item .theme-{user.theme}=app.loggedIn> "Hello"
+<div.item .theme-{user.theme}={app.loggedIn}> "Hello"

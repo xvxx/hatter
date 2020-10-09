@@ -580,7 +580,7 @@ fn readme_features() {
     // Easy inline JavaScript
     assert_render!(
         r#"<li> <a onclick=(alert("Oink!"))> "🐷""#,
-        r#"<li><a onclick='(function(e){ alert("Oink!") })(event);'>🐷
+        r#"<li><a onclick='(function(e){ alert("Oink!") })(event);' href='#'>🐷
 </a>
 </li>
 "#

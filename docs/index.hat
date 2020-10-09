@@ -58,9 +58,9 @@
             max-width: 950px;
         }
         code {
-            color: var(--pink);
+            color: var(--black);
             border: none;
-            background-color: black;
+            background-color: transparent;
             padding: 2px;
         }
         h1, h2, h3 {

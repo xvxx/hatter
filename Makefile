@@ -1,6 +1,14 @@
 .PHONY: build
 build: target/release/hatter
 
+.PHONY: test
+test:
+	@cargo test --features repl
+
+.PHONY: fast-test
+fast-test:
+	@cargo test
+
 .PHONY: repl
 repl:
 	@cargo run -q --features repl -- repl

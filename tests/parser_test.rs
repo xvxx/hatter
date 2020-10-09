@@ -113,6 +113,37 @@ macro_rules! parse_test {
 }
 
 ////
+// comments
+
+parse_test!(
+    comment_test,
+    "
+<!-- okay -->
+true
+",
+    string!("<!-- okay -->"),
+    boo!(true)
+);
+
+parse_test!(
+    multi_line_comment_test,
+    "
+<!--
+    oooo
+    kkkkay
+-->
+true
+",
+    string!(
+        "<!--
+    oooo
+    kkkkay
+-->"
+    ),
+    boo!(true)
+);
+
+////
 // boolean
 
 parse_test!(true_bool, "true", boo!(true));

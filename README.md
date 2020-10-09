@@ -184,7 +184,9 @@ files into HTML.
 
 Just install it using `cargo`:
 
-    cargo install hatter
+```bash
+cargo install hatter
+```
 
 Then point it at any `.hat` file:
 
@@ -198,7 +200,9 @@ $ hatter test.hat
 
 You can also install Hatter with a readline-powered REPL:
 
-    cargo install hatter --features repl
+```bash
+cargo install hatter --features repl
+```
 
 To launch it, start `hatter` with no arguments:
 

@@ -60,7 +60,8 @@
         code {
             color: var(--pink);
             border: none;
-            background-color: transparent;
+            background-color: black;
+            padding: 2px;
         }
         h1, h2, h3 {
             color: #272925;
@@ -136,6 +137,7 @@
 
 <body>
     <script src="lib/prism.js"></>
+    """ <!--
     <nav>
         <a href='/'> Overview
         <a href='/language'> Language
@@ -144,6 +146,7 @@
         <a href='/examples'> Examples
         <a href='/cheat-sheet'> Cheat Sheet
     <.nav-space>
+    --> """
     <main>
         <#rectangle>
         <#header>
@@ -162,28 +165,41 @@ support built right in. Its HTML features and syntax are a cheap
 knock off of <a href="https://imba.io">Imba</a>, except Hatter produces raw, static HTML - no
 JavaScript in sight.</p>
 <p>Hatter can be used to generate static web sites or to render server
-side content in a good ol' fashioned web application. Maybe with
-<a href="http://github.com/xvxx/vial">Vial</a>?</p>
+side content in a good ol' fashioned web application - either with
+<a href="http://github.com/xvxx/vial">Vial</a> or your Rust web framework of choice.</p>
 <p>If you're feeling adventerous, or mad as a hatter, you can use the
 standalone binary to turn templates into HTML files, or include the
 zero-dependency Rust library in your (web/cli/?) application.</p>
 <hr />
 <h2>Hello Hatter</h2>
-<p>Here are a few basic examples of what Hatter looks like:</p>
-<pre><code class="language-html">&lt;#main&gt; Hi there!                 &lt;div id='main'&gt;Hi there!&lt;/div&gt;
+<p>Here are a few basic examples of what Hatter looks like and the HTML
+it generates:</p>
+<pre><code class="language-html">&lt;!-- Hatter --&gt;
+&lt;#main&gt; Hi there!
 
-&lt;span.big.bold&gt; Welcome!          &lt;span class='big bold'&gt;Welcome!&lt;/span&gt;
+&lt;!-- Generated HTML --&gt;
+&lt;div id='main'&gt;Hi there!&lt;/div&gt;
+</code></pre>
+<pre><code class="language-html">&lt;span.big.bold&gt; Welcome!
 
-&lt;.links&gt; for link in nav-links    &lt;div class='links'&gt;
-  &lt;a href={link.href}&gt; link.text    &lt;a href='/link1'&gt;First Link&lt;/a&gt;
-                                    &lt;a href='/link2'&gt;2nd Link&lt;/a&gt;
-                                    &lt;a href='/link3'&gt;Final Link&lt;/a&gt;
-                                  &lt;/div&gt;
+&lt;span class='big bold'&gt;Welcome!&lt;/span&gt;
+</code></pre>
+<pre><code class="language-html">&lt;.links&gt; for link in nav-links
+  &lt;a href={link.href}&gt; link.text
 
-&lt;form GET=&quot;/search&quot;&gt;              &lt;form method='GET' action='/search'&gt;
-  &lt;input@query:text                 &lt;input name='query' type='text' placeholder='Search...' /&gt;
-    placeholder=&quot;Search...&quot; /&gt;      &lt;input type='submit' /&gt;
-  &lt;input:submit/&gt;                 &lt;/form&gt;
+&lt;div class='links'&gt;
+  &lt;a href='/link1'&gt;First Link&lt;/a&gt;
+  &lt;a href='/link2'&gt;2nd Link&lt;/a&gt;
+  &lt;a href='/link3'&gt;Final Link&lt;/a&gt;
+&lt;/div&gt;
+</code></pre>
+<pre><code class="language-html">&lt;form GET=&quot;/search&quot;&gt;
+  &lt;input@query:text placeholder=&quot;Search...&quot; /&gt; &lt;input:submit /&gt;
+
+&lt;form method='GET' action='/search'&gt;
+  &lt;input name='query' type='text' placeholder='Search...' /&gt;
+  &lt;input type='submit' /&gt;
+&lt;/form&gt;
 </code></pre>
 <h2>Features</h2>
 <ul>
@@ -238,7 +254,7 @@ zero-dependency Rust library in your (web/cli/?) application.</p>
 </li>
 <li>Basic types:
 <ul>
-<li><code>bool</code>, <code>int,</code> <code>float</code>, <code>string</code>, <code>list</code>, <code>map</code>, <code>fn()</code></li>
+<li><code>bool, int, float, string, list, map, fn</code></li>
 </ul>
 </li>
 <li>Loop over <code>list</code> and <code>map</code>:
@@ -254,8 +270,8 @@ zero-dependency Rust library in your (web/cli/?) application.</p>
 </li>
 <li>Error-checked assignment with <code>:=</code> and <code>=</code>:
 <ul>
-<li><code>name := 'Bob'</code>  will error if name <strong>is</strong> already set.</li>
-<li><code>name = 'Bob'</code>   will error if name <strong>isn't</strong> already set.</li>
+<li><code>name := 'Bob'</code> will error if name <strong>is</strong> already set.</li>
+<li><code>name = 'Bob'</code> will error if name <strong>isn't</strong> already set.</li>
 </ul>
 </li>
 <li>Call functions defined in Rust:
@@ -272,8 +288,8 @@ return values:
 </li>
 <li>Define your own Hatter operators:
 <ul>
-<li><code>def !!(a, b) do concat(to-uppercase(a), ' ', to-uppercase(b))</code></li>
-<li><code>&quot;one&quot; !! &quot;two&quot;</code> returns <code>ONE TWO</code></li>
+<li><code>def ++(a, b) do concat(to-uppercase(a), ' ', to-uppercase(b))</code></li>
+<li><code>&quot;one&quot; ++ &quot;two&quot;</code> returns <code>ONE TWO</code></li>
 </ul>
 </li>
 <li>Closures and function literals:
@@ -282,14 +298,97 @@ return values:
 <li><code>add1(200)</code> returns <code>201</code></li>
 </ul>
 </li>
+<li>Call functions with keyword arguments:
+<ul>
+<li><code>def greet(title, name) do print(&quot;Hiya, {title}. {name}!&quot;)</code></li>
+<li><code>greet(name: &quot;Marley&quot;, title: &quot;Dr&quot;)</code> prints <code>Hiya, Dr. Marley!</code></li>
+</ul>
+</li>
 <li><code>do</code> keyword for one-line blocks:
 <ul>
-<li><code>if 2 &gt; 1 \n\tprint(&quot;Obviously&quot;)</code> OR <code>if 2 &gt; 1 do print(&quot;Obviously&quot;)</code></li>
-<li><code>for x in list\n\tprint(x)</code> OR <code>for x in list do print(x)</code></li>
+<li><code>if 2 &gt; 1 do print(&quot;Obviously&quot;)</code></li>
+<li><code>for x in list do print(x)</code></li>
+</ul>
+</li>
+<li><code>then</code> keyword for one-line <code>if</code> statements:
+<ul>
+<li><code>if 2 &gt; 1 then print(&quot;Yup!&quot;) else if 2 &lt; 1 then print(&quot;Impossible.&quot;)</code></li>
 </ul>
 </li>
 <li>Hatter will add a <code>&lt;!DOCTYPE&gt;</code> and wrap everything in <code>&lt;html&gt;</code> if
 the first tag in your template is <code>&lt;head&gt;</code>.</li>
+</ul>
+<h2>Getting Started</h2>
+<p>There are two ways to use Hatter:</p>
+<h3>1. In Your Rust Application</h3>
+<p>Hatter can (primarily) be used as a templating language from within
+your Rust applications.</p>
+<p>Simply add Hatter to <code>Cargo.toml</code>:</p>
+<pre><code class="language-toml">[dependencies]
+hatter = &quot;0.1&quot;
+</code></pre>
+<p>Then create a <code>hatter::Env</code>, which represents the top-level Hatter
+scope for your template, to set variables and render your template:</p>
+<pre><code class="language-rust">use hatter::{Args, Env, Value};
+
+let mut env = Env::new();
+env.set(&quot;name&quot;, &quot;Bobby Boucher&quot;);
+env.set(&quot;age&quot;, 31);
+env.render(r#&quot;
+&lt;p&gt; &lt;b&gt;Name:&lt;/&gt; name
+&lt;p&gt; &lt;b&gt;Age:&lt;/&gt; age
+&quot;#)
+</code></pre>
+<p>You can also write functions in Rust and make them available to your
+HTML templates:</p>
+<pre><code class="language-rust">use hatter::prelude::*;
+
+fn quote(args: Args) -&gt; Result&lt;Value&gt; {
+  let file = std::fs::read_to_string(&quot;quotes.txt&quot;)?;
+  let list_of_quotes: Vec&lt;_&gt; = file.split('\n').collect();
+  let line = match args.need_number(0)? as usize {
+    n if n &gt; list_of_quotes.len() =&gt; 0,
+    n =&gt; n,
+  };
+
+  Value::from(list_of_quotes[line]).ok()
+}
+
+fn main() {
+    let mut env = Env::new();
+    env.set(&quot;quote&quot;, quote);
+    println!(&quot;{}&quot;, env.render(&quot;&lt;div&gt; quote(1)&quot;).unwrap());
+}
+</code></pre>
+<p>For more infomation see the <a href="https://docs.rs/hatter/">API Documentation</a>.</p>
+<h3>2. As A Standalone Executable</h3>
+<p>Hatter can be used as a regular command line program to turn <code>.hat</code>
+files into HTML.</p>
+<p>Just install it using <code>cargo</code>:</p>
+<pre><code class="language-bash">cargo install hatter
+</code></pre>
+<p>Then point it at any <code>.hat</code> file:</p>
+<pre><code class="language-bash">$ cat test.hat
+&lt;b.test&gt; &quot;Testing 1 2 3 {2 + 2}&quot;
+
+$ hatter test.hat
+&lt;b class='test'&gt;Testing 1 2 3 4 &lt;/b&gt;
+</code></pre>
+<p>You can also install Hatter with a readline-powered REPL:</p>
+<pre><code class="language-bash">cargo install hatter --features repl
+</code></pre>
+<p>To launch it, start <code>hatter</code> with no arguments:</p>
+<pre><code class="language-bash">$ hatter
+Hatter v0.0.1 REPL
+&gt;&gt; 1 + 2
+3
+</code></pre>
+<h2>TODO</h2>
+<ul>
+<li><input disabled="" type="checkbox"/>
+HTMLized error page</li>
+<li><input disabled="" type="checkbox"/>
+show error location in source text on runtime errors</li>
 </ul>
 <h2>Future Features</h2>
 <ul>
@@ -299,41 +398,13 @@ the first tag in your template is <code>&lt;head&gt;</code>.</li>
 </ul>
 </li>
 <li>Optional type checking for functions</li>
-</ul>
-<h2>TODO</h2>
-<ul>
-<li><input disabled="" type="checkbox"/>
-HTMLized error page</li>
-<li><input disabled="" type="checkbox"/>
-show error location in source text on runtime errors</li>
-</ul>
-<h3>docs</h3>
-<ul>
-<li><input disabled="" type="checkbox"/>
-design</li>
-<li><input disabled="" type="checkbox"/>
-layout</li>
-<li><input disabled="" type="checkbox"/>
-generator</li>
-<li><input disabled="" type="checkbox"/>
-content</li>
-</ul>
-<h3>project</h3>
-<ul>
-<li><input disabled="" type="checkbox"/>
-bomb-ass test suite</li>
-<li><input disabled="" type="checkbox"/>
-stdlib</li>
-<li><input disabled="" type="checkbox"/>
-VSCode Extension</li>
-<li><input disabled="" type="checkbox"/>
-VSCode + luacheck-style LSP</li>
-<li><input disabled="" type="checkbox"/>
-luacheck-style tool</li>
+<li>stdlib</li>
+<li>VSCode Extension</li>
+<li>luacheck-style tool</li>
+<li>LSPc</li>
 </ul>
 <h2>License</h2>
 <p>Hatter is licensed under the MIT License. Please see
-<a href="COPYING">COPYING</a> or http://opensource.org/licenses/MIT for details.</p>
-<p><a href="https://imba.io">Imba</a> is licensed under the MIT License.</p>
-
+<a href="COPYING">COPYING</a> or <a href="http://opensource.org/licenses/MIT">http://opensource.org/licenses/MIT</a> for details.</p>
+<p><a href="https://imba.io">Imba</a> is licensed under the <a href="https://github.com/imba/imba/blob/master/LICENSE">MIT License</a>.</p>
 """

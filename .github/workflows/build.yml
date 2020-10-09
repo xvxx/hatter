@@ -67,6 +67,8 @@ jobs:
         run: cargo check
       - name: clippy
         run: cargo clippy
+      - name: Install tidy
+        run: sudo apt-get install tidy
       - name: test
         run: cargo test
       - name: build

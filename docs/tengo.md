@@ -4,13 +4,10 @@
     Hatter Language
 -->
 
-# module import TODO
-## fmt := import("fmt")
-
 # variable definition and primitive types
 a := "foo"   # String
-b := -19.84  # Float
-c := 5       # Int TODO
+b := -19.84  # Number
+c := 5       # Number
 d := true    # Bool
 e := '九'    # String
 print("a: ", a)
@@ -20,8 +17,7 @@ print("d: ", d)
 print("e: ", e)
 
 # assignment
-b = "bar"    # can assign value of different type
-print("b: ", b)
+b = "bar"    # error: can't assign value of different type
 
 # map and list
 m := {a: {b: {c: [1, 2, 3]}}}
@@ -30,8 +26,7 @@ print("m: ", m)
 # indexing with .
 bb := { first: "Bilbo", last: "Baggins" }
 name := "{bb.first} {bb.last}"
-list := [1, 2, 3, 4, 5].map(fn(x) x * 10)
-print(arr
+print("name: ", name)
 
 # slicing TODO
 str := "hello world"

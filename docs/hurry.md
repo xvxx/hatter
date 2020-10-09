@@ -4,32 +4,6 @@ In a hurry? If you already know how to program, you already know
 Hatter. And if you already know both Python and HTML, well, you're an
 expert, kid. Maybe you should be teaching me.
 
-## Whitespace
-
-Before we get started, it should be noted that Hatter is more
-sensitive than other languages when it comes to whitespace. You could
-say it has a mild allergy. Like Python, Hatter uses indentation to
-determine blocks, but like Lisp, it is extremely liberal with what it
-considers a "word" (aka ident, symbol, variable or function name...).
-
-In most languages, Math is easy:
-
-    a-b*c # becomes a - b * c
-
-In Hatter, you really need to let things breathe:
-
-    a-b*c      # refers to a variable named "a-b*c"
-    a - b * c  # what you'd expect
-
-The benefit of this is that Hatter variable names, like HTML tags, can
-contain a dash (`-`). It also means your variable and function names
-can end in a question mark (`?`), like Ruby.
-
-<#>
-TODO: Maybe just make the lexer more normal, with the two
-exceptions of allowing `-` in words and `?` at the end of words.
-</#>
-
 ## Blocks
 
 Like Python, CoffeeScript, Nim, and Imba, Hatter is a
@@ -41,9 +15,9 @@ and spaces in the same file produces an error.
 # Blocks in action.
 num := ask("Give me a small number: ").to_int()
 
-if num > 0 and num < 100
+if num > 0 && num < 100
     print("One")
-    for i in range(1, num)
+    for i in 1..num
         print("and a' {i}")
     print("Go!")
 else if num >= 100
@@ -65,22 +39,20 @@ Comments start from `#` and go to the end of the line. Nothing fancy:
 There are only a few basic types in Hatter
 
 ```hatter
-# bool
+# Bool
 false
 true
 
-# int
+# Number
 200
 -10_150_203
 0b101
 0o123
 0xdeadbeef
-
-# float
 3.14
 -102.123
 
-# string
+# String
 "Heya pal!"
 'Also, hi.'
 `Also, hello.`
@@ -90,16 +62,16 @@ true
 """
 "Double quoted strings are interpolated: {2 + 2}" # <- This will be 4
 
-# list
+# List
 [1, 2, 3]
 ["John", "Paul", "George", "Ringo"]
 [true, 2, "Paul"] # dynamic language, lists can be mixed types
 
-# map
+# Map
 { one: "one", two: "two" }
 { 0: "oh", 1: "also one" }
 
-# fn
+# Fn
 fn(x) return x + 1
 ```
 
@@ -122,7 +94,7 @@ rand = "random" # error, doesn't exist
 ## Functions
 
 Functions are set with the `def` keyword and always invoked with `()`.
-Arity matters in Hatter: if you pass in too many or too few arguments
+Arity matters to Hatter: if you pass in too many or too few arguments
 to a function you'll get an error:
 
 ```hatter
@@ -163,23 +135,22 @@ else if i > 100_000_000
     print("Way TOO Positive!")
 ```
 
-Like most languages, Hatter includes `and` and `or` which are both
-short-circuiting. It also includes a `not` keyword:
+Like most languages, Hatter includes `&&` and `||` which are both
+short-circuiting. It also includes a `!` prefix operator:
 
 ```hatter
-not true         #=> false
-true and true    #=> true
-happy? or sad?   #=> depends, i guess
+!true            #=> false
+true && true     #=> true
+happy? || sad?   #=> depends, i guess
 ```
 
 ## Loops
 
-Hatter has three types of loops: a `for` loop over `list`, a `for`
-loop for `map`, and a basic `while` loop.
+Hatter has three types of loops: a `for` loop over `List`, a `for`
+loop for `Map`, and a basic `while` loop.
 
-Both the `list` and `map` loops take either a single variable or two
-variables to fill with either the value alone or the key/index and
-value:
+Both the `List` and `Map` loops take either one or two variables to
+fill with either the value alone or the key/index and value:
 
 ```hatter
 for v in [100, 200, 300]

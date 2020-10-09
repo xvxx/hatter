@@ -35,8 +35,7 @@ pub fn run() -> io::Result<()> {
                         let out = env.out();
                         if !out.trim().is_empty() {
                             print!("{}", out);
-                        }
-                        if !matches!(val, Value::None) {
+                        } else if !matches!(val, Value::None) {
                             print!("{}", val);
                         }
                     }

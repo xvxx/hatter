@@ -92,6 +92,25 @@ fn test_string() {
 #[test]
 fn test_list() {
     assert_eval!("[1,2,3]", list![num!(1), num!(2), num!(3)]);
+    assert_eval!(
+        "['Peter', 'Paul', 'Bob']",
+        list![string!("Peter"), string!("Paul"), string!("Bob"),]
+    );
+}
+
+#[test]
+fn test_map() {
+    assert_eval!(
+        "{ name: 'Bilbo', age: 111 }",
+        map!("name" => string!("Bilbo"), "age" => num!(111))
+    );
+
+    assert_render!(
+        "map := { name: 'Bilbo', age: 111 }
+for k, v in map
+    <span> <b> k </> v",
+        "<span><b>name\n</b>\nBilbo\n</span>\n<span><b>age\n</b>\n111\n</span>\n"
+    );
 }
 
 #[test]

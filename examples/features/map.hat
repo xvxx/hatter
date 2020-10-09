@@ -8,7 +8,8 @@ bilbo := {
 }
 
 <table>
-    for k, v in bilbo
+    <!-- We do it this way to control our sort order. -->
+    for k in ["first", "last", "age", "Place of Birth", "Favorite Food"]
         <tr>
             <td> k </>
-            <td> v </>
+            <td> bilbo[k] </>

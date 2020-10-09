@@ -43,7 +43,6 @@ pub use {
     eval::{
         args::Args,
         env::{eval, render, Env, Jump, Scope},
-        natives::{natives, specials},
         value::{self, Fn, NativeFn, Object, SpecialFn, Value},
     },
     interner::Interner,

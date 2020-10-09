@@ -1,5 +1,5 @@
 use {
-    crate::{compile, natives, specials, Args, ErrorKind, Fn, Result, Stmt, Symbol, Tag, Value},
+    crate::{compile, eval::builtin, Args, ErrorKind, Fn, Result, Stmt, Symbol, Tag, Value},
     std::{
         cell::{Ref, RefCell},
         collections::{BTreeMap, HashMap},
@@ -43,10 +43,10 @@ impl Env {
     /// New, top-level Env.
     pub fn new() -> Env {
         let mut scope = HashMap::new();
-        for (name, fun) in natives() {
+        for (name, fun) in builtin::natives() {
             scope.insert(name, Value::Fn(Fn::Native(fun)));
         }
-        for (name, fun) in specials() {
+        for (name, fun) in builtin::specials() {
             scope.insert(name, Value::Fn(Fn::Special(fun)));
         }
         Env {

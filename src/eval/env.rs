@@ -383,6 +383,8 @@ impl Env {
 
         // attributes
         let is_form = tagname == "form";
+        let is_link = tagname == "a";
+        let mut has_href = !is_link;
         for (name, val) in &tag.attrs {
             let val = self.eval(val)?;
             if !val.to_bool() {
@@ -392,14 +394,21 @@ impl Env {
             let attr_name = self.eval(name)?.to_string();
             if is_form && matches!(attr_name.as_ref(), "GET" | "POST") {
                 out.push_str(&format!("method='{}' action='{}'", attr_name, val));
-            } else if let Value::String(s) = val {
-                out.push_str(&format!("{}='{}'", attr_name, s));
-            } else if let Value::Bool(..) = val {
-                out.push_str(&attr_name);
             } else {
-                out.push_str(&format!("{}={}", attr_name, val));
+                if attr_name == "href" {
+                    has_href = true;
+                }
+                match val {
+                    Value::String(s) => out.push_str(&format!("{}='{}'", attr_name, s)),
+                    Value::Bool(..) => out.push_str(&attr_name),
+                    _ => out.push_str(&format!("{}={}", attr_name, val)),
+                }
+                out.push(' ');
             }
-            out.push(' ');
+        }
+
+        if is_link && !has_href {
+            out.push_str(&format!("href='#' "));
         }
 
         // check for self-closing tag

@@ -1,12 +1,16 @@
 [package]
 name = "hatter"
+description = "positively mad, zero dependency html templating language"
+homepage = "https://hatter.rs"
+repository = "https://github.com/xvxx/hatter"
 version = "0.0.4-dev"
 authors = ["chris west <c@xvxx.io>"]
+documentation = "https://docs.rs/hatter/"
 edition = "2018"
-license = "MIT"
-description = "positively mad, zero dependency html templating language"
-repository = "https://github.com/xvxx/hatter"
+license = "MIT/Apache-2.0"
 exclude = [
+    "examples/*",
+    "tests/*",
     "img/*"
 ]
 

@@ -230,8 +230,12 @@ Hatter v0.0.1 REPL
 
 ## License
 
-Hatter is licensed under the MIT License. Please see
-[COPYING](COPYING) or <http://opensource.org/licenses/MIT> for details.
+Hatter is licensed under either of the following, at your pleasure:
+
+- Apache License, Version 2.0, ([LICENSE-APACHE](LICENSE-APACHE) or
+  <http://www.apache.org/licenses/LICENSE-2.0>)
+- MIT License ([LICENSE-MIT](LICENSE-MIT) or
+  <http://opensource.org/licenses/MIT>)
 
 [Imba] is licensed under the [MIT License](https://github.com/imba/imba/blob/master/LICENSE).
 

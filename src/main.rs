@@ -66,12 +66,14 @@ fn main() -> io::Result<()> {
         return Ok(());
     }
 
-    if command == "parse" {
+    if command == "parse" || command == "check" {
         let ast = scan(&source)
             .and_then(|tokens| parse(&tokens))
             .map_err(|e| print_error(&path, &source, e))
             .unwrap();
-        print_ast(&ast);
+        if command == "parse" {
+            print_ast(&ast);
+        }
         return Ok(());
     }
 
@@ -95,6 +97,7 @@ fn print_usage() -> io::Result<()> {
 Commands:
   scan        Print tokens.
   parse       Print AST.
+  check       Check for syntax/parse errors only.
   print       Print HTML. (default)
 {}"#,
         repl

@@ -855,6 +855,7 @@ impl<'s, 't> Parser<'s, 't> {
         Ok(tag)
     }
 
+    /// An attribute in a tag.
     fn attr(&mut self) -> Result<Stmt> {
         if let Some(tok) = self.peek() {
             match tok.kind {
@@ -876,6 +877,8 @@ impl<'s, 't> Parser<'s, 't> {
         }
     }
 
+    /// Get the precedence power of the next token if it's an operator
+    /// that can be used in an infix position, like + or -.
     fn peek_op_power(&mut self) -> u8 {
         if let Some(p) = self.peek() {
             match p.to_str() {
@@ -894,6 +897,8 @@ impl<'s, 't> Parser<'s, 't> {
         }
     }
 
+    // Get the precedence power of the next token if it's an operator
+    // that can be used in the postfix position.
     fn peek_postfix_power(&mut self) -> Option<u8> {
         let p = self.peek()?;
         let res = match p.to_str() {

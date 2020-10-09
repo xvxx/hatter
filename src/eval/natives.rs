@@ -1,10 +1,10 @@
 //! Natives and Specials are Hatter functions written in Rust. Natives
 //! are regular functions that just happen to be written in Rust,
 //! while Specials are more like macros. Specifically, fexprs: their
-//! arguments are not evaluated, but instead passed as syntax to them
+//! arguments are not evaluated, but instead passed as syntax arguments
 //! along with the calling environment. The Special function can
-//! decide if and when to evaluate the arguments. They're used to
-//! implement short-circuit operators like `&&` and `||`.
+//! decide if and when to evaluate the arguments. They're mostly used
+//! to implement short-circuit operators like `&&` and `||`.
 
 use {
     crate::{Args, Env, NativeFn, Result, SpecialFn, Stmt, Value},

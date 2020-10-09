@@ -1,3 +1,6 @@
+//! The Hatter REPL is an optional feature that has a Readline
+//! dependency and can be used to evaluate simple expressions.
+
 use {
     crate::{Args, Env, Result, Value},
     rustyline::{error::ReadlineError, Editor},

@@ -1,4 +1,4 @@
-//! Tokens represent a `Syntax`'s position in source code.
+//! Tokens represent a `Syntax` and its position in source code.
 
 use crate::{Error, ErrorKind, Result, Symbol, Syntax};
 

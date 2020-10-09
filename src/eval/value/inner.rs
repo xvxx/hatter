@@ -1,3 +1,6 @@
+//! Value data structures more complicated than the basics are defined
+//! here.
+
 use {
     crate::{Args, Env, Result, Scope, Stmt, Symbol, Value},
     std::{cell::RefCell, collections::BTreeMap, ops::Deref, rc::Rc},
@@ -65,6 +68,8 @@ pub enum Fn {
 pub type NativeFn = dyn std::ops::Fn(Args) -> Result<Value>;
 pub type SpecialFn = dyn std::ops::Fn(&mut Env, &[Stmt]) -> Result<Value>;
 
+/// If you want to expose your own structs to Hatter code, this is the
+/// trait for you.
 #[allow(unused_variables)]
 pub trait Object {
     fn get(&self, key: &str) -> Option<Value> {

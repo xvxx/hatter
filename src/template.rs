@@ -1,3 +1,6 @@
+//! Compiled template. Probably best to use this in release mode so
+//! you're not reloading templates on each page view.
+
 use {
     crate::{compile, Result, Stmt},
     std::{fs::File, io::Read, path::Path},

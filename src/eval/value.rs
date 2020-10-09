@@ -1,3 +1,6 @@
+//! Value is the dynamic type that represents an active Hatter object,
+//! including objects you define in your own code.
+
 use {
     crate::{Result, Symbol},
     std::{fmt, rc::Rc},

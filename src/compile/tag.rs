@@ -1,6 +1,6 @@
 //! Since HTML tags are a bit more involved than IF statements or
 //! variable assignment, they have their own data structure. This is
-//! still basicall just a Stmt, though.
+//! still basically just a Stmt, though.
 
 use crate::Stmt;
 

@@ -1,3 +1,6 @@
+//! A Symbol is an interned String, created and managed by
+//! [`Interner`] and stored in CACHE.
+
 use {
     crate::Interner,
     std::{
@@ -6,7 +9,10 @@ use {
     },
 };
 
+/// Our String cache, which our Symbols reference.
 static mut CACHE: Option<RwLock<Interner>> = None;
+
+/// Only setup the CACHE once.
 static SETUP: Once = Once::new();
 
 #[derive(Clone, Ord, PartialOrd, Eq)]

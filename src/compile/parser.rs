@@ -535,6 +535,9 @@ impl<'s, 't> Parser<'s, 't> {
                 // pass these up the food chain
                 Syntax::Dedent | Syntax::Semi => break,
 
+                // random indent just gets added to this body
+                Syntax::Indent => block.append(&mut self.block()?),
+
                 // look for </closing> tag and bail if found.
                 Syntax::LCaret if self.peek2_is(Syntax::Slash) => break,
 

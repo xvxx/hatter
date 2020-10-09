@@ -1312,3 +1312,19 @@ xparse_test!(
         Stmt::Tag(span)
     }
 );
+
+parse_test!(
+    indent_after_text,
+    r#"
+<p> Look for these:
+    <b> friends
+"#,
+    {
+        let mut b = tag!("b");
+        b.set_body(vec![word!("friends")]);
+        let mut p = tag!("p");
+        p.set_body(vec!["Look for these:".into(), b.into()]);
+
+        Stmt::Tag(p)
+    }
+);

@@ -1,11 +1,10 @@
-//! The `Args` struct makes it easier to work with arguments when
-//! writing Hatter functions in Rust.
-
 use {
     crate::{Env, Result, Value},
     std::{ops, vec},
 };
 
+/// The `Args` struct makes it easier to work with arguments when
+/// writing Hatter functions in Rust.
 #[derive(Debug)]
 pub struct Args<'e> {
     pub env: &'e mut Env,

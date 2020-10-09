@@ -1,9 +1,8 @@
-//! Since HTML tags are a bit more involved than IF statements or
-//! variable assignment, they have their own data structure. This is
-//! still basically just a Stmt, though.
-
 use crate::Stmt;
 
+/// Since HTML tags are a bit more involved than IF statements or
+/// variable assignment, they have their own data structure. This is
+/// still basically just a Stmt, though.
 #[derive(Debug, Clone)]
 pub struct Tag {
     pub tag: Box<Stmt>,           // tag name

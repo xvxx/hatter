@@ -58,6 +58,11 @@ impl From<BTreeMap<Symbol, Value>> for Map {
     }
 }
 
+/// Three types of functions in Hatter:
+/// Fn: Function defined in Hatter.
+/// Native: Function defined in Rust.
+/// Special: Function defined in Rust whose arguments aren't evaluated,
+/// like a macro.
 #[derive(Clone)]
 pub enum Fn {
     Fn(Vec<Symbol>, Vec<Stmt>, Scope),
@@ -65,7 +70,11 @@ pub enum Fn {
     Special(Rc<SpecialFn>),
 }
 
+/// Hatter function defined in Rust.
 pub type NativeFn = dyn std::ops::Fn(Args) -> Result<Value>;
+
+/// Hatter function defined in Rust whose arguments aren't evaluated,
+/// like a macro.
 pub type SpecialFn = dyn std::ops::Fn(&mut Env, &[Stmt]) -> Result<Value>;
 
 /// If you want to expose your own structs to Hatter code, this is the

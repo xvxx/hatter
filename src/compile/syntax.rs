@@ -1,5 +1,4 @@
-//! The different types of syntax that our `Lexer` recognizes.
-
+/// The different types of syntax that our `Lexer` recognizes.
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Syntax {
     None,

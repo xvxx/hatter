@@ -1,7 +1,6 @@
-//! Tokens represent a `Syntax` and its position in source code.
-
 use crate::{Error, ErrorKind, Result, Symbol, Syntax};
 
+/// A Token is an element of source code, a `Syntax` and its position.
 #[derive(Debug, Clone, Copy)]
 pub struct Token<'s> {
     pub pos: usize,

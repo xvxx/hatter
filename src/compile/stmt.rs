@@ -1,7 +1,6 @@
-//! Stmt is an AST node.
-
 use crate::{Symbol, Tag};
 
+/// Stmt is an AST node.
 #[derive(Debug, Clone, PartialEq)]
 pub enum Stmt {
     None,

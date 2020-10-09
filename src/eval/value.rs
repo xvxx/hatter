@@ -10,6 +10,8 @@ mod from;
 mod inner;
 pub use inner::{Fn, List, Map, NativeFn, Object, SpecialFn};
 
+/// Value is the dynamic type that represents an active Hatter object,
+/// including objects you define in your own code.
 #[derive(Clone)]
 pub enum Value {
     None,

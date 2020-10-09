@@ -17,6 +17,7 @@ pub enum ErrorKind {
     Jump(Jump),
 }
 
+/// Usually source-related.
 #[derive(Debug, PartialEq)]
 pub struct Error {
     pub kind: ErrorKind,

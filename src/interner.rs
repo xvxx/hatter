@@ -1,8 +1,8 @@
-//! String Cache
-//! https://matklad.github.io/2020/03/22/fast-simple-rust-interner.html
-
 use std::{collections::HashMap, mem};
 
+/// Interner creates and manages our string cache.
+// Thanks matklad!
+// https://matklad.github.io/2020/03/22/fast-simple-rust-interner.html
 #[derive(Debug)]
 pub struct Interner {
     map: HashMap<&'static str, u32>,

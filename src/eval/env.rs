@@ -1,6 +1,3 @@
-//! Env is the top-level environment in which a Hatter template is
-//! evaluated and rendered.
-
 use {
     crate::{compile, natives, specials, Args, ErrorKind, Fn, Result, Stmt, Symbol, Tag, Value},
     std::{
@@ -31,9 +28,11 @@ pub enum Jump {
     Return(Value),
 }
 
-/// Name -> Val map
+/// You know what it is.
 pub type Scope = Rc<RefCell<HashMap<String, Value>>>;
 
+/// Env is the top-level environment in which a Hatter template is
+/// evaluated and rendered.
 #[derive(Debug)]
 pub struct Env {
     scopes: Vec<Scope>,
@@ -41,6 +40,7 @@ pub struct Env {
 }
 
 impl Env {
+    /// New, top-level Env.
     pub fn new() -> Env {
         let mut scope = HashMap::new();
         for (name, fun) in natives() {

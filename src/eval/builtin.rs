@@ -13,15 +13,15 @@
 // other applications, too.
 
 use {
-    crate::{Args, Env, NativeFn, Result, SpecialFn, Stmt, Value},
+    crate::{Args, Env, Native, Result, Special, Stmt, Value},
     std::{collections::HashMap, rc::Rc},
 };
 
 /// Return the builtin Special functions that come with Hatter.
 /// Ideally we build this at compile time, at least in release mode,
 /// instead of creating them all at runtime.
-pub(crate) fn specials() -> HashMap<String, Rc<SpecialFn>> {
-    let mut map: HashMap<String, Rc<SpecialFn>> = HashMap::new();
+pub(crate) fn specials() -> HashMap<String, Rc<Special>> {
+    let mut map: HashMap<String, Rc<Special>> = HashMap::new();
 
     map.insert("&&".into(), rc!(and));
     map.insert("||".into(), rc!(or));
@@ -30,8 +30,8 @@ pub(crate) fn specials() -> HashMap<String, Rc<SpecialFn>> {
 }
 
 /// Return the builtin Native functions that come with Hatter.
-pub(crate) fn natives() -> HashMap<String, Rc<NativeFn>> {
-    let mut map: HashMap<String, Rc<NativeFn>> = HashMap::new();
+pub(crate) fn natives() -> HashMap<String, Rc<Native>> {
+    let mut map: HashMap<String, Rc<Native>> = HashMap::new();
 
     macro_rules! native {
         ($name:expr => $fn:expr) => {

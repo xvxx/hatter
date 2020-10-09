@@ -8,7 +8,7 @@ use {
 
 mod from;
 mod inner;
-pub use inner::{Fn, List, Map, NativeFn, Object, SpecialFn};
+pub use inner::{Fn, List, Map, Native, Object, Special};
 
 /// Value is the dynamic type that represents an active Hatter object,
 /// including objects you define in your own code.

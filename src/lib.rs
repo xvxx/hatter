@@ -44,7 +44,7 @@ pub use {
         args::Args,
         builtin,
         env::{eval, render, Env, Jump, Scope},
-        value::{self, Fn, NativeFn, Object, SpecialFn, Value},
+        value::{self, Fn, Native, Object, Special, Value},
     },
     interner::Interner,
     symbol::Symbol,

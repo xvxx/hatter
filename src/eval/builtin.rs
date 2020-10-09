@@ -88,8 +88,10 @@ pub fn concat(args: Args) -> Result<Value> {
 /// Returns a Value if a condition is true.
 /// Used internally by tag attributes.
 ///
-/// `when(true, "yep")   #=> "yep"`
-/// `when(false, "nope") #=> None`
+/// ```ignore
+/// when(true, "yep")   #=> "yep"
+/// when(false, "nope") #=> None
+/// ```
 pub fn when(args: Args) -> Result<Value> {
     let fst = args.need(0)?;
     if matches!(fst, Value::None | Value::Bool(false)) {
@@ -101,8 +103,10 @@ pub fn when(args: Args) -> Result<Value> {
 
 /// Returns the String name of a Value's type.
 ///
-/// `type('heyo')  #=> "String"`
-/// `type(123)     #=> "Number"`
+/// ```ignore
+/// type('heyo')  #=> "String"
+/// type(123)     #=> "Number"
+/// ```
 pub fn r#type(args: Args) -> Result<Value> {
     Value::String(args.need(0)?.typename().into()).ok()
 }
@@ -297,10 +301,12 @@ pub fn index(args: Args) -> Result<Value> {
 /// Get the length of a Map, List, or String. Returns 0 for all
 /// other values.
 ///
-/// `len([])            #=> 0`
-/// `len([5])           #=> 1`
-/// `len('hi')          #=> 2`
-/// `len({name:'Ra'})   #=> 1`
+/// ```ignore
+/// len([])            #=> 0
+/// len([5])           #=> 1
+/// len('hi')          #=> 2
+/// len({name:'Ra'})   #=> 1
+/// ```
 pub fn len(args: Args) -> Result<Value> {
     match args.need(0)? {
         Value::List(list) => list.borrow().len().into(),
@@ -313,8 +319,10 @@ pub fn len(args: Args) -> Result<Value> {
 
 /// True if the length of a Map, List, or String is `0`.
 ///
-/// `empty?([])  #=> true`
-/// `empty?([1]) #=> false`
+/// ```ignore
+/// empty?([])  #=> true
+/// empty?([1]) #=> false
+/// ```
 pub fn empty_(args: Args) -> Result<Value> {
     Value::Bool(len(args)?.to_f64() == 0.0).ok()
 }

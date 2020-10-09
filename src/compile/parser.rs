@@ -96,7 +96,7 @@ impl<'s, 't> Parser<'s, 't> {
 
     /// Advance iterator an return next `Token`.
     fn try_next(&mut self) -> Option<Token> {
-        if !self.tokens.is_empty() {
+        if self.pos < self.tokens.len() {
             Some(self.next())
         } else {
             None

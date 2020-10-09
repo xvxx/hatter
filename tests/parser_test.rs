@@ -1328,3 +1328,62 @@ parse_test!(
         Stmt::Tag(p)
     }
 );
+
+parse_test!(
+    indents_in_tag_body,
+    r#"
+<form POST="">
+    <p> Type something:
+        <input:text@echo/>
+        <input:submit/>
+"#,
+    {
+        let mut text = tag!("input");
+        text.add_attr("type".into(), "text".into());
+        text.add_attr("name".into(), "echo".into());
+        text.close();
+
+        let mut submit = tag!("input");
+        submit.add_attr("type".into(), "submit".into());
+        submit.close();
+
+        let mut p = tag!("p");
+        p.set_body(vec!["Type something:".into(), text.into(), submit.into()]);
+
+        let mut form = tag!("form");
+        form.add_attr("POST".into(), "".into());
+        form.set_body(vec![p.into()]);
+
+        Stmt::Tag(form)
+    }
+);
+
+parse_test!(
+    nested_indents_after_text,
+    r#"
+<ul>
+    <li> One
+        <b> "...is a lonely number..."
+    <li> Two is
+        okay
+            we think
+    <li> Three's whatevs.
+"#,
+    {
+        let mut li1 = tag!("li");
+        let mut b = tag!("b");
+        b.set_body(vec!["...is a lonely number...".into()]);
+        li1.set_body(vec![word!("One"), b.into()]);
+
+        let mut li2 = tag!("li");
+        li2.set_body(vec![string!("Two is"), word!("okay"), string!("we think")]);
+
+        let mut li3 = tag!("li");
+        li3.set_body(vec!["Three's whatevs.".into()]);
+
+        let mut ul = tag!("ul");
+        ul.set_body(vec![li1.into(), li2.into(), li3.into()]);
+
+        Stmt::Tag(ul)
+    }
+);

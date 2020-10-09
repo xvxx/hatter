@@ -1,15 +1,16 @@
 //! Hatter comes with a few built-in functions to help make your life
-//! easier. All of them are defined in this file, and each comes in
-//! one of two flavors of function: `Native` or `Special`.
-//!
-//! `Native` is a regular function that takes an `Args` struct and
-//! returns a `Result<Value>`, but `Special` is more like a macro
-//! (or fexpr): its arguments are not evaluated, but instead passed to
-//! the function as syntax. The scope of the caller is also passed to
-//! the special function. This means the function can then decide how,
-//! when, and if to evaluate arguments or not. We use this to
-//! implement short circuiting in `&&` and `||`, but it could have
-//! other applications, too.
+//! easier, all defined in this module.
+
+// Each built-in Hatter functions comes in one of two flavors of
+// function: `Native` or `Special`. A `Native` function is a regular
+// function that takes an `Args` struct and returns a
+// `Result<Value>`, but `Special` is more like a macro (or fexpr):
+// its arguments are not evaluated, but instead passed to the
+// function as syntax. The scope of the caller is also passed to the
+// special function. This means the function can then decide how,
+// when, and if to evaluate arguments or not. We use this to
+// implement short circuiting in `&&` and `||`, but it could have
+// other applications, too.
 
 use {
     crate::{Args, Env, NativeFn, Result, SpecialFn, Stmt, Value},
@@ -74,8 +75,9 @@ pub(crate) fn natives() -> HashMap<String, Rc<NativeFn>> {
 
 /// Combine several Values into a String.
 /// Used internally by String interpolation.
+///
 /// `concat("hi", "-", 23) #=> "hi-23"`
-fn concat(args: Args) -> Result<Value> {
+pub fn concat(args: Args) -> Result<Value> {
     let mut sum = String::new();
     for arg in args {
         sum.push_str(&arg.to_string());
@@ -83,11 +85,12 @@ fn concat(args: Args) -> Result<Value> {
     Ok(sum.into())
 }
 
-/// Return a Value if a condition is true.
+/// Returns a Value if a condition is true.
 /// Used internally by tag attributes.
+///
 /// `when(true, "yep")   #=> "yep"`
 /// `when(false, "nope") #=> None`
-fn when(args: Args) -> Result<Value> {
+pub fn when(args: Args) -> Result<Value> {
     let fst = args.need(0)?;
     if matches!(fst, Value::None | Value::Bool(false)) {
         Ok(Value::None)
@@ -96,10 +99,11 @@ fn when(args: Args) -> Result<Value> {
     }
 }
 
-/// Get the String name of a Value's type.
+/// Returns the String name of a Value's type.
+///
 /// `type('heyo')  #=> "String"`
 /// `type(123)     #=> "Number"`
-fn r#type(args: Args) -> Result<Value> {
+pub fn r#type(args: Args) -> Result<Value> {
     Value::String(args.need(0)?.typename().into()).ok()
 }
 
@@ -107,7 +111,7 @@ fn r#type(args: Args) -> Result<Value> {
 // Boolean Operators
 
 /// Special: Short-circuiting `&&` operator.
-fn and(env: &mut Env, args: &[Stmt]) -> Result<Value> {
+pub fn and(env: &mut Env, args: &[Stmt]) -> Result<Value> {
     if args.len() != 2 {
         return error!("Expected 2 args, got {}", 2);
     }
@@ -115,15 +119,15 @@ fn and(env: &mut Env, args: &[Stmt]) -> Result<Value> {
 }
 
 /// Special: Short-circuiting `||` operator.
-fn or(env: &mut Env, args: &[Stmt]) -> Result<Value> {
+pub fn or(env: &mut Env, args: &[Stmt]) -> Result<Value> {
     if args.len() != 2 {
         return error!("Expected 2 args, got {}", 2);
     }
     Ok((env.eval(&args[0])?.to_bool() || env.eval(&args[1])?.to_bool()).into())
 }
 
-/// `==` operator
-fn eq(args: Args) -> Result<Value> {
+/// `==` operator: check if two Values are equal.
+pub fn eq(args: Args) -> Result<Value> {
     if let Some(val) = args.get(0) {
         match val {
             Value::None => match args.get(1) {
@@ -151,8 +155,8 @@ fn eq(args: Args) -> Result<Value> {
     .ok()
 }
 
-/// `!=` operator
-fn neq(args: Args) -> Result<Value> {
+/// `!=` operator: check if two Values are not equal.
+pub fn neq(args: Args) -> Result<Value> {
     Value::Bool(match eq(args)? {
         Value::Bool(b) => !b,
         _ => false,
@@ -160,8 +164,8 @@ fn neq(args: Args) -> Result<Value> {
     .ok()
 }
 
-/// `!` operator
-fn not(args: Args) -> Result<Value> {
+/// `!` operator: return the opposite Bool of a Value
+pub fn not(args: Args) -> Result<Value> {
     if let Some(val) = args.get(0) {
         match val {
             Value::None | Value::Bool(false) => Value::Bool(true),
@@ -173,31 +177,31 @@ fn not(args: Args) -> Result<Value> {
     .ok()
 }
 
-/// `>` operator
-fn gt(args: Args) -> Result<Value> {
+/// `>` operator: check if a number is greater than another.
+pub fn gt(args: Args) -> Result<Value> {
     Value::Bool(args.need_number(0)? > args.need_number(1)?).ok()
 }
 
-/// `>=` operator
-fn gte(args: Args) -> Result<Value> {
+/// `>=` operator: check if a number is greater than or equal to another.
+pub fn gte(args: Args) -> Result<Value> {
     Value::Bool(args.need_number(0)? >= args.need_number(1)?).ok()
 }
 
-/// `<` operator
-fn lt(args: Args) -> Result<Value> {
+/// `<` operator: check if a number is less than another.
+pub fn lt(args: Args) -> Result<Value> {
     Value::Bool(args.need_number(0)? < args.need_number(1)?).ok()
 }
 
-/// `<=` operator
-fn lte(args: Args) -> Result<Value> {
+/// `<=` operator: check if a number is less than or equal to another.
+pub fn lte(args: Args) -> Result<Value> {
     Value::Bool(args.need_number(0)? <= args.need_number(1)?).ok()
 }
 
 //////////////////////////////////////////////////////////////////////
 // Math Functions
 
-/// `+` operator
-fn add(args: Args) -> Result<Value> {
+/// `+` operator: add two numbers.
+pub fn add(args: Args) -> Result<Value> {
     if let Some(Value::Number(_)) = args.get(0) {
         let mut sum = 0.0;
         let mut iter = args.iter();
@@ -216,49 +220,43 @@ fn add(args: Args) -> Result<Value> {
     Value::None.ok()
 }
 
-/// `-` operator
-fn sub(args: Args) -> Result<Value> {
-    let a = args.need_number(0)?;
-    let b = args.need_number(1)?;
-    Value::Number(a - b).ok()
+/// `-` operator: subtract one number from another.
+pub fn sub(args: Args) -> Result<Value> {
+    Value::Number(args.need_number(0)? - args.need_number(1)?).ok()
 }
 
-/// `*` operator
-fn mul(args: Args) -> Result<Value> {
-    let a = args.need_number(0)?;
-    let b = args.need_number(1)?;
-    Value::Number(a * b).ok()
+/// `*` operator: multiply two numbers.
+pub fn mul(args: Args) -> Result<Value> {
+    Value::Number(args.need_number(0)? * args.need_number(1)?).ok()
 }
 
-/// `/` operator
-fn div(args: Args) -> Result<Value> {
-    let a = args.need_number(0)?;
-    let b = args.need_number(1)?;
-    Value::Number(a / b).ok()
+/// `/` operator: divide one number by another.
+pub fn div(args: Args) -> Result<Value> {
+    Value::Number(args.need_number(0)? / args.need_number(1)?).ok()
 }
 
-/// `%` operator
-fn r#mod(args: Args) -> Result<Value> {
-    let a = args.need_number(0)?;
-    let b = args.need_number(1)?;
-    Value::Number(a % b).ok()
+/// `%` operator: find the remainder of dividing one number by anohter.
+pub fn r#mod(args: Args) -> Result<Value> {
+    Value::Number(args.need_number(0)? % args.need_number(1)?).ok()
 }
 
 //////////////////////////////////////////////////////////////////////
 // String Functions
 
-/// Rust's String::to_uppercase()
-fn to_uppercase(args: Args) -> Result<Value> {
+/// Rust's `String::to_uppercase(&self)`
+pub fn to_uppercase(args: Args) -> Result<Value> {
     Value::String(args.need_string(0)?.to_uppercase().into()).ok()
 }
 
-/// Rust's String::to_lowercase()
-fn to_lowercase(args: Args) -> Result<Value> {
+/// Rust's `String::to_lowercase(&self)`
+pub fn to_lowercase(args: Args) -> Result<Value> {
     Value::String(args.need_string(0)?.to_lowercase().into()).ok()
 }
 
+/// Find and replace all matches in a target string.
+///
 /// `replace("Mr Rogers", "Ro", "Dod") #=> "Mr Dodgers"`
-fn replace(args: Args) -> Result<Value> {
+pub fn replace(args: Args) -> Result<Value> {
     let s = args.need_string(0)?;
     let search = args.need_string(1)?;
     let replace = args.need_string(2)?;
@@ -269,9 +267,9 @@ fn replace(args: Args) -> Result<Value> {
 // Container (Map, List, Object) Functions
 
 /// `.` operator and `[]` operator
-/// Look up a `List` item by number or a `Map` item by key.
-/// Returns None or the value.
-fn index(args: Args) -> Result<Value> {
+/// Look up a List item by number or a Map item by key.
+/// Returns None or the Value.
+pub fn index(args: Args) -> Result<Value> {
     if args.len() != 2 {
         return Value::None.ok();
     }
@@ -296,11 +294,14 @@ fn index(args: Args) -> Result<Value> {
     .ok()
 }
 
+/// Get the length of a Map, List, or String. Returns 0 for all
+/// other values.
+///
 /// `len([])            #=> 0`
 /// `len([5])           #=> 1`
 /// `len('hi')          #=> 2`
 /// `len({name:'Ra'})   #=> 1`
-fn len(args: Args) -> Result<Value> {
+pub fn len(args: Args) -> Result<Value> {
     match args.need(0)? {
         Value::List(list) => list.borrow().len().into(),
         Value::Map(map) => map.borrow().len().into(),
@@ -310,17 +311,25 @@ fn len(args: Args) -> Result<Value> {
     .ok()
 }
 
+/// True if the length of a Map, List, or String is `0`.
+///
 /// `empty?([])  #=> true`
 /// `empty?([1]) #=> false`
-fn empty_(args: Args) -> Result<Value> {
+pub fn empty_(args: Args) -> Result<Value> {
     Value::Bool(len(args)?.to_f64() == 0.0).ok()
 }
 
 //////////////////////////////////////////////////////////////////////
 // List Functions
 
-/// Add a Value to a `List`. Modifies the `List`.
-fn push(args: Args) -> Result<Value> {
+/// Add a Value to a List. Modifies the List.
+///
+/// ```ignore
+/// a := 1..=3  #=> [1,2,3]
+/// push(a, 4)
+/// a           #=> [1,2,3,4]
+/// ```
+pub fn push(args: Args) -> Result<Value> {
     if let Value::List(list) = args.need(0)? {
         list.borrow_mut().push(args.need(1)?);
     }
@@ -331,16 +340,18 @@ fn push(args: Args) -> Result<Value> {
 // Range Functions
 
 /// `..` operator
+///
 /// `1..5  #=> [1,2,3,4]`
-fn range(args: Args) -> Result<Value> {
+pub fn range(args: Args) -> Result<Value> {
     let start = args.need_number(0)? as i32;
     let end = args.need_number(1)? as i32;
     Ok((start..end).collect::<Vec<_>>().into())
 }
 
 /// `..=` operator
+///
 /// `1..=5  #=> [1,2,3,4,5]`
-fn range_inclusive(args: Args) -> Result<Value> {
+pub fn range_inclusive(args: Args) -> Result<Value> {
     let start = args.need_number(0)? as i32;
     let end = args.need_number(1)? as i32;
     Ok((start..=end).collect::<Vec<_>>().into())
@@ -350,7 +361,7 @@ fn range_inclusive(args: Args) -> Result<Value> {
 // I/O Functions
 
 /// Print one or more Values, with newline.
-fn print(mut args: Args) -> Result<Value> {
+pub fn print(mut args: Args) -> Result<Value> {
     while !args.is_empty() {
         let arg = args.remove(0);
         if args.is_empty() {

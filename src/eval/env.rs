@@ -1,5 +1,5 @@
 use {
-    crate::{compile, eval::builtin, Args, ErrorKind, Fn, Result, Stmt, Symbol, Tag, Value},
+    crate::{builtin, compile, Args, ErrorKind, Fn, Result, Stmt, Symbol, Tag, Value},
     std::{
         cell::{Ref, RefCell},
         collections::{BTreeMap, HashMap},

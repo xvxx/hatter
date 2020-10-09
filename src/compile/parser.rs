@@ -380,6 +380,9 @@ impl<'s, 't> Parser<'s, 't> {
                 let mut list = vec![];
                 while !self.peek_eof() && !self.peek_is(Syntax::RStaple) {
                     self.eat(Syntax::Semi);
+                    if self.peek_is(Syntax::RStaple) {
+                        break;
+                    }
                     list.push(self.expr()?);
                     if self.peek_is(Syntax::RStaple) {
                         break;
@@ -400,6 +403,9 @@ impl<'s, 't> Parser<'s, 't> {
                 let mut map = vec![];
                 while !self.peek_eof() && !self.peek_is(Syntax::RCurly) {
                     self.eat(Syntax::Semi);
+                    if self.peek_is(Syntax::RCurly) {
+                        break;
+                    }
                     let key = match self.peek_kind() {
                         Syntax::Word | Syntax::String(..) | Syntax::Number | Syntax::Bool(..) => {
                             self.next().to_sym()

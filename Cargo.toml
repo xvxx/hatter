@@ -12,6 +12,7 @@ keywords = ["template", "html", "hatter"]
 categories = ["template-engine"]
 exclude = [
     "examples/*",
+    "docs/*",
     "tests/*",
     "img/*"
 ]

@@ -8,6 +8,8 @@ authors = ["chris west <c@xvxx.io>"]
 documentation = "https://docs.rs/hatter/"
 edition = "2018"
 license = "MIT/Apache-2.0"
+keywords = ["template", "html", "hatter"]
+categories = ["template-engine"]
 exclude = [
     "examples/*",
     "tests/*",

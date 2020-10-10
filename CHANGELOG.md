@@ -1,4 +1,4 @@
-## v0.1.1-dev
+## v0.1.1
 
 - Added `hatter check` CLI command.
 - Allow indented text in tag bodies. (Still not perfect.)

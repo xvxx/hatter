@@ -80,6 +80,12 @@ impl PartialEq<&str> for Symbol {
     }
 }
 
+impl PartialEq<str> for Symbol {
+    fn eq(&self, other: &str) -> bool {
+        self.to_str() == other
+    }
+}
+
 impl PartialEq<String> for Symbol {
     fn eq(&self, other: &String) -> bool {
         self.to_str() == other

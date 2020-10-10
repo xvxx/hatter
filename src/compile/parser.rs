@@ -167,14 +167,14 @@ impl<'s, 't> Parser<'s, 't> {
     /// Parse a bool.
     fn boolean(&mut self) -> Result<Stmt> {
         match self.next().kind {
-            Syntax::Bool(b) => Ok(Stmt::Bool(b)),
+            Syntax::Bool(b) => Ok(Stmt::Value(b.into())),
             _ => self.error("boolean"),
         }
     }
 
     /// Parse a number.
     fn number(&mut self) -> Result<Stmt> {
-        Ok(Stmt::Number(self.expect(Syntax::Number)?.to_f64()?))
+        Ok(Stmt::Value(self.expect(Syntax::Number)?.to_f64()?.into()))
     }
 
     /// Parse a string.
@@ -193,8 +193,8 @@ impl<'s, 't> Parser<'s, 't> {
             while let Some(i) = lit[idx..].find('{') {
                 // check for escaped \{}
                 if i > 0 && lit[idx..].bytes().nth(i - 1).unwrap_or(b'0') == b'\\' {
-                    parts.push(Stmt::String(lit[idx..i + idx - 1].into()));
-                    parts.push(Stmt::String(lit[idx + i..i + idx + 1].into()));
+                    parts.push(Stmt::Value(lit[idx..i + idx - 1].into()));
+                    parts.push(Stmt::Value(lit[idx + i..i + idx + 1].into()));
                     idx += i + 1;
                     continue;
                 }
@@ -202,7 +202,7 @@ impl<'s, 't> Parser<'s, 't> {
                 {
                     let s = &lit[idx..i + idx];
                     if !s.is_empty() {
-                        parts.push(Stmt::String(s.into()));
+                        parts.push(Stmt::Value(s.into()));
                     }
                 }
                 idx += i + 1;
@@ -224,7 +224,7 @@ impl<'s, 't> Parser<'s, 't> {
                 idx = end + 1;
             }
             if idx < lit.len() {
-                parts.push(Stmt::String(lit[idx..].into()));
+                parts.push(Stmt::Value(lit[idx..].into()));
             }
             if parts.len() == 1 {
                 Ok(parts.remove(0))
@@ -232,7 +232,7 @@ impl<'s, 't> Parser<'s, 't> {
                 Ok(Stmt::Call(bx!(Stmt::Word("concat".into())), parts))
             }
         } else {
-            Ok(Stmt::String(lit.into()))
+            Ok(Stmt::Value(lit.into()))
         }
     }
 
@@ -328,7 +328,8 @@ impl<'s, 't> Parser<'s, 't> {
                 // convert word to str, ex: map.key => .(map, "key")
                 "." if self.peek_is(Syntax::Word) => match self.op_expr(op_power)? {
                     Stmt::Word(word) => {
-                        left = Stmt::Call(bx!(Stmt::Word(op)), vec![left, Stmt::String(word)]);
+                        left =
+                            Stmt::Call(bx!(Stmt::Word(op)), vec![left, Stmt::Value(word.into())]);
                         continue;
                     }
                     _ => return self.error("Word"),
@@ -685,7 +686,7 @@ impl<'s, 't> Parser<'s, 't> {
                 )
             } else {
                 (
-                    Stmt::Bool(true),
+                    Stmt::Value(true.into()),
                     if self.peek_is(Syntax::Indent) || self.peek_is(Syntax::Do) {
                         self.block()?
                     } else {
@@ -757,8 +758,8 @@ impl<'s, 't> Parser<'s, 't> {
         self.tags += 1;
         self.expect(Syntax::LCaret)?;
         let mut tag = Tag::new(match self.peek_kind() {
-            Syntax::Op => Stmt::String("div".into()),
-            _ => Stmt::String(self.expect(Syntax::Word)?.to_sym()),
+            Syntax::Op => Stmt::Value("div".into()),
+            _ => Stmt::Value(self.expect(Syntax::Word)?.to_sym().into()),
         });
 
         // <#shortcuts.only.work.in@the:first-part-of-the-tag gotcha=true/>
@@ -799,9 +800,9 @@ impl<'s, 't> Parser<'s, 't> {
                     }
                     "@" | ":" => {
                         let attr_name = if next.literal() == "@" {
-                            Stmt::String("name".into())
+                            Stmt::Value("name".into())
                         } else {
-                            Stmt::String("type".into())
+                            Stmt::Value("type".into())
                         };
                         let expr = self.string()?;
                         if self.peek_is(Syntax::Equal) {
@@ -823,7 +824,7 @@ impl<'s, 't> Parser<'s, 't> {
                     let name = self.string()?;
                     // single word attributes, like `defer`
                     if !self.peek_is(Syntax::Equal) {
-                        tag.add_attr(name, Stmt::Bool(true));
+                        tag.add_attr(name, Stmt::Value(true.into()));
                         continue;
                     }
                     self.expect(Syntax::Equal)?;
@@ -845,7 +846,7 @@ impl<'s, 't> Parser<'s, 't> {
 
                             tag.add_attr(
                                 name,
-                                Stmt::String(
+                                Stmt::Value(
                                     format!("(function(e){{ {} }})(event);", &js[1..js.len() - 1])
                                         .into(),
                                 ),

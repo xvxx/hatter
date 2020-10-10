@@ -158,9 +158,7 @@ where
 impl From<Stmt> for Value {
     fn from(s: Stmt) -> Value {
         match s {
-            Stmt::Bool(x) => Value::from(x),
-            Stmt::Number(x) => Value::from(x),
-            Stmt::String(x) => Value::from(x),
+            Stmt::Value(v) => v,
             Stmt::List(x) => Value::from(x),
             Stmt::Map(x) => Value::from(x),
             _ => unimplemented!(),

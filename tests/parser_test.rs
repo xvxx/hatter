@@ -18,13 +18,13 @@ macro_rules! bx {
 
 macro_rules! tag {
     ($name:expr) => {
-        Tag::new(Stmt::String($name.into()))
+        Tag::new(Stmt::Value($name.into()))
     };
 }
 
 macro_rules! boo {
     ($boo:expr) => {
-        Stmt::Bool($boo)
+        Stmt::Value($boo.into())
     };
 }
 
@@ -36,13 +36,13 @@ macro_rules! word {
 
 macro_rules! string {
     ($code:expr) => {
-        Stmt::String($code.into())
+        Stmt::Value($code.into())
     };
 }
 
 macro_rules! num {
     ($num:expr) => {
-        Stmt::Number($num.into())
+        Stmt::Value($num.into())
     };
 }
 
@@ -236,7 +236,7 @@ parse_test!(
 );
 parse_test!(two_words_in_tag_are_a_string, "<b> one two", {
     let mut tag = tag!("b");
-    tag.set_body(vec![Stmt::String("one two".into())]);
+    tag.set_body(vec![Stmt::Value("one two".into())]);
     Stmt::Tag(tag)
 });
 parse_test!(
@@ -245,7 +245,7 @@ parse_test!(
     {
         let mut tag = tag!("a");
         tag.add_attr("href".into(), "/signin".into());
-        tag.set_body(vec![Stmt::String("sign in".into())]);
+        tag.set_body(vec![Stmt::Value("sign in".into())]);
         Stmt::Tag(tag)
     }
 );
@@ -254,13 +254,13 @@ parse_test!(
     "<b> sign in",
     {
         let mut tag = tag!("b");
-        tag.set_body(vec![Stmt::String("sign in".into())]);
+        tag.set_body(vec![Stmt::Value("sign in".into())]);
         Stmt::Tag(tag)
     }
 );
 parse_test!(word_followed_by_colon_in_tag_body, "<b> name: Bob", {
     let mut tag = tag!("b");
-    tag.set_body(vec![Stmt::String("name: Bob".into())]);
+    tag.set_body(vec![Stmt::Value("name: Bob".into())]);
     Stmt::Tag(tag)
 });
 parse_test!(
@@ -268,7 +268,7 @@ parse_test!(
     "<b> One and... two!",
     {
         let mut tag = tag!("b");
-        tag.set_body(vec![Stmt::String("One and... two!".into())]);
+        tag.set_body(vec![Stmt::Value("One and... two!".into())]);
         Stmt::Tag(tag)
     }
 );
@@ -1358,7 +1358,7 @@ parse_test!(
     }
 );
 
-parse_test!(
+xparse_test!(
     nested_indents_after_text,
     r#"
 <ul>

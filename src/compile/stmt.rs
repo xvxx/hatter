@@ -1,12 +1,10 @@
-use crate::{Symbol, Tag};
+use crate::{Symbol, Tag, Value};
 
 /// Stmt is an AST node.
 #[derive(Debug, Clone, PartialEq)]
 pub enum Stmt {
     None,
-    Bool(bool),
-    Number(f64),
-    String(Symbol),
+    Value(Value),
     Word(Symbol),
     List(Vec<Stmt>),
     Map(Vec<(Symbol, Stmt)>),
@@ -29,13 +27,13 @@ impl From<Tag> for Stmt {
 
 impl From<String> for Stmt {
     fn from(s: String) -> Stmt {
-        Stmt::String(Symbol::from(s))
+        Stmt::Value(s.into())
     }
 }
 
 impl From<&str> for Stmt {
     fn from(s: &str) -> Stmt {
-        Stmt::String(s.into())
+        Stmt::Value(s.into())
     }
 }
 
@@ -53,7 +51,7 @@ impl Stmt {
     /// If this is a String or a Word, get a &str of its literal value.
     pub fn to_str(&self) -> &str {
         match self {
-            Stmt::String(s) => s.to_str(),
+            Stmt::Value(Value::String(s)) => s.to_str(),
             Stmt::Word(s) => s.to_str(),
             _ => "",
         }
@@ -63,9 +61,8 @@ impl Stmt {
     pub fn to_string(&self) -> String {
         match self {
             Stmt::None => "Stmt::None".to_string(),
-            Stmt::Bool(b) => format!("{}", b),
-            Stmt::Number(n) => format!("{}", n),
-            Stmt::String(s) => format!(r#""{}""#, s),
+            Stmt::Value(Value::String(s)) => format!(r#""{}""#, s),
+            Stmt::Value(v) => format!("{}", v),
             Stmt::Word(s) => s.to_string(),
             Stmt::Tag(tag) => format!("{:?}", tag),
             Stmt::Return(ex) => format!("return {:?}", ex),

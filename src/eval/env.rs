@@ -193,9 +193,7 @@ impl Env {
     pub fn eval(&mut self, stmt: &Stmt) -> Result<Value> {
         Ok(match stmt {
             Stmt::None => Value::None,
-            Stmt::Bool(x) => x.into(),
-            Stmt::Number(x) => x.into(),
-            Stmt::String(x) => x.into(),
+            Stmt::Value(v) => v.clone(),
             Stmt::Tag(x) => self.eval_tag(x)?,
             Stmt::List(x) => x
                 .iter()
@@ -491,8 +489,8 @@ impl Env {
     /// Is the first stmt a <head> tag?
     fn first_is_head(&self, stmts: &[Stmt]) -> bool {
         if let Some(Stmt::Tag(tag)) = stmts.get(0) {
-            if let Stmt::String(tag) = &*tag.tag {
-                return tag.to_str() == "head";
+            if let Stmt::Value(Value::String(tag)) = &*tag.tag {
+                return tag == "head";
             }
         }
         false

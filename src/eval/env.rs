@@ -131,10 +131,9 @@ impl Env {
         .insert(key.to_string(), val.into());
     }
 
-    /// Print something. Includes trailing newline.
+    /// Add something to our render buffer without a trailing line.
     pub fn print<V: Into<Value>>(&mut self, val: V) {
         self.out.push_str(&val.into().to_string());
-        self.out.push('\n');
     }
 
     /// Render statements into a String.

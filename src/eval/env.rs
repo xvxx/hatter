@@ -412,6 +412,7 @@ impl Env {
         if tag.closed {
             out.push('/');
             out.push('>');
+            out.push('\n');
             return Ok(out.into());
         }
 
@@ -429,7 +430,7 @@ impl Env {
         out.push_str(&mem::replace(&mut self.out, old_out));
 
         // closing tag
-        out.push_str(&format!("</{}>", tagname));
+        out.push_str(&format!("</{}>\n", tagname));
 
         // <debug> gets eval'd but not print'd in --debug mode
         if tagname == "debug" {

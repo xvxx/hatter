@@ -76,7 +76,7 @@ fn banner() {
     ,------------.                ,.--""-._
     |   {purple}WELCOME!{gold}  `.           __/         `.
     |  {purple}TO THE REPL{gold} |     _,**"   "*-.       `.
-    | {purple}HATTER v0.0.1{gold}|   ,'            `.       \
+    | {purple}HATTER v0.1.2{gold}|   ,'            `.       \
     `---------------'  ;    _,.---._    \  ,'\  \
                       :   ,'   ,-.. `.   \'   \ :
                       |  ;_\  (___)`  `-..__  : |

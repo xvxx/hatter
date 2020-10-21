@@ -39,7 +39,7 @@ pub use {
         tag::Tag,
         token::Token,
     },
-    error::{print_error, Error, ErrorKind},
+    error::{line_and_col, print_error, Error, ErrorKind},
     eval::{
         args::Args,
         builtin,

@@ -186,7 +186,7 @@ pub fn print_error<P: AsRef<std::path::Path>, S: AsRef<str>>(path: P, source: S,
 }
 
 /// Calculate line # and col position for a position in a source file.
-fn line_and_col(source: &str, pos: usize) -> (usize, usize) {
+pub fn line_and_col(source: &str, pos: usize) -> (usize, usize) {
     let mut line = 1;
     let mut col = 0;
     for (i, c) in source.chars().enumerate() {

@@ -67,6 +67,8 @@ fn test_string() {
     assert_eval!("contains?('Bob', 'Z')", false);
     assert_eval!(r#"replace("Mr Rogers", "Ro", "Dod")"#, "Mr Dodgers");
     assert_eval!(r#"replace("Mr Rogers", "Zo", "Dod")"#, "Mr Rogers");
+    assert_eval!(r#"count(to-lowercase("Mr Rogers"), "r")"#, 3);
+    assert_eval!(r#"count("mr rogers", "z")"#, 0);
 }
 
 #[test]

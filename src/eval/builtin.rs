@@ -68,6 +68,7 @@ pub(crate) fn natives() -> HashMap<String, Rc<Native>> {
     native!("replace" => replace);
     native!("contains?" => contains_);
     native!("split" => split);
+    native!("count" => count);
     native!("len" => len);
     native!("empty?" => empty_);
 
@@ -265,6 +266,12 @@ pub fn to_lowercase(args: Args) -> Result<Value> {
 /// `contains?("Mr Rogers", "Mr") #=> true`
 pub fn contains_(args: Args) -> Result<Value> {
     Value::Bool(args.need_string(0)?.contains(args.need_string(1)?)).ok()
+}
+
+/// Count occurences of substring in string.
+/// `count("Mr Rogers", "r") #=> 2`
+pub fn count(args: Args) -> Result<Value> {
+    Value::from(args.need_string(0)?.matches(args.need_string(1)?).count()).ok()
 }
 
 /// Split a string into a List by a separator.

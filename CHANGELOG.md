@@ -1,3 +1,9 @@
+## v0.1.4-dev
+
+- More [builtins]: `pop()` for lists.
+
+[builtins]: https://docs.rs/hatter/latest/hatter/builtin/index.html
+
 ## v0.1.3
 
 - Lists can now be indexed with negative numbers, eg `list[-1]` is the last element.

@@ -93,6 +93,8 @@ fn test_list() {
     assert_eval!("a := 1..=3; a << 4; a[-1]", 4);
     assert_eval!("a := 1..=3; a << 40; a << 50; len(a)", 5);
     assert_eval!("a := 1..=3; push(a, 5); a[-1]", 5);
+    assert_eval!("a := 1..=5; pop(a)", 5);
+    assert_eval!("a := 1..=5; pop(a); len(a)", 4);
 }
 
 #[test]

@@ -49,6 +49,7 @@ pub(crate) fn natives() -> HashMap<String, Rc<Native>> {
     native!("index" => index);
     native!("<<" => push);
     native!("push" => push);
+    native!("pop" => pop);
     native!("." => index);
     native!(".." => range);
     native!("..=" => range_inclusive);
@@ -373,6 +374,21 @@ pub fn push(args: Args) -> Result<Value> {
         list.borrow_mut().push(args.need(1)?);
     }
     Value::None.ok()
+}
+
+/// Remove the last Value from a List. Modifies the List.
+/// ```ignore
+/// a := 1..=3  #=> [1,2,3]
+/// pop(a)      #=> 3
+/// len(a)      #=> 2
+/// ```
+pub fn pop(args: Args) -> Result<Value> {
+    if let Value::List(list) = args.need(0)? {
+        Value::from(list.borrow_mut().pop())
+    } else {
+        Value::None
+    }
+    .ok()
 }
 
 //////////////////////////////////////////////////////////////////////

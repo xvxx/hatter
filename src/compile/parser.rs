@@ -543,7 +543,7 @@ impl<'s, 't> Parser<'s, 't> {
                 Syntax::LCaret if self.peek2_is(Syntax::Slash) => break,
 
                 // two words in a row become text in tag bodies
-                Syntax::Word if self.two_words_in_a_row() => {
+                Syntax::Word | Syntax::Number if self.two_words_in_a_row() => {
                     let mut out = self.next().to_string();
                     while !self.peek_eof() {
                         match self.peek_kind() {
@@ -567,13 +567,14 @@ impl<'s, 't> Parser<'s, 't> {
     /// Are peek() and peek2() both words, or otherwise candidates for
     /// implicitly creating text?
     fn two_words_in_a_row(&mut self) -> bool {
-        self.peek_is(Syntax::Word)
+        (self.peek_is(Syntax::Word)
             && self
                 .peek2()
                 .filter(|p| {
                     p.kind.is_word_or_keyword() || matches!(p.kind, Syntax::Comma | Syntax::Colon)
                 })
-                .is_some()
+                .is_some())
+            || (self.peek_is(Syntax::Number) && self.peek2_is(Syntax::Word))
     }
 
     /// Parse a single statement.

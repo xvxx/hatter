@@ -1,4 +1,4 @@
-## v0.1.2-dev
+## v0.1.2
 
 - Added `puts()` builtin to print with trailing newline.
 - Made `print()` print without newline.

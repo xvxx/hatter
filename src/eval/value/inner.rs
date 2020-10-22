@@ -81,9 +81,14 @@ pub type Special = dyn std::ops::Fn(&mut Env, &[Stmt]) -> Result<Value>;
 /// trait for you.
 #[allow(unused_variables)]
 pub trait Object {
+    /// String name of this type, like "string" or "Person".
+    fn typename(&self) -> &str;
+
+    /// obj.KEY
     fn get(&self, key: &str) -> Option<Value> {
-        Some(Value::None)
+        None
     }
 
+    /// obj.KEY = VAL
     fn set(&self, key: &str, val: Value) {}
 }

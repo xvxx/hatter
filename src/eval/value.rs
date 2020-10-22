@@ -177,7 +177,7 @@ impl Value {
             Fn(..) => "Fn",
             List(..) => "List",
             Map(..) => "Map",
-            Object(..) => "Object",
+            Object(o) => o.typename(),
         }
     }
 }

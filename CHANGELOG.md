@@ -1,3 +1,8 @@
+## v0.1.3-dev
+
+- Added `contains?()`, `split()`, and `push()` builtins.
+- For a full list of builtins, see https://docs.rs/hatter/latest/hatter/builtin/index.html
+
 ## v0.1.2
 
 - Added `puts()` builtin to print with trailing newline.

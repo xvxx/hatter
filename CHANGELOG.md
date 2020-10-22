@@ -1,4 +1,4 @@
-## v0.1.3-dev
+## v0.1.3
 
 - Lists can now be indexed with negative numbers, eg `list[-1]` is the last element.
 - Added `contains?()`, `split()`, `count()`, and `push()` builtins.

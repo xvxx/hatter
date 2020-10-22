@@ -1,5 +1,6 @@
 ## v0.1.3-dev
 
+- Lists can now be indexed with negative numbers, eg `list[-1]` is the last element.
 - Added `contains?()`, `split()`, and `push()` builtins.
 - For a full list of builtins, see https://docs.rs/hatter/latest/hatter/builtin/index.html
 

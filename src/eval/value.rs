@@ -170,13 +170,13 @@ impl Value {
     pub fn typename(&self) -> &str {
         use Value::*;
         match self {
-            None => "None",
-            Bool(..) => "Bool",
-            Number(..) => "Number",
-            String(..) => "String",
-            Fn(..) => "Fn",
-            List(..) => "List",
-            Map(..) => "Map",
+            None => "none",
+            Bool(..) => "bool",
+            Number(..) => "number",
+            String(..) => "string",
+            Fn(..) => "fn",
+            List(..) => "list",
+            Map(..) => "map",
             Object(o) => o.typename(),
         }
     }

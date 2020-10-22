@@ -12,6 +12,12 @@ macro_rules! render {
     };
 }
 
+macro_rules! none {
+    () => {
+        Value::None
+    };
+}
+
 macro_rules! boo {
     ($boo:expr) => {
         Value::Bool($boo)
@@ -63,7 +69,7 @@ macro_rules! assert_error {
 
 macro_rules! assert_eval {
     ($code:expr, $val:expr) => {
-        assert_eq!(eval!($code), $val);
+        assert_eq!(eval!($code), $val.into());
     };
 }
 

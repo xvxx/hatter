@@ -14,6 +14,9 @@
 
 #![deny(unused_must_use)]
 #![deny(unreachable_patterns)]
+#![allow(clippy::should_implement_trait)]
+#![allow(clippy::new_without_default)]
+#![allow(clippy::inherent_to_string)]
 
 #[macro_use]
 mod macros;

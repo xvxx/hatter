@@ -59,7 +59,7 @@ impl<'s, 't> Parser<'s, 't> {
                 panic!("infinite loop while peek()ing: {:?}", self.tokens.get(0));
             }
         }
-        self.tokens.get(self.pos).map(|t| *t)
+        self.tokens.get(self.pos).copied()
     }
 
     /// Peek two ahead.
@@ -71,7 +71,7 @@ impl<'s, 't> Parser<'s, 't> {
                 panic!("infinite loop while peek()ing: {:?}", self.tokens.get(0));
             }
         }
-        self.tokens.get(self.pos + 1).map(|t| *t)
+        self.tokens.get(self.pos + 1).copied()
     }
 
     /// Get the next token's kind.
@@ -814,7 +814,7 @@ impl<'s, 't> Parser<'s, 't> {
                                 Stmt::Call(bx!(Stmt::Word("when".into())), vec![cond, expr]),
                             );
                         } else {
-                            tag.add_attr(attr_name.into(), expr);
+                            tag.add_attr(attr_name, expr);
                         }
                     }
                     _ => return self.error("# . @ or :"),
@@ -871,9 +871,7 @@ impl<'s, 't> Parser<'s, 't> {
                 Syntax::String(..) => self.string(),
                 Syntax::Word => {
                     let lit = tok.literal();
-                    if lit.starts_with('{') && lit.ends_with('}') {
-                        self.string()
-                    } else if tok.literal().contains('{') {
+                    if (lit.starts_with('{') && lit.ends_with('}')) || tok.literal().contains('{') {
                         self.string()
                     } else {
                         self.word()

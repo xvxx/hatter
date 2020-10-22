@@ -39,9 +39,8 @@ pub struct Env {
     out: String,
 }
 
-impl Env {
-    /// New, top-level Env.
-    pub fn new() -> Env {
+impl Default for Env {
+    fn default() -> Env {
         let mut scope = HashMap::new();
         for (name, fun) in builtin::natives() {
             scope.insert(name, Value::Fn(Fn::Native(fun)));
@@ -53,6 +52,13 @@ impl Env {
             scopes: vec![rcell!(scope)],
             out: String::new(),
         }
+    }
+}
+
+impl Env {
+    /// New, top-level Env.
+    pub fn new() -> Env {
+        Env::default()
     }
 
     /// Return and clear output.
@@ -100,7 +106,7 @@ impl Env {
     /// Find a value, looking first in the most recently pushed scope.
     pub fn lookup(&self, key: &str) -> Option<Ref<'_, Value>> {
         self.find_scope(key)
-            .and_then(|scope| Some(Ref::map(scope.borrow(), |v| v.get(key).unwrap())))
+            .map(|scope| Ref::map(scope.borrow(), |v| v.get(key).unwrap()))
     }
 
     /// Find the `Scope` in which a var exists, if there is one.
@@ -260,8 +266,6 @@ impl Env {
                                     args.len()
                                 );
                             }
-                            let params = params.clone();
-                            let body = body.clone();
                             self.scopes.push(scope);
                             self.push_scope();
                             for (i, a) in args.iter().enumerate() {
@@ -405,7 +409,7 @@ impl Env {
         }
 
         if is_link && !has_href {
-            out.push_str(&format!("href='#' "));
+            out.push_str(&"href='#' ");
         }
 
         // check for self-closing tag

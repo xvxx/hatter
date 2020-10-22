@@ -102,7 +102,7 @@ pub fn when(args: Args) -> Result<Value> {
     if matches!(fst, Value::None | Value::Bool(false)) {
         Ok(Value::None)
     } else {
-        Ok(args.need(1)?.clone())
+        Ok(args.need(1)?)
     }
 }
 
@@ -139,10 +139,7 @@ pub fn or(env: &mut Env, args: &[Stmt]) -> Result<Value> {
 pub fn eq(args: Args) -> Result<Value> {
     if let Some(val) = args.get(0) {
         match val {
-            Value::None => match args.get(1) {
-                Some(Value::None) => true,
-                _ => false,
-            },
+            Value::None => matches!(args.get(1), Some(Value::None)),
             Value::Bool(b1) => match args.get(1) {
                 Some(Value::Bool(b2)) => b1 == b2,
                 _ => false,
@@ -318,7 +315,7 @@ pub fn index(args: Args) -> Result<Value> {
             if idx < 0 {
                 let len = list.borrow().len();
                 if (idx.abs() as usize) < len {
-                    idx = list.borrow().len() as isize + idx;
+                    idx += list.borrow().len() as isize;
                 }
             }
             list.borrow()

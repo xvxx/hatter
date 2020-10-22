@@ -147,10 +147,10 @@ where
     T: Into<Value>,
 {
     fn from(o: Option<T>) -> Self {
-        if o.is_none() {
-            Value::None
+        if let Some(v) = o {
+            v.into()
         } else {
-            o.unwrap().into()
+            Value::None
         }
     }
 }

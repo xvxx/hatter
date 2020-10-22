@@ -88,8 +88,8 @@ impl Stmt {
             Stmt::Assign(var, expr, re) => {
                 format!("{} {}= {:?}", var, if *re { ":" } else { "" }, expr)
             }
-            Stmt::If(..) => format!("{}", "IF: Coming Soon™"),
-            Stmt::For(..) => format!("{}", "FOR: Coming Soon™"),
+            Stmt::If(..) => "IF: Coming Soon™".to_string(),
+            Stmt::For(..) => "FOR: Coming Soon™".to_string(),
             Stmt::While(test, body) => format!("while({:?}) {:?}", test, body),
             Stmt::Fn(args, body) => format!("fn({:?}) {:?}", args, body),
             Stmt::Call(name, args) => format!(

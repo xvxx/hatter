@@ -152,7 +152,7 @@ pub fn print_error<P: AsRef<std::path::Path>, S: AsRef<str>>(path: P, source: S,
     );
     println!("   {}|{}", blue, clear);
 
-    let lines = source.split("\n");
+    let lines = source.split('\n');
     let pline = |num| {
         if let Some(line) = lines.clone().nth(num) {
             println!("{}   |{} {}", blue, clear, line)

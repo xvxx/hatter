@@ -73,10 +73,7 @@ impl<'s> Lexer<'s> {
         if self.tokens.is_empty() {
             return false;
         }
-        self.tokens
-            .get(self.tokens.len() - 1)
-            .filter(|t| t.kind == kind)
-            .is_some()
+        self.tokens.last().filter(|t| t.kind == kind).is_some()
     }
 
     /// Did we just see =?
@@ -84,10 +81,7 @@ impl<'s> Lexer<'s> {
         if self.tokens.is_empty() {
             return false;
         }
-        self.tokens
-            .get(self.tokens.len() - 1)
-            .filter(|t| t.literal() == "=")
-            .is_some()
+        self.tokens.last().filter(|t| t.literal() == "=").is_some()
     }
 
     /// Advance position in `source` and return next `char`.
@@ -436,12 +430,10 @@ impl<'s> Lexer<'s> {
                 } else if c == '{' {
                     curlies += 1;
                 }
-            } else {
-                if c == '{' {
-                    in_code = true;
-                } else if !c.is_word_char() {
-                    break;
-                }
+            } else if c == '{' {
+                in_code = true;
+            } else if !c.is_word_char() {
+                break;
             }
             self.next();
         }

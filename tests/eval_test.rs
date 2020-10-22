@@ -142,6 +142,27 @@ list[3]
 "#,
         Value::None
     );
+    assert_eval!(
+        r#"
+list := [1,2,3]
+list[-1]
+"#,
+        num!(3)
+    );
+    assert_eval!(
+        r#"
+list := [1,2,3]
+list[-2]
+"#,
+        num!(2)
+    );
+    assert_eval!(
+        r#"
+list := [1,2,3]
+list[-20]
+"#,
+        Value::None
+    );
 }
 
 #[test]
@@ -462,10 +483,7 @@ else if i < 0
     assert_render!(concat!("i := 0", ifelse!()), "Cero");
     assert_render!(concat!("i := 10", ifelse!()), "Positive");
     assert_render!(concat!("i := -10", ifelse!()), "Negative");
-    assert_render!(
-        concat!("i := 100_000_001", ifelse!()),
-        "Way TOO Positive!"
-    );
+    assert_render!(concat!("i := 100_000_001", ifelse!()), "Way TOO Positive!");
 
     assert_render!(
         r#"

@@ -287,7 +287,13 @@ pub fn index(args: Args) -> Result<Value> {
             .unwrap_or(&Value::None)
             .clone(),
         Value::List(list) => {
-            let idx = args.need_number(1)?;
+            let mut idx = args.need_number(1)? as isize;
+            if idx < 0 {
+                let len = list.borrow().len();
+                if (idx.abs() as usize) < len {
+                    idx = list.borrow().len() as isize + idx;
+                }
+            }
             list.borrow()
                 .get(idx as usize)
                 .unwrap_or(&Value::None)

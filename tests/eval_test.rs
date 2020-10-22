@@ -85,8 +85,8 @@ fn it_works() {
 
 #[test]
 fn test_string() {
-    assert_render!(r#"<b> "Hi there""#, "<b>Hi there\n</b>\n");
-    assert_render!(r#"<b> """#, "<b>\n</b>\n");
+    assert_render!(r#"<b> "Hi there""#, "<b>Hi there</b>\n");
+    assert_render!(r#"<b> """#, "<b></b>\n");
 }
 
 #[test]
@@ -109,7 +109,7 @@ fn test_map() {
         "map := { name: 'Bilbo', age: 111 }
 for k, v in map
     <span> <b> k </> v",
-        "<span><b>name\n</b>\nBilbo\n</span>\n<span><b>age\n</b>\n111\n</span>\n"
+        "<span><b>name</b>\nBilbo</span>\n<span><b>age</b>\n111</span>\n"
     );
 }
 
@@ -149,23 +149,23 @@ fn test_if() {
     assert_render!(
         r#"
 if true
-    print("yay")
+    puts("yay")
 "#,
         "yay\n"
     );
 
-    assert_render!(r#"if true do print("yay")"#, "yay\n");
-    assert_render!(r#"if false do print("yay") else do print("nay")"#, "nay\n");
+    assert_render!(r#"if true do print("yay")"#, "yay");
+    assert_render!(r#"if false do print("yay") else do print("nay")"#, "nay");
     assert_render!(
         r#"if false do print("yay") else if 1 > 0 do print("nay") else do print("cray")"#,
-        "nay\n"
+        "nay"
     );
 
-    assert_render!(r#"if true then print("yay")"#, "yay\n");
-    assert_render!(r#"if false then print("yay") else print("nay")"#, "nay\n");
+    assert_render!(r#"if true then print("yay")"#, "yay");
+    assert_render!(r#"if false then print("yay") else print("nay")"#, "nay");
     assert_render!(
         r#"if false then print("yay") else if 1 > 0 then print("nay") else print("cray")"#,
-        "nay\n"
+        "nay"
     );
 }
 
@@ -190,7 +190,7 @@ def test()
     return false
 test() && test()
 "#,
-        "Tested!\nfalse\n"
+        "Tested!false"
     );
 }
 
@@ -199,7 +199,7 @@ fn test_for() {
     assert_render!(
         r#"
 for x in [10,20,30]
-    print(x)
+    puts(x)
 "#,
         "10\n20\n30\n"
     );
@@ -209,7 +209,7 @@ for x in [10,20,30]
 for x in [10,20,30,40]
     if x > 20
         break
-    print(x)
+    puts(x)
 "#,
         "10\n20\n"
     );
@@ -219,7 +219,7 @@ for x in [10,20,30,40]
 for x in [10,20,30,40]
     if x == 20
         continue
-    print(x)
+    puts(x)
 "#,
         "10\n30\n40\n"
     );
@@ -228,7 +228,7 @@ for x in [10,20,30,40]
         r#"
 for x in [10,20,30,40]
     if x == 20 do continue
-    print(x)
+    puts(x)
 "#,
         "10\n30\n40\n"
     );
@@ -241,7 +241,7 @@ fn test_def() {
 def test() do print("OK")
 test()
 "#,
-        "OK\n"
+        "OK"
     );
 
     assert_render!(
@@ -250,7 +250,7 @@ def test()
     print("OK")
 test()
 "#,
-        "OK\n"
+        "OK"
     );
 }
 
@@ -261,7 +261,7 @@ fn test_call_with_keywords() {
 def greet(title, name) do print("Hiya, {title}. {name}!")
 greet(name: 'Bob', title: 'Dr')
 "#,
-        "Hiya, Dr. Bob!\n"
+        "Hiya, Dr. Bob!"
     );
 }
 
@@ -285,7 +285,7 @@ def test()
     print("OK!")
 test()
 "#,
-        "BYE\n"
+        "BYE"
     );
 }
 
@@ -415,7 +415,7 @@ def greet(title, name)
     print("Hiya, {title}. {name}!")
 greet('Mrs', 'Robinson')
 "#,
-        "Hiya, Mrs. Robinson!\n"
+        "Hiya, Mrs. Robinson!"
     );
 
     assert_error!(
@@ -438,7 +438,7 @@ def fizz-buzz
     for i in 1..=30
         word := mod(i, 3, 'Fizz') + mod(i, 5, 'Buzz')
         if len(word) > 0
-            print(word)
+            puts(word)
 fizz-buzz()
 "#,
         "Fizz\nBuzz\nFizz\nFizz\nBuzz\nFizz\nFizzBuzz\nFizz\nBuzz\nFizz\nFizz\nBuzz\nFizz\nFizzBuzz\n"
@@ -459,18 +459,18 @@ else if i < 0
         };
     }
 
-    assert_render!(concat!("i := 0", ifelse!()), "Cero\n");
-    assert_render!(concat!("i := 10", ifelse!()), "Positive\n");
-    assert_render!(concat!("i := -10", ifelse!()), "Negative\n");
+    assert_render!(concat!("i := 0", ifelse!()), "Cero");
+    assert_render!(concat!("i := 10", ifelse!()), "Positive");
+    assert_render!(concat!("i := -10", ifelse!()), "Negative");
     assert_render!(
         concat!("i := 100_000_001", ifelse!()),
-        "Way TOO Positive!\n"
+        "Way TOO Positive!"
     );
 
     assert_render!(
         r#"
 for v in [100, 200, 300]
-    print(v) #=> 100 then 200 then 300
+    puts(v) #=> 100 then 200 then 300
 "#,
         "100\n200\n300\n"
     );
@@ -478,7 +478,7 @@ for v in [100, 200, 300]
     assert_render!(
         r#"
 for i, v in [100, 200, 300]
-    print(i) #=> 0 then 1 then 2
+    puts(i) #=> 0 then 1 then 2
     "#,
         "0\n1\n2\n"
     );
@@ -486,7 +486,7 @@ for i, v in [100, 200, 300]
     assert_render!(
         r#"
 for k, v in { first: 1, second: 2 }
-    print("{k} is {v}") #=> `first is 1` then `second is 2`
+    puts("{k} is {v}") #=> `first is 1` then `second is 2`
     "#,
         "first is 1\nsecond is 2\n"
     );
@@ -496,7 +496,7 @@ for k, v in { first: 1, second: 2 }
 x := 0
 while true
     x += 1
-    print("O'DOYLE RULES!")
+    puts("O'DOYLE RULES!")
     if x > 1
         break
     "#,
@@ -512,7 +512,7 @@ def hundreds(list)
     return new-list
 
 for v in hundreds(1..5)
-    print(v)
+    puts(v)
     if v > 300
         break
         "#,
@@ -523,12 +523,9 @@ for v in hundreds(1..5)
 #[test]
 fn readme_features() {
     // Auto-closing HTML tags and code blocks based on indentation
-    assert_render!(
-        "<h1> Welcome, <i> Rob",
-        "<h1>Welcome,\n<i>Rob\n</i>\n</h1>\n"
-    );
-    assert_render!("<b> Heya", "<b>Heya\n</b>\n");
-    assert_render!("<b> Heya <i> there", "<b>Heya\n<i>there\n</i>\n</b>\n");
+    assert_render!("<h1> Welcome, <i> Rob", "<h1>Welcome,<i>Rob</i>\n</h1>\n");
+    assert_render!("<b> Heya", "<b>Heya</b>\n");
+    assert_render!("<b> Heya <i> there", "<b>Heya<i>there</i>\n</b>\n");
 
     // Shorthand for `id`, `class`, `type`, and `name` attributes
     assert_render!("<div#id>", "<div id='id'></div>\n");
@@ -561,27 +558,26 @@ fn readme_features() {
     assert_render!(
         r#"name := 'Bob'
 <span.greeting> "Hey there {name}. 2 + 2 is {2 + 2}""#,
-        "<span class='greeting'>Hey there Bob. 2 + 2 is 4\n</span>\n"
+        "<span class='greeting'>Hey there Bob. 2 + 2 is 4</span>\n"
     );
 
     // Shorthand interpolation
     assert_render!(
         r#"page := { id: 22, type: 'index', title: 'Index' }
 <span #page-{page.id} .is-{page.type}> page.title"#,
-        "<span id='page-22' class='is-index'>Index\n</span>\n"
+        "<span id='page-22' class='is-index'>Index</span>\n"
     );
 
     // Implicit divs
     assert_render!(r#"<#main>"#, "<div id='main'></div>\n");
 
     // Implicit closing tags
-    assert_render!(r#"<i>delicious</>"#, "<i>delicious\n</i>\n");
+    assert_render!(r#"<i>delicious</>"#, "<i>delicious</i>\n");
 
     // Easy inline JavaScript
     assert_render!(
         r#"<li> <a onclick=(alert("Oink!"))> "🐷""#,
-        r#"<li><a onclick='(function(e){ alert("Oink!") })(event);' href='#'>🐷
-</a>
+        r#"<li><a onclick='(function(e){ alert("Oink!") })(event);' href='#'>🐷</a>
 </li>
 "#
     );
@@ -616,12 +612,12 @@ fn readme_features() {
     assert_render!(
         r#"pages := [{id: 1, name: "Page 1"}, {id: 2, name: "2nd"}]
 <ul> for page in pages do <li id=page-{page.id}> page.name"#,
-        "<ul><li id='page-1'>Page 1\n</li>\n<li id='page-2'>2nd\n</li>\n</ul>\n"
+        "<ul><li id='page-1'>Page 1</li>\n<li id='page-2'>2nd</li>\n</ul>\n"
     );
     assert_render!(
         r#"some-map := { one: 1, two: 2 }
 for k, v in some-map do <tr> <td> k </> <td> v"#,
-        "<tr><td>one\n</td>\n<td>1\n</td>\n</tr>\n<tr><td>two\n</td>\n<td>2\n</td>\n</tr>\n"
+        "<tr><td>one</td>\n<td>1</td>\n</tr>\n<tr><td>two</td>\n<td>2</td>\n</tr>\n"
     );
 
     // if/else statement
@@ -633,7 +629,7 @@ if logged_in? then <h2> Welcome back!"#,
     assert_render!(
         "logged_in? := true
 if logged_in? then <h2> Welcome back!",
-        "<h2>Welcome back!\n</h2>\n"
+        "<h2>Welcome back!</h2>\n"
     );
 
     // Error-checked assignment with `:=` and `=`
@@ -648,13 +644,13 @@ name := 'Rob'"
     assert_render!(
         r#"name := "tony"
 <div.name> to-uppercase(name)"#,
-        "<div class='name'>TONY\n</div>\n"
+        "<div class='name'>TONY</div>\n"
     );
 
     // Define your own Hatter functions with strict arity and implici
     //   return values:
     assert_render!(
-        r#"def greet(name) do print("Hey there, {name}!")
+        r#"def greet(name) do puts("Hey there, {name}!")
 greet("Lydia")"#,
         "Hey there, Lydia!\n"
     );
@@ -663,7 +659,7 @@ greet("Lydia")"#,
     assert_render!(
         r#"
 def ++(a, b) do concat(to-uppercase(a), ' ', to-uppercase(b))
-print("cat" ++ "dog")
+puts("cat" ++ "dog")
 "#,
         "CAT DOG\n"
     );
@@ -681,19 +677,19 @@ add1(200)
     // Call functions with keyword arguments
     assert_render!(
         r#"
-def greet(title, name) do print("Hiya, {title}. {name}!")
+def greet(title, name) do puts("Hiya, {title}. {name}!")
 greet(name: "Marley", title: "Dr")
 "#,
         "Hiya, Dr. Marley!\n"
     );
 
     // `do` keyword for one-line blocks
-    assert_render!(r#"if 2 > 1 do print("Obviously")"#, "Obviously\n");
-    assert_render!(r#"for x in [1,2,3] do print(x)"#, "1\n2\n3\n");
+    assert_render!(r#"if 2 > 1 do puts("Obviously")"#, "Obviously\n");
+    assert_render!(r#"for x in [1,2,3] do puts(x)"#, "1\n2\n3\n");
 
     // `then` keyword for one-line `if` statements
     assert_render!(
-        r#"if 2 > 1 then print("Yup!") else if 2 < 1 then print("Impossible.")"#,
+        r#"if 2 > 1 then puts("Yup!") else if 2 < 1 then puts("Impossible.")"#,
         "Yup!\n"
     );
 
@@ -706,18 +702,13 @@ greet(name: "Marley", title: "Dr")
     <h1> Heya
     <p> Hey ya!",
         "<!DOCTYPE html>
-<html>
-<head><title>Kewl
-</title>
+<html><head><title>Kewl</title>
 </head>
-<body><h1>Heya
-</h1>
-<p>Hey ya!
-</p>
+<body><h1>Heya</h1>
+<p>Hey ya!</p>
 </body>
 
 </html>
-
 "
     );
 }

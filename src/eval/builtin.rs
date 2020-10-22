@@ -61,6 +61,7 @@ pub(crate) fn natives() -> HashMap<String, Rc<Native>> {
     native!("<" => lt);
     native!("<=" => lte);
     native!("print" => print);
+    native!("puts" => puts);
     native!("to-uppercase" => to_uppercase);
     native!("to-lowercase" => to_lowercase);
     native!("replace" => replace);
@@ -368,7 +369,7 @@ pub fn range_inclusive(args: Args) -> Result<Value> {
 //////////////////////////////////////////////////////////////////////
 // I/O Functions
 
-/// Print one or more Values, with newline.
+/// Print one or more Values, without newline.
 pub fn print(mut args: Args) -> Result<Value> {
     while !args.is_empty() {
         let arg = args.remove(0);
@@ -378,5 +379,19 @@ pub fn print(mut args: Args) -> Result<Value> {
             args.env.print(format!("{} ", arg));
         }
     }
+    Value::None.ok()
+}
+
+/// Print one or more Values, wit newlines.
+pub fn puts(mut args: Args) -> Result<Value> {
+    while !args.is_empty() {
+        let arg = args.remove(0);
+        if args.is_empty() {
+            args.env.print(format!("{}", arg));
+        } else {
+            args.env.print(format!("{} ", arg));
+        }
+    }
+    args.env.print("\n");
     Value::None.ok()
 }

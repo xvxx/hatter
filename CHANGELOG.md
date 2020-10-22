@@ -1,3 +1,13 @@
+## v0.1.2-dev
+
+- Added `puts()` builtin to print with trailing newline.
+- Made `print()` print without newline.
+- Added `line_and_col()` to public API to get file location information
+  from an error.
+- Tag body expressions that begin with a number followed by a word are
+  now treated as implicit text.
+- trait Object now requires typename() fn.
+
 ## v0.1.1
 
 - Added `hatter check` CLI command.

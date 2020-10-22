@@ -48,6 +48,7 @@ pub(crate) fn natives() -> HashMap<String, Rc<Native>> {
     native!("concat" => concat);
     native!("index" => index);
     native!("<<" => push);
+    native!("push" => push);
     native!("." => index);
     native!(".." => range);
     native!("..=" => range_inclusive);
@@ -65,6 +66,8 @@ pub(crate) fn natives() -> HashMap<String, Rc<Native>> {
     native!("to-uppercase" => to_uppercase);
     native!("to-lowercase" => to_lowercase);
     native!("replace" => replace);
+    native!("contains?" => contains_);
+    native!("split" => split);
     native!("len" => len);
     native!("empty?" => empty_);
 
@@ -256,6 +259,23 @@ pub fn to_uppercase(args: Args) -> Result<Value> {
 /// Rust's `String::to_lowercase(&self)`
 pub fn to_lowercase(args: Args) -> Result<Value> {
     Value::String(args.need_string(0)?.to_lowercase().into()).ok()
+}
+
+/// Does the string contain a substring?
+/// `contains?("Mr Rogers", "Mr") #=> true`
+pub fn contains_(args: Args) -> Result<Value> {
+    Value::Bool(args.need_string(0)?.contains(args.need_string(1)?)).ok()
+}
+
+/// Split a string into a List by a separator.
+/// `split("Mr Rogers", " ")` #=> ["Mr", "Rogers"]`
+pub fn split(args: Args) -> Result<Value> {
+    Value::from(
+        args.need_string(0)?
+            .split(args.need_string(1)?)
+            .collect::<Vec<_>>(),
+    )
+    .ok()
 }
 
 /// Find and replace all matches in a target string.

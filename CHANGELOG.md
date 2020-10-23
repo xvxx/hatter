@@ -1,7 +1,8 @@
 ## v0.1.4-dev
 
 - More [builtins]: `pop()` for lists.
-- Finally added `set_index` operations for List and Map: `a[1] = 2`
+- Finally added `set_index` operations for List, Map, and Object,
+  both `a[1] = 2` and `map.thing = true` forms.
 
 [builtins]: https://docs.rs/hatter/latest/hatter/builtin/index.html
 

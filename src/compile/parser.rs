@@ -323,14 +323,15 @@ impl<'s, 't> Parser<'s, 't> {
                         Stmt::Word(name) => {
                             return Ok(Stmt::Assign(name, bx!(self.expr()?), reassign));
                         }
-                        Stmt::Call(ex, mut args) => {
-                            if ex.to_str() == "index" {
+                        Stmt::Call(ex, mut args) => match ex.to_str() {
+                            "index" | "." => {
                                 args.push(self.expr()?);
                                 return Ok(Stmt::Call(bx!(Stmt::Word("set_index".into())), args));
-                            } else {
+                            }
+                            _ => {
                                 return self.error("Word or index");
                             }
-                        }
+                        },
                         _ => return self.error("Word"),
                     }
                 }

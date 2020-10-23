@@ -350,6 +350,11 @@ parse_test!(
         ("three".to_sym(), num!(3))
     ])
 );
+parse_test!(
+    lua_style_index_assign,
+    "map.thing = 'x'",
+    call!("set_index", word!("map"), string!("thing"), string!("x"))
+);
 
 ////
 // if

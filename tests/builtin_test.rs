@@ -95,13 +95,14 @@ fn test_list() {
     assert_eval!("a := 1..=3; push(a, 5); a[-1]", 5);
     assert_eval!("a := 1..=5; pop(a)", 5);
     assert_eval!("a := 1..=5; pop(a); len(a)", 4);
-    assert_eval!("a := 1..=5; a[1] = 100; a[1]", 100);
 }
 
 #[test]
 fn test_map() {
     assert_eval!("a := { one: 1, two: 2}; a['one'] = 100; a.one", 100);
+    assert_eval!("a := { one: 1, two: 2}; a.one = 100; a.one", 100);
     assert_eval!("a := {m: {}}; a.m['one'] = 100; a.m.one", 100);
+    assert_eval!("a := {m: {}}; a.m.one = 100; a.m.one", 100);
 }
 
 #[test]

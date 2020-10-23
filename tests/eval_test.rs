@@ -93,6 +93,8 @@ list[-20]
 "#,
         Value::None
     );
+
+    assert_eval!("[1][-1]", num!(1));
 }
 
 #[test]

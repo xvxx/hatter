@@ -316,7 +316,7 @@ pub fn index(args: Args) -> Result<Value> {
             let mut idx = args.need_number(1)? as isize;
             if idx < 0 {
                 let len = list.borrow().len();
-                if (idx.abs() as usize) < len {
+                if (idx.abs() as usize) <= len {
                     idx += list.borrow().len() as isize;
                 }
             }

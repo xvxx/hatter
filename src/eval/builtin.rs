@@ -13,7 +13,7 @@
 // other applications, too.
 
 use {
-    crate::{Args, Env, Native, Result, Special, Stmt, Value},
+    crate::{Args, Env, Native, Result, Special, Stmt, Symbol, Value},
     std::{collections::HashMap, rc::Rc},
 };
 
@@ -309,7 +309,7 @@ pub fn index(args: Args) -> Result<Value> {
     match subject {
         Value::Map(map) => map
             .borrow()
-            .get(&args.need_string(1)?.into())
+            .get(Symbol::from(args.need_string(1)?))
             .unwrap_or(&Value::None)
             .clone(),
         Value::List(list) => {
@@ -342,7 +342,7 @@ fn set_index(args: Args) -> Result<Value> {
     match args.need(0)? {
         Value::Map(map) => {
             map.borrow_mut()
-                .insert(args.need_string(1)?.into(), args.need(2)?.into());
+                .insert(Symbol::from(args.need_string(1)?), args.need(2)?.into());
         }
         Value::List(list) => {
             let mut idx = args.need_number(1)? as isize;

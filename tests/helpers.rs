@@ -46,12 +46,12 @@ macro_rules! list {
 
 macro_rules! map {
     ($($key:expr => $val:expr),+) => {{
-        use std::collections::BTreeMap;
-        let mut map = BTreeMap::new();
+        use hatter::{Symbol, Value, OMap};
+        let mut map = OMap::new();
         $(
-            map.insert($key.to_string(), $val);
+            map.insert(Symbol::from($key), $val.into());
         )+
-        Value::from(map)
+        Value::Map(map.into())
     }};
     ($($key:expr => $val:expr,)+) => {
         map!($($key => $val),+)

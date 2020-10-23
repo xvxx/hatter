@@ -25,6 +25,7 @@ mod error;
 mod compile;
 mod eval;
 mod interner;
+mod omap;
 pub mod prelude;
 mod symbol;
 mod template;
@@ -50,6 +51,7 @@ pub use {
         value::{self, Fn, Native, Object, Special, Value},
     },
     interner::Interner,
+    omap::OMap,
     symbol::Symbol,
     template::Template,
 };

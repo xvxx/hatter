@@ -14,7 +14,7 @@ static SETUP: Once = Once::new();
 
 /// A Symbol is an interned String, created and managed by
 /// `Interner` and stored in CACHE.
-#[derive(Clone, Ord, PartialOrd, Eq)]
+#[derive(Clone, Ord, PartialOrd, Eq, Hash)]
 pub struct Symbol(u32);
 
 fn cache() -> Option<&'static RwLock<Interner>> {

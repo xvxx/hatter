@@ -2,8 +2,8 @@
 //! here.
 
 use {
-    crate::{Args, Env, Result, Scope, Stmt, Symbol, Value},
-    std::{cell::RefCell, collections::BTreeMap, ops::Deref, rc::Rc},
+    crate::{Args, Env, OMap, Result, Scope, Stmt, Symbol, Value},
+    std::{cell::RefCell, ops::Deref, rc::Rc},
 };
 
 #[derive(Clone)]
@@ -33,14 +33,14 @@ impl From<Vec<Value>> for List {
 }
 
 #[derive(Clone)]
-pub struct Map(Rc<RefCell<BTreeMap<Symbol, Value>>>);
+pub struct Map(Rc<RefCell<OMap>>);
 impl Map {
-    pub fn new(m: BTreeMap<Symbol, Value>) -> Self {
+    pub fn new(m: OMap) -> Self {
         Self(rcell!(m))
     }
 }
 impl Deref for Map {
-    type Target = Rc<RefCell<BTreeMap<Symbol, Value>>>;
+    type Target = Rc<RefCell<OMap>>;
     fn deref(&self) -> &Self::Target {
         &self.0
     }
@@ -52,8 +52,8 @@ impl PartialEq for Map {
         me.len() == you.len() && me.iter().all(|(i, v)| Some(v) == you.get(i))
     }
 }
-impl From<BTreeMap<Symbol, Value>> for Map {
-    fn from(m: BTreeMap<Symbol, Value>) -> Self {
+impl From<OMap> for Map {
+    fn from(m: OMap) -> Self {
         Self::new(m)
     }
 }

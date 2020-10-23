@@ -1,5 +1,5 @@
 use {
-    crate::{Args, Fn, Result, Stmt, Symbol, Value},
+    crate::{Args, Fn, OMap, Result, Stmt, Symbol, Value},
     std::{
         collections::{BTreeMap, HashMap},
         rc::Rc,
@@ -116,13 +116,13 @@ impl From<&&str> for Value {
 
 impl<S, V> From<BTreeMap<S, V>> for Value
 where
-    S: AsRef<str>,
+    S: Into<Symbol>,
     V: Into<Value>,
 {
     fn from(map: BTreeMap<S, V>) -> Self {
-        let mut new = BTreeMap::new();
+        let mut new = OMap::new();
         for (k, v) in map {
-            new.insert(k.as_ref().into(), v.into());
+            new.insert(k.into(), v.into());
         }
         Value::Map(new.into())
     }
@@ -130,13 +130,13 @@ where
 
 impl<S, V> From<HashMap<S, V>> for Value
 where
-    S: AsRef<str>,
+    S: Into<Symbol>,
     V: Into<Value>,
 {
     fn from(map: HashMap<S, V>) -> Self {
-        let mut new = BTreeMap::new();
+        let mut new = OMap::new();
         for (k, v) in map {
-            new.insert(k.as_ref().into(), val(v));
+            new.insert(k.into(), val(v));
         }
         Value::Map(new.into())
     }

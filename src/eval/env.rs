@@ -1,8 +1,8 @@
 use {
-    crate::{builtin, compile, Args, ErrorKind, Fn, Result, Stmt, Symbol, Tag, Value},
+    crate::{builtin, compile, Args, ErrorKind, Fn, OMap, Result, Stmt, Symbol, Tag, Value},
     std::{
         cell::{Ref, RefCell},
-        collections::{BTreeMap, HashMap},
+        collections::HashMap,
         mem,
         rc::Rc,
     },
@@ -206,9 +206,9 @@ impl Env {
                 .collect::<Result<Vec<_>>>()?
                 .into(),
             Stmt::Map(pairs) => {
-                let mut map = BTreeMap::new();
+                let mut map = OMap::new();
                 for (k, v) in pairs {
-                    map.insert(k.into(), self.eval(v)?);
+                    map.insert(k, self.eval(v)?);
                 }
                 Value::Map(map.into())
             }

@@ -47,6 +47,7 @@ pub(crate) fn natives() -> HashMap<String, Rc<Native>> {
     native!("!" => not);
     native!("concat" => concat);
     native!("index" => index);
+    native!("set_index" => set_index);
     native!("<<" => push);
     native!("push" => push);
     native!("pop" => pop);
@@ -328,6 +329,41 @@ pub fn index(args: Args) -> Result<Value> {
         _ => Value::None,
     }
     .ok()
+}
+
+/// Set a specific index in a List or Map.
+/// If List, must be equal to or below the length.
+///
+/// ```ignore
+/// a[1] = 2
+/// map[key] = val
+/// ```
+fn set_index(args: Args) -> Result<Value> {
+    match args.need(0)? {
+        Value::Map(map) => {
+            map.borrow_mut()
+                .insert(args.need_string(1)?.into(), args.need(2)?.into());
+        }
+        Value::List(list) => {
+            let mut idx = args.need_number(1)? as isize;
+            if idx < 0 {
+                let len = list.borrow().len();
+                if (idx.abs() as usize) < len {
+                    idx += list.borrow().len() as isize;
+                }
+            }
+            let idx = idx as usize;
+            if idx > list.borrow().len() {
+                return Value::None.ok();
+            }
+            list.borrow_mut().insert(idx, args.need(2)?.into());
+        }
+        Value::Object(o) => {
+            o.set(args.need_string(1)?, args.need(2)?);
+        }
+        _ => {}
+    }
+    Value::None.ok()
 }
 
 /// Get the length of a Map, List, or String. Returns 0 for all

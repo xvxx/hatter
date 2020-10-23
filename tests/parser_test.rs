@@ -309,6 +309,21 @@ parse_test!(
     'two','three']",
     Stmt::List(vec![string!("one"), string!("two"), string!("three")])
 );
+parse_test!(
+    basic_list_index,
+    "abc[1]",
+    call!("index", word!("abc"), num!(1))
+);
+parse_test!(
+    basic_list_index_expr,
+    "abc[n + 1]",
+    call!("index", word!("abc"), call!("+", word!("n"), num!(1)))
+);
+parse_test!(
+    basic_list_index_assign,
+    "abc[1] = 'x'",
+    call!("set_index", word!("abc"), num!(1), string!("x"))
+);
 
 ////
 // map

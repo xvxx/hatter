@@ -319,10 +319,19 @@ impl<'s, 't> Parser<'s, 't> {
             match op.as_ref() {
                 ":=" | "=" => {
                     let reassign = op == "=";
-                    if let Stmt::Word(name) = left {
-                        return Ok(Stmt::Assign(name, bx!(self.expr()?), reassign));
-                    } else {
-                        return self.error("Word");
+                    match left {
+                        Stmt::Word(name) => {
+                            return Ok(Stmt::Assign(name, bx!(self.expr()?), reassign));
+                        }
+                        Stmt::Call(ex, mut args) => {
+                            if ex.to_str() == "index" {
+                                args.push(self.expr()?);
+                                return Ok(Stmt::Call(bx!(Stmt::Word("set_index".into())), args));
+                            } else {
+                                return self.error("Word or index");
+                            }
+                        }
+                        _ => return self.error("Word"),
                     }
                 }
                 // convert word to str, ex: map.key => .(map, "key")

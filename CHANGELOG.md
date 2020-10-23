@@ -1,4 +1,4 @@
-## v0.1.4-dev
+## v0.1.4
 
 - Hatter maps now perserve insertion order, unlike Rust but like
   Ruby/JS/Lua.

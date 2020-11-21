@@ -228,6 +228,21 @@ greet(name: 'Bob', title: 'Dr')
 }
 
 #[test]
+fn test_recursion() {
+    assert_eval!(
+        r#"
+def total(x)
+    if x == 0
+        return 0
+    else
+        return x + total(x - 1)
+total(5)
+        "#,
+        15
+    )
+}
+
+#[test]
 fn test_return() {
     assert_eval!(
         r#"

@@ -1,6 +1,10 @@
+## v0.1.5-dev
+
+- ...
+
 ## v0.1.4
 
-- Hatter maps now perserve insertion order, unlike Rust but like
+- Hatter maps now preserve insertion order, unlike Rust but like
   Ruby/JS/Lua.
 - More [builtins]: `pop()` for lists.
 - Finally added `set_index` operations for List, Map, and Object,

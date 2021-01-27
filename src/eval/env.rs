@@ -276,6 +276,7 @@ impl Env {
                             }
                             let out = self.block(&body);
                             self.pop_scope();
+                            self.pop_scope();
                             match out {
                                 Ok(v) => v,
                                 Err(e) => match e.kind {
@@ -294,7 +295,10 @@ impl Env {
                 for (test, body) in conds {
                     if self.eval(test)?.to_bool() {
                         self.push_scope();
-                        self.block(body)?;
+                        self.block(body).map_err(|e| {
+                            self.pop_scope();
+                            e
+                        })?;
                         self.pop_scope();
                         break;
                     }

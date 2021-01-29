@@ -11,13 +11,17 @@ use {
 /// Eval a list of Stmts and return the last's Value.
 pub fn eval(src: &str) -> Result<Value> {
     let mut env = Env::new();
-    env.eval_src(src)
+    let val = env.eval_src(src);
+    debug_assert_eq!(env.scopes.len(), 1);
+    val
 }
 
 /// Render source to a String.
 pub fn render(source: &str) -> Result<String> {
     let mut env = Env::new();
-    env.render(source)
+    let string = env.render(source);
+    debug_assert_eq!(env.scopes.len(), 1);
+    string
 }
 
 /// Error-ish that lets us abort what we're doing.
@@ -276,6 +280,7 @@ impl Env {
                             }
                             let out = self.block(&body);
                             self.pop_scope();
+                            self.pop_scope();
                             match out {
                                 Ok(v) => v,
                                 Err(e) => match e.kind {
@@ -294,7 +299,10 @@ impl Env {
                 for (test, body) in conds {
                     if self.eval(test)?.to_bool() {
                         self.push_scope();
-                        self.block(body)?;
+                        self.block(body).map_err(|e| {
+                            self.pop_scope();
+                            e
+                        })?;
                         self.pop_scope();
                         break;
                     }
@@ -310,7 +318,10 @@ impl Env {
                         Err(e) => match e.kind {
                             ErrorKind::Jump(Jump::Break) => break,
                             ErrorKind::Jump(Jump::Continue) => continue,
-                            _ => return Err(e),
+                            _ => {
+                                self.pop_scope();
+                                return Err(e)
+                            },
                         },
                     }
                     self.scope().borrow_mut().clear();
@@ -481,7 +492,10 @@ impl Env {
                 Err(e) => match e.kind {
                     ErrorKind::Jump(Jump::Break) => break,
                     ErrorKind::Jump(Jump::Continue) => continue,
-                    _ => return Err(e),
+                    _ => {
+                        self.pop_scope();
+                        return Err(e)
+                    },
                 },
             }
             self.scope().borrow_mut().clear();

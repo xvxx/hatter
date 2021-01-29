@@ -264,6 +264,30 @@ test()
 "#,
         "BYE"
     );
+
+    assert_render!(
+        r#"
+def test()
+    for i in [1,2,3]
+        print("BYE")
+        return
+    print("OK!")
+test()
+"#,
+        "BYE"
+    );
+
+    assert_render!(
+        r#"
+def test()
+    while true
+        print("BYE")
+        return
+    print("OK!")
+test()
+"#,
+        "BYE"
+    );
 }
 
 // #[test]
